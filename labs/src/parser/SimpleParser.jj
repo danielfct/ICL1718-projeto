@@ -1,0 +1,89 @@
+options {
+  STATIC=false;
+}
+
+PARSER_BEGIN(SimpleParser)
+
+package parser;
+import ast.*;
+
+public class SimpleParser {
+
+}
+
+PARSER_END(SimpleParser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+}
+
+TOKEN :
+{
+  < Num: (["0"-"9"]) + >
+  |
+  < PLUS : "+" >
+  |
+  < MINUS : "-">
+  |
+  < TIMES : "*">
+  |
+  < DIV : "/">
+  |
+  < LPAR : "(" >
+  |
+  < RPAR : ")" >
+  |
+  < EOL : "\n" >
+  | 
+  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+}
+
+void Start():
+{ }
+{
+   Exp() <EOL>
+}
+
+void Exp() :
+{ }
+{
+   Term() ( <PLUS> Term() | <MINUS> Term() )*
+}
+
+void Term() :
+{ }
+{
+    Fact() ( <TIMES> Fact() | <DIV> Fact() )*
+}
+
+void Fact() :
+{ }
+{
+ 	<Num>
+ |
+   <LPAR> Exp() <RPAR>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
