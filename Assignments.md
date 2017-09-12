@@ -77,7 +77,7 @@ bexp ::= bool | cmp | exp '&&' exp | exp '||' exp | '!' exp
 
 cmp ::= exp '<' exp | exp '>' exp | exp '==' exp | exp '!=' exp | ...
 
-exp ::= exp '+' exp | exp '-' exp | exp '*' exp | exp '+' exp | '-' exp | '(' exp ')' | num
+exp ::= exp '+' exp | exp '-' exp | exp '*' exp | exp '/' exp | '-' exp | '(' exp ')' | num
 
 bool ::= true | false
 
