@@ -2,7 +2,7 @@
 
 In this repository you will find all the materials and resources needed in the [MIEI](www.di.fct.unl.pt/MIEI) course in its 2017/2018 edition.
 
-Below, we provide a planning for the lectures, and for the lab assignments. A separate page is provided for the [lab assignments](Assignments.html). More information is also given towards the end of this document regarding useful documentation and resources.
+Below, we provide a planning for the lectures, and for the lab assignments. A separate page is provided for the [lab assignments](Assignments.md). More information is also given towards the end of this document regarding useful documentation and resources.
 
 # Lecture planning
 
@@ -76,7 +76,7 @@ Below, we provide a planning for the lectures, and for the lab assignments. A se
 
 # Lab assignments
 
-The detailed lab assignments can be found in the following [document](Assignments.html).
+The detailed lab assignments can be found in the following [document](Assignments.md).
 
 # Software tools 
 
@@ -94,7 +94,7 @@ As development method we recommend (and require) that unit and integration tests
 
 * [GIT Repository](http://bitbucket.org/costaseco/icl-1718)
 * [Slack Team](icl-1718.slack.com)
-* [Piazza](Piazza) discussion forums are also setup and available.
+* [Piazza](piazza.com/fct.unl.pt/fall2017/8152) discussion forums are also setup and available.
 
 ## Documentation & Software
 
