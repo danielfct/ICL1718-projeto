@@ -1,0 +1,101 @@
+options {
+  STATIC=false;
+}
+
+PARSER_BEGIN(Parser)
+
+package parser;
+import ast.*;
+
+public class Parser {
+
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+}
+
+TOKEN :
+{
+  < Num: (["0"-"9"]) + >
+  |
+  < PLUS : "+" >
+  |
+  < MINUS : "-">
+  |
+  < TIMES : "*">
+  |
+  < DIV : "/">
+  |
+  < LPAR : "(" >
+  |
+  < RPAR : ")" >
+  |
+  < EL: "\n" >
+  |
+  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+}
+
+ASTNode Start():
+{ ASTNode e; }
+{
+   e = Exp() <EL>  { return e; }
+}
+
+ASTNode Exp() :
+{ ASTNode e1, e2; }
+{
+   e1 = Term() 
+     ( <PLUS> e2 = Term() { e1 = new ASTAdd(e1,e2); }
+     | <MINUS> e2 = Term() { e1 = new ASTSub(e1,e2); }
+     )*
+     { return e1; }
+}
+
+ASTNode Term() :
+{ ASTNode e1, e2; }
+{
+     e1 = Fact()
+     ( <TIMES> e2 = Fact() { e1 = new ASTMul(e1,e2); }
+     | <DIV> e2 = Fact() { e1 = new ASTDiv(e1,e2); }
+     )*
+     { return e1; }
+}
+
+ASTNode Fact() :
+{ Token x; ASTNode e, e1, e2;}
+{
+ 	x = <Num>
+ {
+ 	return new ASTNum(Integer.parseInt(x.image));
+ }
+ | 
+   <LPAR> e = Exp() <RPAR> { return e; }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

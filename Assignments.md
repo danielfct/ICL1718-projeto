@@ -42,6 +42,54 @@ This is the list of lab assignments for the course. We first have the complete l
 
 
 
+
+## Lab 2 - Interpretation of an expression 
+
+This lab assignment is focused on the implementation of an interpreter for the expression language developed in Lab 1. We will define an abstract representation for our programs (expressions) and will define an interpretation function on all objects.
+
+### Git tip
+
+In order to proceed we first need to commit the work done so far. To do that use the following command
+
+```
+git commit -a -m "Lab 1"
+```
+
+This means that you will commit all tracked files (option `-a`) and use a message "Lab 1" (option `-m`). You can also use the GUI provided by Atlassian's application [`SourceTree`](https://www.sourcetreeapp.com/).
+
+The next action is to synchronize your repository (`Sync` button in the bitbucket website), and pull the modifications through the command
+
+```
+git pull
+```
+
+### Starter code
+
+Consider the modifications introduced in file `Parser.jj` and by the classes defined in package `ast`. You must now modify the `Console` class to use the `Parser` class instead the `SimpleParser` class. Notice that the function `Start` (and the other non-terminal functions) now returns an object representing the expression. The object is of type `ASTNode` and implemented by the classes added in package `ast`.
+
+### Semantic Functions
+
+Study the `ASTNode` interface and the functions it declares. An evaluation function is provided to define the structural operational semantics of the language. The testing infrastructure was also extended to test the language semantics.
+
+### Part 1
+
+Extend the evaluation function to all operators over boolean values introduced in Lab 1. In order to return boolean values, you should change the return value of function `eval` to an interface `IValue` implemented by two classes `IntValue` and `BoolValue`.
+
+### Part 2
+
+Detect erroneous situation and abort the evaluation if they occur.
+
+### Part 3
+
+Produce enough tests to ensure a correct implementation.
+
+### Conclusion
+
+Consider the unit test under function `testsLabClass02` which tests the minimum requirements for completing the assignment.
+
+
+
+
 ### Lab 1 - Parsing of an Expression Language using JavaCC
 
 Please fork and clone this repository and build a project using Eclipse or IntelliJ with the sources pointing to the folder `labs`. Start a branch called `work` and use it as your own workspace. In this way the updates done in the master repository can be easily controlled. Create a project from the existing sources in folder `labs`
@@ -68,7 +116,7 @@ or use the plugin for the chosen IDE. Notice the extra classes that were produce
 
 Test the given grammar, using the provided `JUNit` classes, and write more tests for it.
 
-#### Goal 1
+#### Part 1
 
 Extend the grammar with the top-level non-terminal `bexp`, to have the following extra operations, still following the standard priorities between operators
 
@@ -84,11 +132,11 @@ bool ::= true | false
 num ::= ['1'-'9']\['0'-'9'\]*
 ~~~
 
-#### Goal 2
+#### Part 2
 
 Produce new tests that cover significant cases of the new grammar.
 
-#### Goal 3
+#### Part 3
 
 Add the possibility of using identifiers
 

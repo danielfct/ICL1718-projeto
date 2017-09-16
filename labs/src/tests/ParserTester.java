@@ -1,6 +1,6 @@
 package tests;
 
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import main.Console;
@@ -10,11 +10,11 @@ import parser.ParseException;
 public class ParserTester {
 
 	private void testCase(String expression) throws ParseException {
-		Assert.assertTrue(Console.accept(expression));		
+		assertTrue(Console.accept(expression));		
 	}
 	
 	private void testNegativeCase(String expression) throws ParseException {
-		Assert.assertFalse(Console.accept(expression));
+		assertFalse(Console.accept(expression));
 	}
 	
 	@Test
