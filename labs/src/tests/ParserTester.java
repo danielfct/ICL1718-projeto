@@ -1,20 +1,20 @@
 package tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import main.Console;
 import parser.ParseException;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParserTester {
 
 	private void testCase(String expression) throws ParseException {
-		assertTrue(Console.accept(expression));		
+		Assert.assertTrue(Console.accept(expression));		
 	}
 	
 	private void testNegativeCase(String expression) throws ParseException {
-		assertFalse(Console.accept(expression));
+		Assert.assertFalse(Console.accept(expression));
 	}
 	
 	@Test
