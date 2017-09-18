@@ -2,9 +2,12 @@ package main;
 
 import java.io.ByteArrayInputStream;
 
+import ast.ASTNode;
 import parser.ParseException;
+import parser.Parser;
 import parser.SimpleParser;
 import parser.TokenMgrError;
+import values.IntValue;
 
 public class Console {
 
@@ -33,8 +36,27 @@ public class Console {
 		try {
 			parser.Start();
 			return true;
+		} catch (TokenMgrError e) {
+			return false;
 		} catch (ParseException e) {
 			return false;
 		}
 	}
+
+	public static boolean acceptCompare(String s, int value) {
+		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
+		try {
+			ASTNode n = parser.Start();
+			return n.eval() == value;
+//			return n.eval() == new IntValue(value);
+		} catch (TokenMgrError e) {
+			return false;
+		} catch (ParseException e) {
+			return false;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+
 }
