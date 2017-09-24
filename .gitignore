@@ -1,0 +1,13 @@
+labs/.idea
+labs/out
+ParseException.java
+Parser.java
+ParserConstants.java
+ParserTokenManager.java
+labs.iml
+SimpleCharStream.java
+SimpleParser.java
+SimpleParserConstants.java
+SimpleParserTokenManager.java
+Token.java
+TokenMgrError.java
