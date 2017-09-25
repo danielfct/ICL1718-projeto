@@ -8,13 +8,13 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Set 11-15** - Parsing of an expression language.
 
->**Set 18-22** - Interpretation of an expression language.
+>**Set 18-22** - Interpretation of an expression language. Dynamic typing.
 
->**Set 25-29** - Extending the language with boolean values. Typing an expression language.
-
->**Project assignment: announcement**
+>**Set 25-29** - Static typing of an expression language.
 
 >**Out 2-6**  - Compiling arithmetic expressions to the JVM.
+
+>**Project assignment: announcement**
 
 >**Out 9-13** - Type-directed compilation. Compiling boolean expressions to the JVM.
 
@@ -42,8 +42,37 @@ This is the list of lab assignments for the course. We first have the complete l
 
 
 
+## Lab 3 - Static typing of expressions. Compiling to the JVM
 
-## Lab 2 - Interpretation of an expression 
+This Lab is focused on the implementation of a type checker for the expression language, and in the first compiler to the JVM. This lab starts with the definition of two semantic functions. The first semantic function will associate a type to all expressions of the language, the second one will have as result a sequence of JVM instructions that should have the same behaviour as the interpreter for the same expression.
+
+### Starter code for typing
+
+Commit, sync, and pull the new code to your local repository. The typing function has one of three possible outcomes, `int`, `bool`, and type `none` which can be represented by throwing an exception. Follow the same approach taken to implement values, and implement a sum type for types. Consider the interface `IType` and the new method in interface `ASTNode` named `typecheck`.
+
+### Starter code for compiling
+
+Commit, sync, and pull the new code to your local repository. uncomment the compile method in ASTNode.
+
+### Goal 1
+
+To implement the typechecker and intersect the execution of every ill-typed program.
+
+### Goal 2
+
+Make some more tests for your typechecker for both positive and negative cases
+
+### Goal 3
+
+To implement the compiler for the language
+
+### Goal 4
+
+Test your compiler... make sure that you are running the compiled code.
+
+
+
+## Lab 2 - Interpretation of an expression. Dynamic Typing.
 
 This lab assignment is focused on the implementation of an interpreter for the expression language developed in Lab 1. We will define an abstract representation for our programs (expressions) and will define an interpretation function on all objects.
 
