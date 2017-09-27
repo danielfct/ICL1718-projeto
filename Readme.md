@@ -8,9 +8,9 @@ Below, we provide a planning for the lectures, and for the lab assignments. A se
 
 > **Set 11-15**: Programming languages based tools, an overview and examples. Syntax and Semantics, Abstract Representation. Parsing.
 
-> **Set 18-22**: Inductive data types, inductive algorithms. A programming language as an abstract data type.
+> **Set 18-22**: Inductive data types, inductive algorithms. A programming language as an abstract data type. Semantic functions: interpretation of a programming language.
 
-> **Set 25-29**: Semantic functions: interpretation of a programming language. Other semantic functions: type analysis, and compilation. Dynamic vs static typing.
+> **Set 25-29**: Semantic functions: type analysis, and compilation. Dynamic vs static typing.
 
 > **Out 2-6**: Virtual machines, target languages (JVM, LLVM, Javascript).
 
@@ -42,13 +42,13 @@ Below, we provide a planning for the lectures, and for the lab assignments. A se
 
 >**Set 11-15** - Parsing of an expression language.
 
->**Set 18-22** - Interpretation of an expression language.
+>**Set 18-22** - Interpretation of an expression language. Dynamic typing.
 
->**Set 25-29** - Extending the language with boolean values. Typing an expression language.
-
->**Project assignment: announcement**
+>**Set 25-29** - Static typing of an expression language.
 
 >**Out 2-6**  - Compiling arithmetic expressions to the JVM.
+
+>**Project assignment: announcement**
 
 >**Out 9-13** - Type-directed compilation. Compiling boolean expressions to the JVM.
 
