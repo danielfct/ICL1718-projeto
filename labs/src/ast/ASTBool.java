@@ -1,33 +1,33 @@
 package ast;
 
 import compiler.CodeBlock;
+import types.BoolType;
 import types.IType;
-import types.IntType;
 import types.TypingException;
+import values.BoolValue;
 import values.IValue;
-import values.IntValue;
 
-public class ASTNum implements ASTNode {
+public class ASTBool implements ASTNode {
 
-	int val;
+	boolean val;
 
-	public ASTNum(int n) {
-		val = n;
+	public ASTBool(boolean b) {
+		val = b;
 	}
 
 	@Override
 	public String toString() {
-		return Integer.toString(val);
+		return Boolean.toString(val);
 	}
 
 	@Override
 	public IValue eval() {
-		return new IntValue(val);
+		return new BoolValue(val);
 	}
 
 	@Override
 	public IType typecheck() throws TypingException {
-		return IntType.singleton;
+		return BoolType.singleton;
 	}
 
 	@Override
@@ -35,4 +35,5 @@ public class ASTNum implements ASTNode {
 		// TODO Auto-generated method stub
 		
 	}
+	
 }

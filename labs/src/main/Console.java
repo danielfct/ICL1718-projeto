@@ -7,18 +7,21 @@ import parser.ParseException;
 import parser.Parser;
 import parser.SimpleParser;
 import parser.TokenMgrError;
-import values.IntValue;
+import types.IType;
+import types.TypingException;
+import values.IValue;
+import values.TypeMismatchException;
 
 public class Console {
 
-	@SuppressWarnings("static-access")
 	public static void main(String args[]) {
-		SimpleParser parser = new SimpleParser(System.in);
+		Parser parser = new Parser(System.in);
 
 		while (true) {
 			try {
-				parser.Start();
-				System.out.println("OK!" );
+				ASTNode n = parser.Start();
+				n.typecheck();
+				System.out.println("OK! = " + n.eval());
 			} catch (TokenMgrError e) {
 				System.out.println("Lexical Error!");
 				e.printStackTrace();
@@ -27,6 +30,12 @@ public class Console {
 				System.out.println("Syntax Error!");
 				e.printStackTrace();
 				parser.ReInit(System.in);
+			} catch (TypingException e) {
+				System.out.println("Static Typing Error!");
+				e.printStackTrace();
+			} catch (TypeMismatchException e) {
+				System.out.println("Dynamic Typing Error!");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -43,12 +52,25 @@ public class Console {
 		}
 	}
 
-	public static boolean acceptCompare(String s, int value) {
+	public static boolean acceptCompare(String s, IValue value) {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.eval() == value;
-//			return n.eval() == new IntValue(value);
+			return n.equals(value);
+		} catch (TokenMgrError e) {
+			return false;
+		} catch (ParseException e) {
+			return false;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	public static boolean acceptCompareTypes(String s, IType type) {
+		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
+		try {
+			ASTNode n = parser.Start();
+			return n.typecheck().equals(type);
 		} catch (TokenMgrError e) {
 			return false;
 		} catch (ParseException e) {

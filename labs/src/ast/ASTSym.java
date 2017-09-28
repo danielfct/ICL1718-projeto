@@ -8,27 +8,25 @@ import values.IValue;
 import values.IntValue;
 import values.TypeMismatchException;
 
-public class ASTSub implements ASTNode {
+public class ASTSym implements ASTNode {
 
-	final ASTNode left, right;
+	final ASTNode value;
 
-	public ASTSub(ASTNode left, ASTNode right) {
-		this.left = left;
-		this.right = right;
+	public ASTSym(ASTNode value) {
+		this.value = value;
 	}
 
 	@Override
 	public String toString() {
-		return left + " - " + right;
+		return "-" + value;
 	}
 
 	@Override
 	public IValue eval() throws TypeMismatchException {
-		IValue l = left.eval();
-		IValue r = right.eval();
+		IValue v = value.eval();
 		
-		if (l instanceof IntValue && r instanceof IntValue) {
-			return new IntValue(((IntValue)l).getValue() - ((IntValue)r).getValue());
+		if (v instanceof IntValue) {
+			return new IntValue(-((IntValue)v).getValue());
 		}
 		else {
 			throw new TypeMismatchException();
@@ -37,12 +35,11 @@ public class ASTSub implements ASTNode {
 
 	@Override
 	public IType typecheck() throws TypingException {
-		IType l = left.typecheck();
-		IType r = right.typecheck();
+		IType v = value.typecheck();
 		
-		if (l == r)
+		if (v == IntType.singleton)
 			return IntType.singleton;
-		else
+		else 
 			throw new TypingException();
 	}
 

@@ -15,87 +15,140 @@ PARSER_END(Parser)
 
 SKIP :
 {
-  " "
-| "\t"
-| "\r"
+  	" "
+	|
+	"\t"
+	|
+	"\r"
 }
 
 TOKEN :
 {
-  < Num: (["0"-"9"]) + >
-  |
-  < PLUS : "+" >
-  |
-  < MINUS : "-">
-  |
-  < TIMES : "*">
-  |
-  < DIV : "/">
-  |
-  < LPAR : "(" >
-  |
-  < RPAR : ")" >
-  |
-  < EL: "\n" >
-  |
-  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  	< Num: (["0"-"9"]) + >
+  	|
+  	< PLUS : "+" >
+  	|
+  	< MINUS : "-">
+  	|
+  	< TIMES : "*">
+  	|
+  	< DIV : "/">
+  	|
+  	< LPAR : "(" >
+  	|
+  	< RPAR : ")" >
+  	|
+  	< TRUE : "true" >
+  	|
+  	< FALSE : "false" >
+  	|
+  	< OR : "||" >
+  	|
+  	< AND : "&&" >
+  	|
+  	< EQ : "==" >
+ 	|
+ 	< NEQ : "!=" >
+ 	|
+ 	< LEQ : "<=" >
+  	|
+  	< GEQ: ">=" >
+  	|
+  	< LT : "<" >
+  	|
+  	< GT : ">" >
+  	|
+  	< NOT: "!" >
+  	|
+ 	< EOL : "\n" >
+  	| 
+  	< Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
 
 ASTNode Start():
 { ASTNode e; }
 {
-   e = Exp() <EL>  { return e; }
+   	e = Disjunction() <EOL>  { return e; }
 }
+
+
+ASTNode Disjunction(): // D -- > C ( '||' C )*
+{ ASTNode e1, e2; }
+{
+	e1 = Conjunction()
+	(
+	  	<OR> e2 = Conjunction() { e1 = new ASTDisj(e1, e2); }
+	)*
+	{  return e1; }
+}
+
+ASTNode Conjunction(): // C -- > B ('&&' B )*
+{  ASTNode e1, e2; }
+{
+	e1 = BooleanExp()
+	(
+	  	<AND> e2 = BooleanExp() { e1 = new ASTConj(e1, e2); }
+	)*
+	{ return e1; }
+}
+
+ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
+{ ASTNode e1, e2; }
+{
+  	<NOT> { e1 = new ASTNot(BooleanExp()); }
+	| 
+	e1 = Exp()
+	(
+		<EQ> e2 = Exp() { e1 = new ASTEqual(e1, e2); }
+	  	|
+	  	<NEQ> e2 = Exp() { e1 = new ASTNotEqual(e1, e2); }
+	  	|
+	  	<LT> e2 = Exp() { e1 = new ASTLesser(e1, e2); }
+	  	|
+	  	<GT> e2 = Exp() { e1 = new ASTGreater(e1, e2); }
+	  	|
+	  	<LEQ> e2 = Exp() { e1 = new ASTLesserEq(e1, e2); }
+	  	|
+	  	<GEQ> e2 = Exp() { e1 = new ASTGreaterEq(e1, e2); }
+	)*
+	{ return e1; }
+}
+
 
 ASTNode Exp() :
 { ASTNode e1, e2; }
 {
-   e1 = Term() 
-     ( <PLUS> e2 = Term() { e1 = new ASTAdd(e1,e2); }
-     | <MINUS> e2 = Term() { e1 = new ASTSub(e1,e2); }
-     )*
-     { return e1; }
+   	e1 = Term()
+	(
+	  	<PLUS> e2 = Term() { e1 = new ASTAdd(e1,e2); }
+		|
+		<MINUS> e2 = Term() { e1 = new ASTSub(e1,e2); }
+    )*
+    { return e1; }
 }
 
 ASTNode Term() :
 { ASTNode e1, e2; }
 {
      e1 = Fact()
-     ( <TIMES> e2 = Fact() { e1 = new ASTMul(e1,e2); }
-     | <DIV> e2 = Fact() { e1 = new ASTDiv(e1,e2); }
+     (
+       	<TIMES> e2 = Fact() { e1 = new ASTMult(e1,e2); }
+     	|
+     	<DIV> e2 = Fact() { e1 = new ASTDiv(e1,e2); }
      )*
      { return e1; }
 }
 
 ASTNode Fact() :
-{ Token x; ASTNode e, e1, e2;}
+{ Token x; ASTNode e; }
 {
- 	x = <Num>
- {
- 	return new ASTNum(Integer.parseInt(x.image));
- }
- | 
-   <LPAR> e = Exp() <RPAR> { return e; }
-
+  	< MINUS > e = Fact() { return new ASTSym(e); }
+	| 
+ 	x = <Num> { return new ASTNum(Integer.parseInt(x.image)); }
+ 	| 
+   	<LPAR> e = Exp() <RPAR> { return e; }
+	|
+	< TRUE > { return new ASTBool(true); }
+	|
+	< FALSE > { return new ASTBool(false); }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -8,18 +8,18 @@ import values.IValue;
 import values.IntValue;
 import values.TypeMismatchException;
 
-public class ASTSub implements ASTNode {
+public class ASTMult implements ASTNode {
 
 	final ASTNode left, right;
 
-	public ASTSub(ASTNode left, ASTNode right) {
+	public ASTMult(ASTNode left, ASTNode right) {
 		this.left = left;
 		this.right = right;
 	}
 
 	@Override
 	public String toString() {
-		return left + " - " + right;
+		return left + " * " + right;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class ASTSub implements ASTNode {
 		IValue r = right.eval();
 		
 		if (l instanceof IntValue && r instanceof IntValue) {
-			return new IntValue(((IntValue)l).getValue() - ((IntValue)r).getValue());
+			return new IntValue(((IntValue)l).getValue() * ((IntValue)r).getValue());
 		}
 		else {
 			throw new TypeMismatchException();
@@ -51,5 +51,6 @@ public class ASTSub implements ASTNode {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }
