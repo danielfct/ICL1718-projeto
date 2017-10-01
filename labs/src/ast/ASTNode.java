@@ -9,6 +9,6 @@ public interface ASTNode {
 	
 //	IType typecheck() throws TypingException;
 	
-//	compile(CodeBlock code);
+//	void compile(CodeBlock code);
 }
 
