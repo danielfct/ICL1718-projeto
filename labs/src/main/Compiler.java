@@ -21,7 +21,7 @@ public class Compiler {
       CodeBlock code = new CodeBlock();
 //      exp.compile(code);
 
-      code.dump("Demo.j");
+      code.dump("DemoLab3.j");
 
     } catch (Exception e) {
       System.out.println ("Syntax Error!");

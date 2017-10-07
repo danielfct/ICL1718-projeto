@@ -41,6 +41,26 @@ This is the list of lab assignments for the course. We first have the complete l
 >**Dec 11-15** - Project Presentation and Discussion
 
 
+## Lab 4 - Compiling to the JVM
+
+This Lab is focused on the implementation of your first compiler to the JVM. You will have to implement a semantic function that will have as result a sequence of JVM instructions that should have the same behaviour as the interpreter for the same expression.
+
+### Starter code for compiling
+
+Commit, sync, and pull the code to your local repository. uncomment the compile method in ASTNode. Use class `CodeBlock` as a repository for instructions. It already implements the basic functionality that you need, and all tests are in place for you to test the toolchain.
+
+### Goal 1
+
+To implement the compiler for the language with arithmetic expressions. 
+
+### Goal 2
+
+Extend your compiler to support the boolean expressions. Take into account the implementation that the actual Java compiler does.
+
+### Goal 3
+
+Test your compiler using JUnit. Make sure that you are actually running the compiled code.
+
 
 ## Lab 3 - Static typing of expressions. Compiling to the JVM
 
@@ -50,9 +70,7 @@ This Lab is focused on the implementation of a type checker for the expression l
 
 Commit, sync, and pull the new code to your local repository. The typing function has one of three possible outcomes, `int`, `bool`, and type `none` which can be represented by throwing an exception. Follow the same approach taken to implement values, and implement a sum type for types. Consider the interface `IType` and the new method in interface `ASTNode` named `typecheck`.
 
-### Starter code for compiling
 
-Commit, sync, and pull the new code to your local repository. uncomment the compile method in ASTNode.
 
 ### Goal 1
 
@@ -62,13 +80,7 @@ To implement the typechecker and intersect the execution of every ill-typed prog
 
 Make some more tests for your typechecker for both positive and negative cases
 
-### Goal 3
 
-To implement the compiler for the language
-
-### Goal 4
-
-Test your compiler... make sure that you are running the compiled code.
 
 
 
