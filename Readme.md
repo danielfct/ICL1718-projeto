@@ -10,13 +10,13 @@ Below, we provide a planning for the lectures, and for the lab assignments. A se
 
 > **Set 18-22**: Inductive data types, inductive algorithms. A programming language as an abstract data type. Semantic functions: interpretation of a programming language.
 
-> **Set 25-29**: Semantic functions: type analysis, and compilation. Dynamic vs static typing.
+> **Set 25-29**: Semantic functions: type analysis, and compilation. Dynamic vs static typing. Virtual machines, target languages (JVM, LLVM, Javascript).
 
-> **Out 2-6**: Virtual machines, target languages (JVM, LLVM, Javascript).
+> **Out 2-6**: Binding and scope. Interpretation and compilation.
 
 > **Out 9-13**: Type-directed compilation. Typing in a compilers pipeline.
 
-> **Out 16-20**: Binding and scope. Interpretation and compilation.
+> **Out 16-20**: Compiling with Stackframes.
 
 > **Out 23-27**: Imperative Languages: interpretation
 
