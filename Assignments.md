@@ -16,9 +16,9 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Project assignment: announcement**
 
->**Out 9-13** - Type-directed compilation. Compiling boolean expressions to the JVM.
+>**Out 9-13** - Implementing an interpreter with binding and scope.
 
->**Out 16-20** - Implementing an interpreter with binding and scope.
+>**Out 16-20** - Type-directed compilation. Compiling binding and scope.
 
 >**Project assignment: 1st phase** (exact date awaiting approval)
 
@@ -40,6 +40,37 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Dec 11-15** - Project Presentation and Discussion
 
+## Lab 5 - Binding and Scope
+
+This lab extends the language with name declarations. You need to extend the interpreter and typechecker with an environment based semantics. (See slides).
+
+Extend the language with the (multiple) declaration expression
+
+```
+decl x1=E1 x2=E2 ... xn=En in E end
+```
+
+and the identifier usage expression 
+
+```
+x
+```
+
+The steps you need to follow are:
+
+1. Implement the two new expressions in the parser (`Parser.jj`)
+
+2. Create the classes `ASTDecl` and `ASTId` with the corresponding inner structure and constructor.
+
+3. Add an extra parameter to all `eval` functions in all classes implementing interface `ASTNode`.
+
+4. Implement function `eval` on the new classes.
+
+5. Implement function `typecheck` on the new classes.
+
+### Starter code
+
+Consider the `IEnvironment` interface and `Environment` class, and implement the changes in the parser and the corresponding classes for the new AST nodes (`ASTDecl` and `ASTId`)
 
 ## Lab 4 - Compiling to the JVM
 
