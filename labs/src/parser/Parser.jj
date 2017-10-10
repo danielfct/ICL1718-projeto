@@ -76,18 +76,24 @@ ASTNode Term() :
 }
 
 ASTNode Fact() :
-{ Token x; ASTNode e, e1, e2;}
+{ Token x; ASTDecl e; ASTNode e1, e2;}
 {
  	x = <Num>
  {
  	return new ASTNum(Integer.parseInt(x.image));
  }
  | 
-   <LPAR> e = Exp() <RPAR> { return e; }
+   <LPAR> e1 = Exp() <RPAR> { return e1; }
 |
-< DECL > x = <ID > <EQ > e1 = Exp() <IN > e2 = Exp()  <END >
+< DECL >
+    { e = new ASTDecl(); }
+	(	  x = <ID > <EQ > e1 = Exp()
+	  { e.newBinding(x.image,e1); }
+	)+
+<IN > e2 = Exp()  <END >
 {
-  return new ASTDecl(x,e1,e2);
+ 	e.addBody(e2);
+  	return e;
 }
 |
 x = < ID > { return new ASTId(x.image); }
