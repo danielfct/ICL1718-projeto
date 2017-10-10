@@ -35,10 +35,18 @@ TOKEN :
   < LPAR : "(" >
   |
   < RPAR : ")" >
+|
+< DECL : "decl" >
+| 
+< IN : "in" >
+| 
+< END: "end" >
+| 
+< EQ: "=" >
   |
   < EL: "\n" >
   |
-  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  < ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
 
 ASTNode Start():
@@ -76,6 +84,13 @@ ASTNode Fact() :
  }
  | 
    <LPAR> e = Exp() <RPAR> { return e; }
+|
+< DECL > x = <ID > <EQ > e1 = Exp() <IN > e2 = Exp()  <END >
+{
+  return new ASTDecl(x,e1,e2);
+}
+|
+x = < ID > { return new ASTId(x.image); }
 
 }
 
