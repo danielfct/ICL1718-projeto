@@ -7,6 +7,8 @@ import parser.ParseException;
 import parser.Parser;
 import parser.SimpleParser;
 import parser.TokenMgrError;
+import util.Environment;
+import values.IValue;
 import values.IntValue;
 
 public class Console {
@@ -47,7 +49,7 @@ public class Console {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.eval() == value;
+			return n.eval(new Environment<IValue>()) == value;
 //			return n.eval() == new IntValue(value);
 		} catch (TokenMgrError e) {
 			return false;

@@ -1,5 +1,8 @@
 package ast;
 
+import util.IEnvironment;
+import values.IValue;
+
 public class ASTSub implements ASTNode {
 
 	ASTNode left, right;
@@ -15,8 +18,8 @@ public class ASTSub implements ASTNode {
 	}
 	
 	@Override
-	public int eval() {
-		return left.eval() - right.eval();
+	public int eval(IEnvironment<IValue> env) {
+		return left.eval(env) - right.eval(env);
 	}
 
 }

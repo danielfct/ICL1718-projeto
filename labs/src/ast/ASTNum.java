@@ -1,5 +1,8 @@
 package ast;
 
+import util.IEnvironment;
+import values.IValue;
+
 public class ASTNum implements ASTNode {
 
 	int val;
@@ -14,7 +17,7 @@ public class ASTNum implements ASTNode {
 	}
 
 	@Override
-	public int eval() {
+	public int eval(IEnvironment<IValue> env) {
 		return val;
 	}
 }
