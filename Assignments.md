@@ -14,9 +14,9 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Out 2-6**  - Compiling arithmetic expressions to the JVM.
 
->**Project assignment: announcement**
-
 >**Out 9-13** - Implementing an interpreter with binding and scope.
+
+>**Project assignment: announcement**
 
 >**Out 16-20** - Type-directed compilation. Compiling binding and scope.
 
@@ -39,6 +39,22 @@ This is the list of lab assignments for the course. We first have the complete l
 >**Project assignment: submission** (exact date awaiting approval)
 
 >**Dec 11-15** - Project Presentation and Discussion
+
+## Project assignment
+
+The first project assignment consists on the implementation of the parser, interpreter, compiler, and corresponding tests of the previous labs.
+
+### Important dates
+
+The project is due on Nov 5th. You may use a total of 2 late days without penalty in the whole semestre.
+
+### Teams 
+
+The teams should be of at most 2 elements
+
+## Lab 6 - Compiling with stackframes
+
+The goal of this lab is to implement the compiler for name declarations introduced in Lab 5.
 
 ## Lab 5 - Binding and Scope
 
