@@ -52,4 +52,15 @@ public class InterpreterTests {
 //		testCaseNegativeBool("1 == 2 || 3 == 4 && xpto \n", true);
 //		testCaseNegativeBool("!(1 == 2) && xpto \n", true);
 	}
+	
+	@Test
+	public void testsLabClass05() throws Exception {
+		testCase("decl x = 1 in x+1 end\n",2);
+		testCase("decl x = 1 in decl y = 2 in x+y end end\n",3);
+		testCase("decl x = decl y = 2 in 2*y end in x*3\n",4);
+		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 5);
+		testNegativeCase("x+1", 0);
+		testNegativeCase("decl x = 1 in x+1 end + x", 0);
+		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);		
+	}
 }

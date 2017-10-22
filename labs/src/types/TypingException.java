@@ -11,4 +11,8 @@ public class TypingException extends Exception {
 		super(message);
 	}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 011425bfc3abd7bae4a1a4f9a5c66cf3927df1e8
 }

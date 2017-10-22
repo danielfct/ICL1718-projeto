@@ -6,7 +6,11 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class CodeBlock {
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 011425bfc3abd7bae4a1a4f9a5c66cf3927df1e8
 	ArrayList<String> code;
 
 	public CodeBlock() {
@@ -75,10 +79,17 @@ public class CodeBlock {
 	}
 
 	void dumpCode(PrintStream out) {
+<<<<<<< HEAD
 		for (String s : code)
 			out.println("       " + s);
 	}
 
+=======
+		for( String s : code )
+			out.println("       "+s);
+	}
+	
+>>>>>>> 011425bfc3abd7bae4a1a4f9a5c66cf3927df1e8
 	public void dump(String filename) throws FileNotFoundException {
 		PrintStream out = new PrintStream(new FileOutputStream(filename));
 		dumpHeader(out);
