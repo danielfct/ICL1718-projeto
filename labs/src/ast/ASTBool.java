@@ -4,6 +4,9 @@ import compiler.CodeBlock;
 import types.BoolType;
 import types.IType;
 import types.TypingException;
+import util.DuplicateIdentifierException;
+import util.IEnvironment;
+import util.UndeclaredIdentifierException;
 import values.BoolValue;
 import values.IValue;
 
@@ -21,19 +24,18 @@ public class ASTBool implements ASTNode {
 	}
 
 	@Override
-	public IValue eval() {
+	public IValue eval(IEnvironment<IValue> env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		return new BoolValue(val);
 	}
 
 	@Override
-	public IType typecheck() throws TypingException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
 		return BoolType.singleton;
 	}
 
 	@Override
 	public void compile(CodeBlock code) {
-		// TODO Auto-generated method stub
-		
+		code.emit_bool(val);
 	}
 	
 }

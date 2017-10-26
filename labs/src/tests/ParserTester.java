@@ -56,12 +56,3 @@ public class ParserTester {
 		testNegativeCase("&& A\n");
 	}
 }
-
-
-
-
-
-
-
-
-

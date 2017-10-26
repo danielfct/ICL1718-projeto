@@ -5,8 +5,10 @@ import java.io.ByteArrayInputStream;
 import ast.ASTNode;
 import parser.ParseException;
 import parser.Parser;
-import parser.SimpleParser;
 import parser.TokenMgrError;
+import util.DuplicateIdentifierException;
+import util.Environment;
+import util.UndeclaredIdentifierException;
 import types.IType;
 import types.TypingException;
 import values.IValue;
@@ -16,12 +18,11 @@ public class Console {
 
 	public static void main(String args[]) {
 		Parser parser = new Parser(System.in);
-
 		while (true) {
 			try {
 				ASTNode n = parser.Start();
-				n.typecheck();
-				System.out.println("OK! = " + n.eval());
+				n.typecheck(new Environment<>());
+				System.out.println("OK! " + n.eval(new Environment<>()));
 			} catch (TokenMgrError e) {
 				System.out.println("Lexical Error!");
 				e.printStackTrace();
@@ -31,17 +32,23 @@ public class Console {
 				e.printStackTrace();
 				parser.ReInit(System.in);
 			} catch (TypingException e) {
-				System.out.println("Static Typing Error!");
+				System.out.println("Typing Error!");
+				e.printStackTrace();
+			} catch (UndeclaredIdentifierException e) {
+				System.out.println("Undeclared Identifier " + e.getMessage());
+				e.printStackTrace();
+			} catch (DuplicateIdentifierException e) {
+				System.out.println("Duplicate Identifier " + e.getMessage());
 				e.printStackTrace();
 			} catch (TypeMismatchException e) {
-				System.out.println("Dynamic Typing Error!");
+				System.out.println("Type Mismatch Error!");
 				e.printStackTrace();
 			}
 		}
 	}
 
 	public static boolean accept(String s) throws ParseException {
-		SimpleParser parser = new SimpleParser(new ByteArrayInputStream(s.getBytes()));
+		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			parser.Start();
 			return true;
@@ -56,7 +63,7 @@ public class Console {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.equals(value);
+			return n.eval(new Environment<>()).equals(value);
 		} catch (TokenMgrError e) {
 			return false;
 		} catch (ParseException e) {
@@ -65,12 +72,12 @@ public class Console {
 			return false;
 		}
 	}
-	
+
 	public static boolean acceptCompareTypes(String s, IType type) {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.typecheck().equals(type);
+			return n.typecheck(new Environment<>()).equals(type);
 		} catch (TokenMgrError e) {
 			return false;
 		} catch (ParseException e) {

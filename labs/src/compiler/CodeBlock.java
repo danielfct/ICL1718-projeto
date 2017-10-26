@@ -6,35 +6,28 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class CodeBlock {
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> 011425bfc3abd7bae4a1a4f9a5c66cf3927df1e8
+	static class StackFrame {
+		void dump() {
+//			frame_id.j
+//
+//			.class frame_id
+//			.super java/lang/Object
+//			.field public SL Lancestor_frame_id; 
+//			.field public loc_00 type;
+//			.field public loc_01 type;
+//			..
+//			.field public loc_n type;
+//			.end method 
+		}
+	}
+
 	ArrayList<String> code;
+	ArrayList<StackFrame> frames;
+	public final LabelFactory labelFactory = new LabelFactory();
 
 	public CodeBlock() {
 		code = new ArrayList<String>(100);
-	}
-
-	public void emit_push(int n) {
-		code.add("sipush "+n);
-	}
-
-	public void emit_add() {
-		code.add("iadd");
-	}
-
-	public void emit_mul() {
-		code.add("imul");
-	}
-
-	public void emit_div() {
-		code.add("idiv");
-	}
-
-	public void emit_sub() {
-		code.add("isub");
 	}
 
 	void dumpHeader(PrintStream out) {
@@ -63,6 +56,11 @@ public class CodeBlock {
 		out.println("       ; START");
 		out.println("");
 	}
+	
+	void dumpCode(PrintStream out) {
+		for (String s : code)
+			out.println("       " + s);
+	}
 
 	void dumpFooter(PrintStream out) {
 		out.println("       ; END");
@@ -77,23 +75,126 @@ public class CodeBlock {
 		out.println("");		
 		out.println(".end method");
 	}
-
-	void dumpCode(PrintStream out) {
-<<<<<<< HEAD
-		for (String s : code)
-			out.println("       " + s);
-	}
-
-=======
-		for( String s : code )
-			out.println("       "+s);
-	}
 	
->>>>>>> 011425bfc3abd7bae4a1a4f9a5c66cf3927df1e8
+//	private void dumpFrames() {
+//		for (Stackframe frame : frames)
+//			frame.dump();
+//	}
+
 	public void dump(String filename) throws FileNotFoundException {
 		PrintStream out = new PrintStream(new FileOutputStream(filename));
 		dumpHeader(out);
 		dumpCode(out);
 		dumpFooter(out);
+//		dumpFrames();
 	}
+
+	// Bytecode instructions
+
+	// push value into the stack
+	public void emit_push(int n) {
+		code.add("sipush " + n);
+	}
+
+	// add the two top integer values on stack
+	public void emit_add() {
+		code.add("iadd");
+	}
+
+	// multiple the two top integer values on stack
+	public void emit_mul() {
+		code.add("imul");
+	}
+
+	// divide the two top integer values on stack
+	public void emit_div() {
+		code.add("idiv");
+	}
+
+	// subtract the two top integer values on stack
+	public void emit_sub() {
+		code.add("isub");
+	}
+
+	// xor between the two top integer values on stack
+	public void emit_xor() {
+		code.add("ixor");
+	}
+
+	// push 0 or 1 into the stack
+	public void emit_bool(boolean val) {
+		if (val)
+			emit_val(1);
+		else 
+			emit_val(0);
+	}
+
+	// push a value from -1 to 5 into the stack
+	public void emit_val(int val) {
+		if (val == -1) 
+			code.add("iconst_m1");
+		else
+			code.add("iconst_" + val);
+	}
+
+	// compare is two integer values are equal, if so, jump to given label
+	public void emit_icmpeq(String label) {
+		code.add("if_icmpeq " + label);
+	}
+
+	// compare if two integer values are not equal, if so, jump to given label
+	public void emit_icmpne(String label) {
+		code.add("if_icmpne " + label);
+	}
+
+	// compare if first integer value is greater or equal than second integer value, if so, jump to given label
+	public void emit_icmpge(String label) {
+		code.add("if_icmpge " + label);
+	}
+
+	// compare if first integer value is greater than second integer value, if so, jump to given label
+	public void emit_icmpgt(String label) {
+		code.add("if_icmpgt " + label);
+	}
+
+	// compare if first integer value is lesser or equal than second integer value, if so, jump to given label
+	public void emit_icmple(String label) {
+		code.add("if_icmple " + label);
+	}
+
+	// compare if first ineger value is lesser than second integer value, if so, jump to given label
+	public void emit_icmplt(String label) {
+		code.add("if_icmplt " + label);
+	}
+
+	// compare value on top of stack with 0, if equal, jumpo to given label
+	public void emit_ifeq(String label) {
+		code.add("ifeq " + label);
+	}
+
+	// check if value on top of stack is diferent than 0 
+	public void emit_ifne(String label) {
+		code.add("ifne " + label);
+	}
+
+	// jump to given label
+	public void emit_jump(String label) {
+		code.add("goto " + label);
+	}
+
+	// anchor the given label
+	public void emit_anchor(String label) {
+		code.add(label + ":");
+	}
+
+	// bitwise int AND
+	public void emit_and() {
+		code.add("iand");
+	}
+
+	// bitwise int OR
+	public void emit_or() {
+		code.add("ior");
+	}
+
 }

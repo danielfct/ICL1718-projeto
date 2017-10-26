@@ -17,4 +17,3 @@ public class UndeclaredIdentifierException extends Exception {
 	}
 	
 }
-
