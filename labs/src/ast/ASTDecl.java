@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import compiler.CodeBlock;
 import types.IType;
@@ -25,7 +26,7 @@ public class ASTDecl implements ASTNode {
 		
 	}
 	
-	ArrayList<Declaration> declarations; //TODO List
+	List<Declaration> declarations;
 	ASTNode body;
 	
 	public ASTDecl() {
@@ -54,7 +55,7 @@ public class ASTDecl implements ASTNode {
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
 		IEnvironment<IType> newenv = env.beginScope();
-		for (Declaration d: declarations)
+		for (Declaration d : declarations)
 			newenv.assoc(d.id, d.def.typecheck(env));
 		IType type = body.typecheck(newenv);
 		env.endScope();

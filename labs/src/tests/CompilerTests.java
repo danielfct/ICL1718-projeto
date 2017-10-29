@@ -15,11 +15,10 @@ import parser.ParseException;
 
 public class CompilerTests {
 
-	/*
-	 * Directory in which jasmin.jar resides
-	 */
+	// Directory in which jasmin.jar resides
 	private static final File dir = new File(System.getProperty("user.dir") + "/src/");
 	
+	// Define true and false values
 	private static final int TRUE = 1;
 	private static final int FALSE = 0;
 

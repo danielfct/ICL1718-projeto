@@ -15,11 +15,11 @@ import values.IntValue;
 public class TypeCheckingTests {
 
 	private void testCase(String expression, IValue value) throws ParseException {
-		assertTrue(Console.acceptCompare(expression,value));		
+		assertTrue(Console.acceptCompareValues(expression,value));		
 	}
 	
 	private void testNegativeCase(String expression, IValue value) throws ParseException {
-		assertFalse(Console.acceptCompare(expression,value));
+		assertFalse(Console.acceptCompareValues(expression,value));
 	}
 	
 	// private void testCaseBool(String expression, boolean value) throws ParseException {

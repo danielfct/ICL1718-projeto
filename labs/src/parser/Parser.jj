@@ -46,7 +46,7 @@ TOKEN :
   	|
   	< AND : "&&" >
   	|
-  	< EQ : "==" >
+  	< EQ : "==" >	
  	|
  	< NEQ : "!=" >
  	|
@@ -60,9 +60,17 @@ TOKEN :
   	|
   	< NOT: "!" >
   	|
+	< DECL : "decl" >
+	|
+	< ASSIGN : "=" >
+	| 
+	< IN : "in" >
+	| 
+	< END: "end" >
+  	|
  	< EOL : "\n" >
   	| 
-  	< Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  	< ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
 
 ASTNode Start():
@@ -77,7 +85,7 @@ ASTNode Disjunction(): // D -- > C ( '||' C )*
 {
 	e1 = Conjunction()
 	(
-	  	<OR> e2 = Conjunction() { e1 = new ASTDisj(e1, e2); }
+	  	<OR> e2 = Conjunction() { e1 = new ASTOr(e1, e2); }
 	)*
 	{  return e1; }
 }
@@ -87,7 +95,7 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 {
 	e1 = BooleanExp()
 	(
-	  	<AND> e2 = BooleanExp() { e1 = new ASTConj(e1, e2); }
+	  	<AND> e2 = BooleanExp() { e1 = new ASTAnd(e1, e2); }
 	)*
 	{ return e1; }
 }
@@ -95,7 +103,7 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 { ASTNode e1, e2; }
 {
-  	<NOT> { e1 = new ASTNot(BooleanExp()); }
+  	<NOT> e2 = BooleanExp() { return new ASTNot(e2); }
 	| 
 	e1 = Exp()
 	(
@@ -132,23 +140,32 @@ ASTNode Term() :
 {
      e1 = Fact()
      (
-       	<TIMES> e2 = Fact() { e1 = new ASTMult(e1,e2); }
+       	<TIMES> e2 = Fact() { e1 = new ASTMul(e1,e2); }
      	|
      	<DIV> e2 = Fact() { e1 = new ASTDiv(e1,e2); }
      )*
      { return e1; }
 }
 
+
 ASTNode Fact() :
-{ Token x; ASTNode e; }
+{ Token x; ASTDecl d; ASTNode e1, e2; }
 {
-  	< MINUS > e = Fact() { return new ASTSym(e); }
+  	<MINUS> e1 = Fact() { return new ASTSub(new ASTNum(0), e1); }
 	| 
  	x = <Num> { return new ASTNum(Integer.parseInt(x.image)); }
  	| 
-   	<LPAR> e = Exp() <RPAR> { return e; }
+	<DECL> { d = new ASTDecl(); }
+		(
+	  		x = <ID> <ASSIGN> e1 = Exp() { d.newBinding(x.image, e1); }
+		)+
+		<IN> e2 = Disjunction() <END> { d.addBody(e2); return d; }
 	|
-	< TRUE > { return new ASTBool(true); }
+	x = <ID> { return new ASTId(x.image); }
+	| 
+   	<LPAR> e1 = Conjunction() <RPAR> { return e1; }
 	|
-	< FALSE > { return new ASTBool(false); }
+	<TRUE> { return new ASTBool(true); }
+	|
+	<FALSE> { return new ASTBool(false); }
 }

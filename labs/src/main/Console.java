@@ -34,15 +34,19 @@ public class Console {
 			} catch (TypingException e) {
 				System.out.println("Typing Error!");
 				e.printStackTrace();
+				parser.ReInit(System.in);
 			} catch (UndeclaredIdentifierException e) {
 				System.out.println("Undeclared Identifier " + e.getMessage());
 				e.printStackTrace();
+				parser.ReInit(System.in);
 			} catch (DuplicateIdentifierException e) {
 				System.out.println("Duplicate Identifier " + e.getMessage());
 				e.printStackTrace();
+				parser.ReInit(System.in);
 			} catch (TypeMismatchException e) {
 				System.out.println("Type Mismatch Error!");
 				e.printStackTrace();
+				parser.ReInit(System.in);
 			}
 		}
 	}
@@ -52,22 +56,16 @@ public class Console {
 		try {
 			parser.Start();
 			return true;
-		} catch (TokenMgrError e) {
-			return false;
-		} catch (ParseException e) {
+		} catch (TokenMgrError | ParseException e) {
 			return false;
 		}
 	}
 
-	public static boolean acceptCompare(String s, IValue value) {
+	public static boolean acceptCompareValues(String s, IValue value) {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
 			return n.eval(new Environment<>()).equals(value);
-		} catch (TokenMgrError e) {
-			return false;
-		} catch (ParseException e) {
-			return false;
 		} catch (Exception e) {
 			return false;
 		}
@@ -78,10 +76,6 @@ public class Console {
 		try {
 			ASTNode n = parser.Start();
 			return n.typecheck(new Environment<>()).equals(type);
-		} catch (TokenMgrError e) {
-			return false;
-		} catch (ParseException e) {
-			return false;
 		} catch (Exception e) {
 			return false;
 		}
