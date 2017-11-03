@@ -3,6 +3,7 @@ package ast;
 import compiler.CodeBlock;
 import types.BoolType;
 import types.IType;
+import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
 import util.IEnvironment;
@@ -33,10 +34,10 @@ public class ASTNotEqual implements ASTNode {
 
 		if (l instanceof IntValue && r instanceof IntValue)
 			return new BoolValue(((IntValue)l).getValue() != ((IntValue)r).getValue());
-		if (l instanceof BoolValue && r instanceof BoolValue)
+		else if (l instanceof BoolValue && r instanceof BoolValue)
 			return new BoolValue(((BoolValue)l).getValue() != ((BoolValue)r).getValue());
 		else
-			throw new TypeMismatchException();
+			throw new TypeMismatchException("Wrong types on Not Equal Operation: Neq(" + l + ", " + r + ")");
 	}
 
 	@Override
@@ -44,10 +45,10 @@ public class ASTNotEqual implements ASTNode {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
 
-		if (l == r)
+		if (l == IntType.singleton && r == IntType.singleton || l == BoolType.singleton && r == BoolType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Not Equal Operation: Neq(" + l + ", " + r + ")");
 	}
 
 	@Override

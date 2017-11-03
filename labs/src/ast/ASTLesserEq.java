@@ -3,6 +3,7 @@ package ast;
 import compiler.CodeBlock;
 import types.BoolType;
 import types.IType;
+import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
 import util.IEnvironment;
@@ -32,12 +33,10 @@ public class ASTLesserEq implements ASTNode {
 		IValue l = left.eval(env);
 		IValue r = right.eval(env);
 
-		if (l instanceof IntValue && r instanceof IntValue) {
+		if (l instanceof IntValue && r instanceof IntValue)
 			return new BoolValue(((IntValue)l).getValue() <= ((IntValue)r).getValue());
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong types on Lesser or Equal Operation: Leq(" + l + ", " + r + ")");
 	}
 
 	@Override
@@ -46,10 +45,10 @@ public class ASTLesserEq implements ASTNode {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
 		
-		if (l == r)
+		if (l == IntType.singleton && r == IntType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Lesser or Equal Operation: Leq(" + l + ", " + r + ")");
 	}
 
 	@Override

@@ -25,25 +25,23 @@ public class ASTNot implements ASTNode {
 	}
 
 	@Override
-	public IValue eval(IEnvironment<IValue> env) 
-			throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, UndeclaredIdentifierException, DuplicateIdentifierException {
 		IValue v = value.eval(env);
-		if (v instanceof BoolValue) {
+		
+		if (v instanceof BoolValue)
 			return new BoolValue(!((BoolValue)v).getValue());
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong type on Not Operation: Not(" + v + ")");
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) 
-			throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
 		IType v = value.typecheck(env);
+		
 		if (v == BoolType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong type on Not Operation: Not(" + v + ")");
 	}
 
 	@Override

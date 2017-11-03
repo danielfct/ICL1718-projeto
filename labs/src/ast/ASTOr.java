@@ -30,12 +30,10 @@ public class ASTOr implements ASTNode {
 		IValue l = left.eval(env);
 		IValue r = right.eval(env);
 
-		if (l instanceof BoolValue && r instanceof BoolValue) {
+		if (l instanceof BoolValue && r instanceof BoolValue)
 			return new BoolValue(((BoolValue)l).getValue() || ((BoolValue)r).getValue());
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong types on Disjunction Operation: And(" + l + ", " + r + ")");
 	}
 
 	@Override
@@ -43,10 +41,10 @@ public class ASTOr implements ASTNode {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
 
-		if (l == r)
+		if (l == BoolType.singleton && r == BoolType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Disjunction Operation: And(" + l + ", " + r + ")");
 	}
 
 	@Override

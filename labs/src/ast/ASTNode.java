@@ -11,11 +11,9 @@ import values.TypeMismatchException;
 
 public interface ASTNode {
 	
-	IValue eval(IEnvironment<IValue> env) 
-			throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException;
+	IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException;
 	
-	IType typecheck(IEnvironment<IType> env) 
-			throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException;
+	IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException;
 	
 	void compile(CodeBlock code);
 }

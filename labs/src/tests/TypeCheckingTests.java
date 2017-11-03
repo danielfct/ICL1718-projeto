@@ -10,7 +10,7 @@ import types.BoolType;
 import types.IType;
 import types.IntType;
 
-public class InterpreterTests {
+public class TypeCheckingTests {
 
 	private void testCase(String expression, IType type) throws ParseException {
 		assertTrue(Console.acceptCompareTypes(expression, type));		
@@ -162,14 +162,13 @@ public class InterpreterTests {
 	
 	@Test
 	public void testDecl() throws Exception {
-		System.out.println("decl");
 		testCase("decl x = 1 in x+1 end\n", IntType.singleton);
 		testCase("decl x = 1 in decl y = 2 in x+y end end\n", IntType.singleton);
 		testCase("decl x = decl y = 2 in 2*y end in x*3 end\n", IntType.singleton);
 		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", IntType.singleton);
 		testCase("decl x = true in x && true end\n", BoolType.singleton);
 		testCase("decl x = false in x && true end\n", BoolType.singleton);
-		testCase("decl x = false in x && true end\n", BoolType.singleton);
+		testCase("decl x = decl y = false in y || true end in x && true end\n", BoolType.singleton);
 		testCase("decl x = false in !x end\n", BoolType.singleton);
 		testNegativeCase("decl x = 1 in x+1 end\n", BoolType.singleton);
 		testNegativeCase("decl x = false in !x end\n", IntType.singleton);
