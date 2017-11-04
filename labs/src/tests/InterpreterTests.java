@@ -60,7 +60,7 @@ public class InterpreterTests {
         testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 6);
         testNegativeCase("x+1\n", 0);
         testNegativeCase("decl x = 1 in x+1 end + x\n", 0);
-        testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);
+        testNegativeCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);
         testCase("decl x = 1 in decl x = 3 y = x+1 in y end end\n", 2);
 	}
 }
