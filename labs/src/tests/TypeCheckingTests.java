@@ -20,6 +20,10 @@ public class TypeCheckingTests {
 		assertFalse(Console.acceptCompareTypes(expression, type));
 	}
 	
+	private void testExceptionCase(String expression) throws ParseException {
+		testNegativeCase(expression, null);
+	}
+	
 	@Test
 	public void testAdd() throws Exception {
 		testCase("1+2\n", IntType.singleton);
@@ -29,6 +33,8 @@ public class TypeCheckingTests {
 		testNegativeCase("1+1\n", BoolType.singleton);
 		testNegativeCase("1+2\n", BoolType.singleton);
 		testNegativeCase("(1+2)+1\n", BoolType.singleton);
+		testExceptionCase("1+false\n");
+		testExceptionCase("1+xpto\n");
 	}
 	
 	@Test
@@ -41,6 +47,8 @@ public class TypeCheckingTests {
 		testNegativeCase("true && false\n", IntType.singleton);
 		testNegativeCase("false && false\n", IntType.singleton);
 		testNegativeCase("true && (true && false)\n", IntType.singleton);
+		testExceptionCase("1 && false\n");
+		testExceptionCase("xpto && false\n");
 	}
 	
 	@Test
@@ -57,6 +65,8 @@ public class TypeCheckingTests {
 		testCase("6/3/2\n", IntType.singleton);
 		testCase("4/2/2\n", IntType.singleton);
 		testNegativeCase("1/1\n", BoolType.singleton);
+		testExceptionCase("1/true\n");
+		testExceptionCase("1/xpto\n");
 	}
 	
 	@Test
@@ -67,6 +77,9 @@ public class TypeCheckingTests {
 		testCase("true == false\n", BoolType.singleton);
 		testNegativeCase("1 == 1\n", IntType.singleton);
 		testNegativeCase("true == true\n", IntType.singleton);
+		testExceptionCase("1 == true\n");
+		testExceptionCase("1 == xpto\n");
+		testExceptionCase("true == xpto\n");
 	}
 	
 	@Test
@@ -76,6 +89,9 @@ public class TypeCheckingTests {
 		testCase("3 > 1 && 1 > 2\n", BoolType.singleton);
 		testNegativeCase("10 > 1\n", IntType.singleton);
 		testNegativeCase("1 > 10\n", IntType.singleton);
+		testExceptionCase("1 > true\n");
+		testExceptionCase("false > 1\n");
+		testExceptionCase("false > false\n");
 	}
 	
 	@Test
@@ -85,6 +101,9 @@ public class TypeCheckingTests {
 		testCase("1 >= 2\n", BoolType.singleton);
 		testNegativeCase("1 >= 1\n", IntType.singleton);
 		testNegativeCase("1 >= 2\n", IntType.singleton);
+		testExceptionCase("1 >= true\n");
+		testExceptionCase("false >= false\n");
+		testExceptionCase("false >= 1\n");
 	}
 	
 	@Test
@@ -95,6 +114,9 @@ public class TypeCheckingTests {
 		testCase("1 < 2 && 2 < 1\n", BoolType.singleton);
 		testNegativeCase("1 < 2\n", IntType.singleton);
 		testNegativeCase("1 < 2 && 2 < 1\n", IntType.singleton);
+		testExceptionCase("1 < true\n");
+		testExceptionCase("true < 1\n");
+		testExceptionCase("true < true\n");
 	}
 	
 	@Test
@@ -103,6 +125,9 @@ public class TypeCheckingTests {
 		testCase("1 <= 2\n", BoolType.singleton);
 		testCase("2 <= 1\n", BoolType.singleton);
 		testNegativeCase("1 <= 1\n", IntType.singleton);
+		testExceptionCase("1 <= true\n");
+		testExceptionCase("true <= 1\n");
+		testExceptionCase("true <= true\n");
 	}
 	
 	@Test
@@ -111,6 +136,9 @@ public class TypeCheckingTests {
 		testCase("4*2*2\n", IntType.singleton);
 		testNegativeCase("1*1\n", BoolType.singleton);
 		testNegativeCase("1*1*0\n", BoolType.singleton);
+		testExceptionCase("1*true\n");
+		testExceptionCase("true*1\n");
+		testExceptionCase("true*true\n");
 	}
 	
 	@Test
@@ -120,6 +148,7 @@ public class TypeCheckingTests {
 		testCase("!(false)\n", BoolType.singleton);
 		testNegativeCase("!false\n", IntType.singleton);
 		testNegativeCase("!true\n", IntType.singleton);
+		testExceptionCase("!1\n");
 	}
 	
 	@Test
@@ -130,6 +159,9 @@ public class TypeCheckingTests {
 		testCase("true != true\n", BoolType.singleton);
 		testNegativeCase("1 != 2\n", IntType.singleton);
 		testNegativeCase("true != true\n", IntType.singleton);
+		testExceptionCase("1 != true\n");
+		testExceptionCase("true != 1\n");
+		testExceptionCase("true != true\n");
 	}
 	
 	@Test
@@ -150,6 +182,9 @@ public class TypeCheckingTests {
 		testNegativeCase("true || false\n", IntType.singleton);
 		testNegativeCase("false || true\n", IntType.singleton);
 		testNegativeCase("false || false\n", IntType.singleton);
+		testExceptionCase("1 || true\n");
+		testExceptionCase("true || 1\n");
+		testExceptionCase("1 || 1\n");
 	}
 	
 	@Test
@@ -158,6 +193,9 @@ public class TypeCheckingTests {
 		testCase("1-2-3\n", IntType.singleton);
 		testNegativeCase("1-1\n", BoolType.singleton);
 		testNegativeCase("1-1-1\n", BoolType.singleton);
+		testExceptionCase("1-true\n");
+		testExceptionCase("true-1\n");
+		testExceptionCase("true-true\n");
 	}
 	
 	@Test
@@ -173,6 +211,8 @@ public class TypeCheckingTests {
 		testNegativeCase("decl x = 1 in x+1 end\n", BoolType.singleton);
 		testNegativeCase("decl x = false in !x end\n", IntType.singleton);
 		testNegativeCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", IntType.singleton);
+		testExceptionCase("decl x = true in 1+x end\n");
+		testExceptionCase("decl x = 1 in 1+true end\n");
 	}
 	
 	@Test
@@ -183,6 +223,7 @@ public class TypeCheckingTests {
 		testCase("(20+20)/(4*5)\n", IntType.singleton);
 		testNegativeCase("(20+20)/(4*5)\n", BoolType.singleton);
 		testNegativeCase("true || false != false && false\n", IntType.singleton);
+		testExceptionCase("1+2 && true != false\n");
 	}
 	
 }

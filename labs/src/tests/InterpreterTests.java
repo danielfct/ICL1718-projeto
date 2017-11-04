@@ -21,30 +21,6 @@ public class InterpreterTests {
 	}
 	
 	@Test
-	public void test01() throws Exception {
-		testCase("1\n",new IntValue(1));
-		testCase("1+2\n",new IntValue(3));
-		testCase("1-2-3\n",new IntValue(-4));
-	}
-	
-	@Test
-	public void testsLabClass02() throws Exception {
-		testCase("4*2\n",new IntValue(8));
-		testCase("4/2/2\n",new IntValue(1));
-		testCase("-1\n",new IntValue(-1));
-		// more tests for boolean values
-		// testCaseBool("true\n",true);
-		// testCaseBool("false\n",false);
-		// testCaseBool("11 < 22\n", true);
-		// testCaseBool("11 > 22\n", false);
-		// testCaseBool("11 == 22\n", false);
-		// testCaseBool("3*5 != 1+2 == true\n", true);
-		// testCaseBool("1 == 2 && 3 == 4\n", false);
-		// testCaseNegativeBool("1 == 2 || 3 == 4 && xpto \n", true);
-		// testCaseNegativeBool("!(1 == 2) && xpto \n", true);
-	}
-	
-	@Test
 	public void testAdd() throws Exception {
 		testCase("1+2\n", new IntValue(3));
 		testCase("1+2+3\n", new IntValue(6));
@@ -205,7 +181,11 @@ public class InterpreterTests {
 		testCase("1+2*3+2/2\n", new IntValue(8));
 		testCase("true || false != false && false\n", new BoolValue(true));
 		testCase("(20+20)/(4*5)\n", new IntValue(2));
+		testCase("3*5 != 1+2 == true\n", new BoolValue(true));
 		testNegativeCase("(20+20)/(4*5)\n", new IntValue(1));
 		testNegativeCase("true || false != false && false\n", new BoolValue(false));
+		testNegativeCase("1 == 2 || 3 == 4 && xpto \n", new BoolValue(true));
+		testNegativeCase("!(1 == 2) && xpto \n", new BoolValue(true));
 	}
+	
 }

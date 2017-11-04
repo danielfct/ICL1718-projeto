@@ -3,6 +3,7 @@ package ast;
 import compiler.CodeBlock;
 import types.BoolType;
 import types.IType;
+import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
 import util.IEnvironment;
@@ -31,12 +32,10 @@ public class ASTEqual implements ASTNode {
 		IValue l = left.eval(env);
 		IValue r = right.eval(env);
 		
-		if (l instanceof IntValue && r instanceof IntValue || l instanceof BoolValue && r instanceof BoolValue) {
+		if (l instanceof IntValue && r instanceof IntValue || l instanceof BoolValue && r instanceof BoolValue)
 			return new BoolValue(l.equals(r));
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong types on Equal Operation: Eq(" + l + ", " + r + ")");
 	}
 
 	@Override
@@ -44,10 +43,10 @@ public class ASTEqual implements ASTNode {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
 
-		if (l == r)
+		if (l == IntType.singleton && r == IntType.singleton || l == BoolType.singleton && r == BoolType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Equal Operation: Eq(" + l + ", " + r + ")");
 	}
 
 	@Override

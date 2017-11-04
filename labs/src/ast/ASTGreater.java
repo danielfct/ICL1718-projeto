@@ -3,6 +3,7 @@ package ast;
 import compiler.CodeBlock;
 import types.BoolType;
 import types.IType;
+import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
 import util.IEnvironment;
@@ -28,26 +29,24 @@ public class ASTGreater implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(null);
-		IValue r = right.eval(null);
+		IValue l = left.eval(env);
+		IValue r = right.eval(env);
 		
-		if (l instanceof IntValue && r instanceof IntValue) {
+		if (l instanceof IntValue && r instanceof IntValue)
 			return new BoolValue(((IntValue)l).getValue() > ((IntValue)r).getValue());
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong types on Greater Operation: Gt(" + l + ", " + r + ")");
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
-		IType l = left.typecheck(null);
-		IType r = right.typecheck(null);
+		IType l = left.typecheck(env);
+		IType r = right.typecheck(env);
 		
-		if (l == r)
+		if (l == IntType.singleton && r == IntType.singleton)
 			return BoolType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Greater Operation: Gt(" + l + ", " + r + ")");
 	}
 
 	@Override

@@ -65,18 +65,15 @@ public class CompilerTests {
 	}
 
 	private void testCase(String expression, int value) throws FileNotFoundException, IOException, InterruptedException, ParseException {
-		String result = getResult(expression);		
-		assertTrue(result.equals(value + "\n"));
+		assertTrue(getResult(expression).equals(value + "\n"));
 	}
 	
 	private void testNegativeCase(String expression, int value) throws FileNotFoundException, IOException, InterruptedException, ParseException {
-		String result = getResult(expression);
-		assertFalse(result.equals(value + "\n"));
+		assertFalse(getResult(expression).equals(value + "\n"));
 	}
 	
 	@Test
 	public void testAdd() throws Exception {
-		System.out.println("ADD");
 		testCase("1+2\n", 3);
 		testCase("1+2+3\n", 6);
 		testCase("(1+2)+4\n", 7);
@@ -221,9 +218,9 @@ public class CompilerTests {
 		testCase("decl x = 1 in decl y = 2 in x+y end end\n", 3);
 		testCase("decl x = decl y = 2 in 2*y end in x*3\n", 4);
 		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 5);
+		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);
 		testNegativeCase("x+1", 0);
 		testNegativeCase("decl x = 1 in x+1 end + x", 0);
-		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);
 	}
 	
 	@Test

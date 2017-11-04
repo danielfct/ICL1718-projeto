@@ -27,26 +27,24 @@ public class ASTDiv implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(null);
-		IValue r = right.eval(null);
+		IValue l = left.eval(env);
+		IValue r = right.eval(env);
 		
-		if (l instanceof IntValue && r instanceof IntValue) {
+		if (l instanceof IntValue && r instanceof IntValue)
 			return new IntValue(((IntValue)l).getValue() / ((IntValue)r).getValue());
-		}
-		else {
-			throw new TypeMismatchException();
-		}
+		else
+			throw new TypeMismatchException("Wrong types on Division Operation: Div(" + l + ", " + r + ")");
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
-		IType l = left.typecheck(null);
-		IType r = right.typecheck(null);
+		IType l = left.typecheck(env);
+		IType r = right.typecheck(env);
 		
-		if (l == r)
+		if (l == IntType.singleton && r == IntType.singleton)
 			return IntType.singleton;
 		else
-			throw new TypingException();
+			throw new TypingException("Wrong types on Division Operation: Div(" + l + ", " + r + ")");
 	}
 
 	@Override
