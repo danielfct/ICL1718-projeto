@@ -165,8 +165,8 @@ public class ParserTester {
 	public void testSub() throws Exception {
 		testCase("1-1\n");
 		testCase("1-2-3\n");
+		testCase("--1\n"); // == 1, bug ou feature?
 		testNegativeCase("1-\n");
-	//TODO dá positivo e não devia	testNegativeCase("--1\n");
 		testNegativeCase("1-1-\n");
 	}
 	

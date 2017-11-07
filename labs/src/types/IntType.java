@@ -6,4 +6,9 @@ public class IntType implements IType {
 	
 	private IntType() { }
 	
+	@Override
+	public String toString() {
+		return "I";
+	}
+	
 }

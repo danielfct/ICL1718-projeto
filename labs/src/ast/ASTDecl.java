@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import compiler.CodeBlock;
+import compiler.StackFrame;
 import types.IType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
+import util.ICompilationEnvironment;
 import util.IEnvironment;
 import util.UndeclaredIdentifierException;
 import values.IValue;
 import values.TypeMismatchException;
+import static main.Compiler.SL;
 
 public class ASTDecl implements ASTNode {
 	
@@ -28,9 +31,11 @@ public class ASTDecl implements ASTNode {
 	
 	List<Declaration> declarations;
 	ASTNode body;
+	private IType type;
 	
 	public ASTDecl() {
-		declarations = new ArrayList<>();
+		this.declarations = new ArrayList<>();
+		this.type = null;
 	}
 	
 	public void addBody(ASTNode body) {
@@ -53,65 +58,44 @@ public class ASTDecl implements ASTNode {
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
-		IEnvironment<IType> newenv = env.beginScope();
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		IEnvironment<IType> newEnv = env.beginScope();
 		for (Declaration d : declarations)
-			newenv.assoc(d.id, d.def.typecheck(env));
-		IType type = body.typecheck(newenv);
+			newEnv.assoc(d.id, d.def.typecheck(env));
+		type = body.typecheck(newEnv);
 		env.endScope();
 		
 		return type;	
 	}
 
 	@Override
-	public void compile(CodeBlock code) { // <<< IEnvironment<Integer> env
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+		// decl
+		StackFrame frame = code.newFrame();
 		
-		// Create and initialize the stackframe (frame_i) in the compiler
-		// Use code to manage stackframes ( code.newFrame() ??)
-		// Generate code that initializes the stack frame
-		/*
-		new frame_id
-		dup
-		invokespecial frame_id/<init>()V
-		*/
+		// x=1 , x=y+1, x=decl y=1 in x+y end, etc
+		ICompilationEnvironment newEnv = env.beginScope();
+		for (Declaration d : declarations) {
+			int location = frame.nextLocation();
+			newEnv.assoc(d.id, location);
+			frame.setLocation(location, d.def.getType().toString());
+			code.emit_dup();
+			d.def.compile(code, env);
+			code.emit_putfield("Frame_" + frame.id, "loc_" + String.format("%02d", location), d.def.getType().toString());
+		}
+		// in
+		code.setCurrentFrame(frame);
+		code.emit_astore(SL);
+		body.compile(code, newEnv);
 		
-		// initialize SL in the stackframe
-		/*
-		dup
-		aload SP
-		putfield frame_id/SL Lframe_up; 
-		*/
-		
-		// beginScope
-		// For each declaration:
-			// assoc id_i to loc_i (fresh)
-			// add loc_i to frame (use the type)
-			// compile its expression and generate code that stores the value
-			// in the original environment
-			/*
-			  dup
-			  [[ E_i ]]
-			  putfield frame_id/loc_i type;
-			*/
-		// terminate by storing the stack pointer
-		/*
-		astore SP
-		*/
-		
-		// For the main declaration body
-		// compiles it, in an environment that "knows" that loc_i corresponds to id_i
-		/*
-		[[ E ]] 
-		*/
-		
-		// this corresponds to the endScope
-		/*
-		aload SP
-		checkcast frame_id
-		getfield frame_id/SL Lframe_up;
-		astore SP
-		 */
-		
-		
+		// end
+		env.endScope();
+		code.endScope();
 	}
+
+	@Override
+	public IType getType() {
+		return type;
+	}
+	
 }

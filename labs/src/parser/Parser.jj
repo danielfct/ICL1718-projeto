@@ -103,8 +103,6 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 { ASTNode e1, e2; }
 {
-  	<NOT> e2 = BooleanExp() { return new ASTNot(e2); }
-	| 
 	e1 = Exp()
 	(
 		<EQ> e2 = Exp() { e1 = new ASTEqual(e1, e2); }
@@ -152,20 +150,23 @@ ASTNode Fact() :
 { Token x; ASTDecl d; ASTNode e1, e2; }
 {
   	<MINUS> e1 = Fact() { return new ASTSub(new ASTNum(0), e1); }
-	| 
+	|
  	x = <Num> { return new ASTNum(Integer.parseInt(x.image)); }
- 	| 
+ 	|
 	<DECL> { d = new ASTDecl(); }
 		(
-	  		x = <ID> <ASSIGN> e1 = Exp() { d.newBinding(x.image, e1); }
+	  		x = <ID> <ASSIGN> e1 = Disjunction() { d.newBinding(x.image, e1); }
 		)+
 		<IN> e2 = Disjunction() <END> { d.addBody(e2); return d; }
 	|
 	x = <ID> { return new ASTId(x.image); }
 	| 
-   	<LPAR> e1 = Conjunction() <RPAR> { return e1; }
+   	<LPAR> e1 = Disjunction() <RPAR> { return e1; }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
 	<FALSE> { return new ASTBool(false); }
+	|
+	<NOT> e1 = BooleanExp() { return new ASTNot(e1); }
+	
 }

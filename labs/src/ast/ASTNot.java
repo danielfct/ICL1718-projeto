@@ -5,6 +5,7 @@ import types.BoolType;
 import types.IType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
+import util.ICompilationEnvironment;
 import util.IEnvironment;
 import util.UndeclaredIdentifierException;
 import values.BoolValue;
@@ -14,9 +15,11 @@ import values.TypeMismatchException;
 public class ASTNot implements ASTNode {
 
 	final ASTNode value;
+	private IType type;
 
 	public ASTNot(ASTNode value) {
 		this.value = value;
+		this.type = null;
 	}
 
 	@Override
@@ -35,24 +38,31 @@ public class ASTNot implements ASTNode {
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType v = value.typecheck(env);
 		
 		if (v == BoolType.singleton)
-			return BoolType.singleton;
+			type = BoolType.singleton;
 		else
 			throw new TypingException("Wrong type on Not Operation: Not(" + v + ")");
+		
+		return type;
 	}
 
 	@Override
-	public void compile(CodeBlock code) {
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		// Since false is represented by an integer of value 0 and
 		// true is represented by an integer of value 1, a not operation can be
 		// achieved with a xor operation. !B = B^1
 		
-		value.compile(code);
+		value.compile(code, env);
 		code.emit_bool(true);
 		code.emit_xor();
+	}
+
+	@Override
+	public IType getType() {
+		return type;
 	}
 
 }

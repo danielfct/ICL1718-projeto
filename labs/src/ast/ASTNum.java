@@ -5,6 +5,7 @@ import types.IType;
 import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
+import util.ICompilationEnvironment;
 import util.IEnvironment;
 import util.UndeclaredIdentifierException;
 import values.IValue;
@@ -12,7 +13,7 @@ import values.IntValue;
 
 public class ASTNum implements ASTNode {
 
-	int val;
+	final int val;
 
 	public ASTNum(int n) {
 		val = n;
@@ -29,12 +30,17 @@ public class ASTNum implements ASTNode {
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		return IntType.singleton;
 	}
 
 	@Override
-	public void compile(CodeBlock code) {
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		code.emit_push(val);
+	}
+
+	@Override
+	public IType getType() {
+		return IntType.singleton;
 	}
 }

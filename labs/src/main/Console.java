@@ -36,11 +36,9 @@ public class Console {
 				e.printStackTrace();
 				parser.ReInit(System.in);
 			} catch (UndeclaredIdentifierException e) {
-				System.out.println("Undeclared Identifier " + e.getMessage());
 				e.printStackTrace();
 				parser.ReInit(System.in);
 			} catch (DuplicateIdentifierException e) {
-				System.out.println("Duplicate Identifier " + e.getMessage());
 				e.printStackTrace();
 				parser.ReInit(System.in);
 			} catch (TypeMismatchException e) {

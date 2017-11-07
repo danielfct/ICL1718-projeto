@@ -4,33 +4,24 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
+import static main.Compiler.SL;
 
 public class CodeBlock {
-
-	static class StackFrame {
-		void dump() {
-//			frame_id.j
-//
-//			.class frame_id
-//			.super java/lang/Object
-//			.field public SL Lancestor_frame_id; 
-//			.field public loc_00 type;
-//			.field public loc_01 type;
-//			..
-//			.field public loc_n type;
-//			.end method 
-		}
-	}
-
-	ArrayList<String> code;
-	ArrayList<StackFrame> frames;
-	public final LabelFactory labelFactory = new LabelFactory();
+	
+	private List<String> code;
+	private List<StackFrame> frames;
+	private StackFrame currentFrame;
+	public final LabelFactory labelFactory;
 
 	public CodeBlock() {
-		code = new ArrayList<String>(100);
+		this.code = new ArrayList<String>(100);
+		this.frames = new ArrayList<StackFrame>(10);
+		this.currentFrame = null;
+		this.labelFactory = new LabelFactory();
 	}
 
-	void dumpHeader(PrintStream out) {
+	private void dumpHeader(PrintStream out) {
 		out.println(".class public Demo");
 		out.println(".super java/lang/Object");
 		out.println("");
@@ -52,18 +43,16 @@ public class CodeBlock {
 		out.println("       ;    1 - the PrintStream object held in java.lang.out");
 		out.println("       getstatic java/lang/System/out Ljava/io/PrintStream;");
 		out.println("");
-		out.println("       ; place your bytecodes here");
-		out.println("       ; START");
-		out.println("");
+		out.println("       ; 	START");
 	}
-	
-	void dumpCode(PrintStream out) {
+
+	private void dumpCode(PrintStream out) {
 		for (String s : code)
 			out.println("       " + s);
 	}
 
-	void dumpFooter(PrintStream out) {
-		out.println("       ; END");
+	private void dumpFooter(PrintStream out) {
+		out.println("       ; 	END");
 		out.println("");
 		out.println("");		
 		out.println("       ; convert to String;");
@@ -75,21 +64,127 @@ public class CodeBlock {
 		out.println("");		
 		out.println(".end method");
 	}
-	
-//	private void dumpFrames() {
-//		for (Stackframe frame : frames)
-//			frame.dump();
-//	}
+
+	private void dumpFrames() throws FileNotFoundException {
+		for (StackFrame frame : frames)
+			frame.dump();
+	}
 
 	public void dump(String filename) throws FileNotFoundException {
 		PrintStream out = new PrintStream(new FileOutputStream(filename));
 		dumpHeader(out);
 		dumpCode(out);
 		dumpFooter(out);
-//		dumpFrames();
+		out.close();
+		dumpFrames();
+	}
+	
+	public StackFrame newFrame() {
+		// Create and initialize the stackframe in the compiler
+		StackFrame frame = new StackFrame(frames.size() + 1, currentFrame);
+		frames.add(frame);
+		emit_comment("Initialize frame " + frame.id);
+		emit_new("Frame_" + frame.id);
+		emit_dup();
+		emit_invokespecial("Frame_" + frame.id, "<init>", "()V");
+		// Initialize Static Linker in the stackframe
+		if (frame.ancestor != null) {
+			emit_dup();
+			emit_aload(SL);
+			emit_putfield("Frame_" + frame.id, "SL", "LFrame_" + frame.ancestor.id + ";");
+		}
+		
+		return frame;
+	}
+	
+	public void setCurrentFrame(StackFrame frame) {
+		currentFrame = frame;
+	}
+
+	public StackFrame getCurrentFrame() {
+		return currentFrame;
+	}
+
+	public void endScope() {
+		if (currentFrame.ancestor != null) {
+			emit_aload(SL);
+			emit_checkcast("Frame_" + currentFrame.id);
+			emit_getfield("Frame_" + currentFrame.id, "SL", "LFrame_" + currentFrame.ancestor.id + ";");
+		}
+		else {
+			emit_null();
+		}
+		emit_astore(SL);
+		setCurrentFrame(currentFrame.ancestor);
 	}
 
 	// Bytecode instructions
+
+	// make a comment
+	public void emit_comment(String comment) {
+		code.add(" ; " + comment);
+	}
+	
+	// pushes stack pointer onto the operand stack 
+	public void emit_SP() {
+		if (currentFrame != null) {
+			emit_aload(SL);
+			emit_checkcast("Frame_" + currentFrame.id);
+		}
+	}
+	
+	// create new object
+	public void emit_new(String classname) {
+		code.add("new " + classname);
+	}
+	
+	// invoke instance method; special handling for superclass, private, and instance initialization method invocations
+	public void emit_invokespecial(String classname, String methodname, String descriptor) {
+		code.add("invokespecial " + classname + "/" + methodname + descriptor);
+	}
+	
+	public void emit_null() {
+		code.add("aconst_null");
+	}
+
+	// getfield pops objectref (a reference to an object) from the stack, retrieves the value of the field identified by <field-spec> from objectref, 
+	// and pushes the one-word or two-word value onto the operand stack.
+	// Examples:
+	// 		getfield Frame_n1/SL LFrame_n;
+	// 		getfield Frame_1/loc_X I
+	public void emit_getfield(String classname, String fieldname, String descriptor) {
+		code.add("getfield " + classname + "/" + fieldname + " " + descriptor);
+	}
+
+	// putfield sets the value of the field identified by <classname/fieldname> in objectref (a reference to an object) 
+	// to the single or double word value on the operand stack
+	// Examples:
+	// 		putfield Frame_n1/SL LFrame_n;
+	// 		putfield Frame_1/loc_X I
+	public void emit_putfield(String classname, String fieldname, String descriptor) {
+		code.add("putfield " + classname + "/" + fieldname + " " + descriptor);
+	}
+
+	// This pops the top single-word value off the operand stack, and then pushes that value twice 
+	//- i.e. it makes an extra copy of the top item on the stack
+	public void emit_dup() {
+		code.add("dup");
+	}
+
+	// Pops objectref (a reference to an object or array) off the stack and stores it in local variable <n>
+	public void emit_astore(int n) {
+		code.add("astore_" + n);
+	}
+
+	// retrieves an object reference from a local variable and pushes it onto the operand stack
+	public void emit_aload(int n) {
+		code.add("aload_" + n); 
+	}
+	
+	// checks that the top item on the operand stack (a reference to an object or array) can be cast to a given type
+	public void emit_checkcast(String t) {
+		code.add("checkcast " + t);
+	}
 
 	// push value into the stack
 	public void emit_push(int n) {

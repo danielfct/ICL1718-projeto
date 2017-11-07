@@ -1,18 +1,33 @@
 package ast;
 
 import compiler.CodeBlock;
+import compiler.StackFrame;
 import types.IType;
 import types.TypingException;
+import util.DuplicateIdentifierException;
+import util.ICompilationEnvironment;
 import util.IEnvironment;
 import util.UndeclaredIdentifierException;
 import values.IValue;
 
 public class ASTId implements ASTNode {
-	
-	String id;
-	
+
+	public static class Address { 
+		final int jumps; 
+		final int location;
+
+		public Address(int jumps, int location) {
+			this.jumps = jumps;
+			this.location = location;
+		}
+	}
+
+	final String id;
+	private IType type;
+
 	public ASTId(String id) {
 		this.id = id;
+		this.type = null;
 	}
 
 	@Override 
@@ -21,38 +36,36 @@ public class ASTId implements ASTNode {
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException {
-		return env.find(id);
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		type = env.find(id);
+		return type;
 	}
 
 	@Override
-	public void compile(CodeBlock code) {
-		
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		// Get the stack pointer
-		/*
-		aload SP
-		checkcast frame_id
-		*/
-		// ask code for the current frame
+		code.emit_SP();
+		
+		// Ask code for the current frame
+		StackFrame currentFrame = code.getCurrentFrame();
 
-		// ask env for the address (jumps, loc_X)
-		// class Address { int jumps; int loc; ... }
-		// Address addr = env.lookup(id) <<< Lookup in a class that extends Environment 
-		// for each jump:
-			/*
-			getfield frame_n/SL Lframe_n1;
-			getfield frame_n2/SL Lframe_n2;
-			getfield frame_n2/SL Lframe_n3;
-			…
-			*/
-		/*
-		getfield frame_1/loc_X I ; <<<< I is the type of the identifier
+		code.emit_comment("Get " + id);
 
-		 */
-		// use getType to know the field type
-		
-		
-		
-		
+		// Ask Environment for the address (num jumps, location)
+		Address addr = env.lookup(id);
+
+		// Get Static Links
+		for (int i = 0; i < addr.jumps; i++) {
+			code.emit_getfield("Frame_" + currentFrame.id, "SL", "LFrame_" + currentFrame.ancestor.id + ";");
+			currentFrame = currentFrame.ancestor;
+		}
+		// Get Id
+		code.emit_getfield("Frame_" + currentFrame.id, "loc_" + String.format("%02d", addr.location), getType().toString());
 	}
+
+	@Override
+	public IType getType() {
+		return type;
+	}
+	
 }

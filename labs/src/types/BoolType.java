@@ -6,4 +6,8 @@ public class BoolType implements IType {
 	
 	private BoolType() { }
 
+	@Override
+	public String toString() {
+		return "I";
+	}
 }

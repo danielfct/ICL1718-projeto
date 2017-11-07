@@ -5,6 +5,7 @@ import types.IType;
 import types.IntType;
 import types.TypingException;
 import util.DuplicateIdentifierException;
+import util.ICompilationEnvironment;
 import util.IEnvironment;
 import util.UndeclaredIdentifierException;
 import values.IValue;
@@ -14,10 +15,12 @@ import values.TypeMismatchException;
 public class ASTDiv implements ASTNode {
 
 	final ASTNode left, right;
+	private IType type;
 
 	public ASTDiv(ASTNode left, ASTNode right) {
 		this.left = left;
 		this.right = right;
+		this.type = null;
 	}
 
 	@Override
@@ -37,21 +40,28 @@ public class ASTDiv implements ASTNode {
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) throws TypingException, UndeclaredIdentifierException, DuplicateIdentifierException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
 		
 		if (l == IntType.singleton && r == IntType.singleton)
-			return IntType.singleton;
+			type = IntType.singleton;
 		else
 			throw new TypingException("Wrong types on Division Operation: Div(" + l + ", " + r + ")");
+		
+		return type;
 	}
 
 	@Override
-	public void compile(CodeBlock code) {
-		left.compile(code);
-		right.compile(code);
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+		left.compile(code, env);
+		right.compile(code, env);
 		code.emit_div();
+	}
+
+	@Override
+	public IType getType() {
+		return type;
 	}
 
 }

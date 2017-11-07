@@ -1,4 +1,5 @@
 package util;
+
 import java.util.*;
 
 public class Environment<T> implements IEnvironment<T> {
@@ -14,7 +15,7 @@ public class Environment<T> implements IEnvironment<T> {
 	}
 
 	Environment<T> up;
-	ArrayList<Assoc<T>> assocs;
+	List<Assoc<T>> assocs;
 
 	public Environment() {
 		this(null);
@@ -25,6 +26,7 @@ public class Environment<T> implements IEnvironment<T> {
 		this.assocs = new ArrayList<Assoc<T>>();
 	}
 
+	@Override
 	public T find(String id) throws UndeclaredIdentifierException {
 		Environment<T> current = this;
 		while (current != null) {
@@ -36,19 +38,22 @@ public class Environment<T> implements IEnvironment<T> {
 		throw new UndeclaredIdentifierException(id);
 	}
 
+	@Override
 	public Environment<T> beginScope() {
 		return new Environment<T>(this);
 	}
 
+	@Override
 	public Environment<T> endScope() {
 		return up;
 	}
 
+	@Override
 	public void assoc(String id, T value) throws DuplicateIdentifierException {
 		for (Assoc<T> assoc : assocs)
 			if (assoc.id.equals(id))
 				throw new DuplicateIdentifierException(id);
-		assocs.add(new Assoc<T>(id,value));
-
+		assocs.add(new Assoc<T>(id, value));
 	}
+
 }
