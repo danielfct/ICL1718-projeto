@@ -54,12 +54,13 @@ public class InterpreterTests {
 	
 	@Test
 	public void testsLabClass05() throws Exception {
-		testCase("decl x = 1 in x+1 end\n",2);
-		testCase("decl x = 1 in decl y = 2 in x+y end end\n",3);
-		testCase("decl x = decl y = 2 in 2*y end in x*3\n",4);
-		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 5);
-		testNegativeCase("x+1", 0);
-		testNegativeCase("decl x = 1 in x+1 end + x", 0);
-		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);		
+        testCase("decl x = 1 in x+1 end\n",2);
+        testCase("decl x = 1 in decl y = 2 in x+y end end\n",3);
+        testCase("decl x = decl y = 2 in 2*y end in x*3 end\n",12);
+        testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 6);
+        testNegativeCase("x+1\n", 0);
+        testNegativeCase("decl x = 1 in x+1 end + x\n", 0);
+        testNegativeCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);
+        testCase("decl x = 1 in decl x = 3 y = x+1 in y end end\n", 2);
 	}
 }
