@@ -58,10 +58,9 @@ exp ::= ...
 
 You will have to go through the usual implementation steps: extend the parser knowing that the least priority is given to the sequence operator (';'); implement the nodes of the AST, and corresponding semantics.
 
-To implement the semantics you will need to implement different kinds of values (Integers, Booleans, and References) as an inductive type. This is composed by an interface `IValue`, and the corresponding case classes (inductive constructors), for `IntValue`, `BoolValue`, and `RefValue`. This implies that you have to modify the signature (and implementation) of all methods `eval` in the AST nodes (remember to use refactoring capabilities in Eclipse).
+To implement the semantics you will need to implement different kinds of values (Integers, Booleans, and References) as an inductive type. This is composed by an interface `IValue`, and the corresponding case classes (inductive constructors), for `IntValue`, `BoolValue`, and `RefValue`. 
 
-Memory cells can be directly implemented by the `RefValue` objects, that implement set and get methods to manipulate the value stored in the variable. Follow the lecture slides to implement the remaining expressions. 
-
+Memory cells are implemented by Java objects. Follow the lecture slides for reference on how to implement the interpreter, type system, and compiler for all expressions. 
 
 ## Project assignment (1st phase)
 
