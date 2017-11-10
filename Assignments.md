@@ -40,7 +40,30 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Dec 11-15** - Project Presentation and Discussion
 
-## Project assignment
+
+
+## Lab 7 - Implementing an imperative language
+
+Implement the interpreter, type system and compiler for a language with the following extra expressions:
+
+~~~
+exp ::= ... 
+    | 'var' '(' exp ')' 
+    | exp ':=' exp 
+    | '*' exp
+    | exp ';' exp 
+    | 'while' exp 'do' exp 'end' 
+    | 'if' exp 'then' exp 'else' exp 'end' 
+~~~
+
+You will have to go through the usual implementation steps: extend the parser knowing that the least priority is given to the sequence operator (';'); implement the nodes of the AST, and corresponding semantics.
+
+To implement the semantics you will need to implement different kinds of values (Integers, Booleans, and References) as an inductive type. This is composed by an interface `IValue`, and the corresponding case classes (inductive constructors), for `IntValue`, `BoolValue`, and `RefValue`. This implies that you have to modify the signature (and implementation) of all methods `eval` in the AST nodes (remember to use refactoring capabilities in Eclipse).
+
+Memory cells can be directly implemented by the `RefValue` objects, that implement set and get methods to manipulate the value stored in the variable. Follow the lecture slides to implement the remaining expressions. 
+
+
+## Project assignment (1st phase)
 
 The first project assignment consists on the implementation of the parser, interpreter, compiler, and corresponding tests of the previous labs.
 
