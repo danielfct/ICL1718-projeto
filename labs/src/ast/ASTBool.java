@@ -5,6 +5,7 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.BoolType;
 import types.IType;
 import types.TypingException;
@@ -25,7 +26,7 @@ public class ASTBool implements ASTNode {
 	}
 
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		return new BoolValue(val);
 	}
 

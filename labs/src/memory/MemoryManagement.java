@@ -5,7 +5,7 @@ import values.RefValue;
 
 public interface MemoryManagement {
 
-	RefValue newVar(IValue value);
+	RefValue var(IValue value);
 	
 	IValue get(RefValue reference);
 	

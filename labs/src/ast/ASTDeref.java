@@ -5,32 +5,39 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
+import values.RefValue;
 import values.TypeMismatchException;
 
 public class ASTDeref implements ASTNode {
 
-	final ASTNode value;
+	final ASTNode node;
 	private IType type;
 	
-	public ASTDeref(ASTNode value) {
-		this.value = value;
+	public ASTDeref(ASTNode n) {
+		this.node = n;
 		this.type = null;
 	}
 	
 	@Override
 	public String toString() {
-		return "*" + value;
+		return "*" + node;
 	}
 	
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 //		eval(deref(E), env, m0) = [ 	(ref, m1) = eval(E, env, m0);
 //										(m1.get(ref), m1) 
 //								   ]
-		return null;
+		Eval evaluation = node.eval(env, mem);
+		IValue ref = evaluation.value;
+		MemoryManagement newMem = evaluation.mem;
+		IValue value = newMem.get((RefValue)ref);
+		
+		return new Eval(value, newMem);
 	}
 
 	@Override

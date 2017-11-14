@@ -5,6 +5,7 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
@@ -30,7 +31,7 @@ public class ASTIf implements ASTNode {
 	}
 	
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 //		eval(if(E1, E2, E3), env, m0) = [		(v1, m1) = eval(E1, env, m0);
 //												if (v1 = T) then 
 //													(v2, m2) = eval(E2, env, m1);

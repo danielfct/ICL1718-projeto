@@ -5,6 +5,7 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
@@ -24,16 +25,21 @@ public class ASTAssign implements ASTNode {
 	
 	@Override
 	public String toString() {
-		return left + " ; " + right;
+		return left + " := " + right;
 	}
 	
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 //		eval(assign(E1, E2), env, m0) = [	(v1, m1) = eval(E1, env, m0);
 //											(v2, m2) = eval(E2, env, m1);
 //											m3 = m2.set(v1, v2);
 //											(v2, m3)
 //										 ]
+		Eval leftEvaluation = left.eval(env, mem);
+		IValue ref = leftEvaluation.value;
+		MemoryManagement newMem = leftEvaluation.mem;
+		Eval rightEvaluation = right.eval(env, leftEvaluation.mem);
+		rightEvaluation.mem.set(reference, value)
 		return null;
 	}
 

@@ -5,6 +5,7 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.IntType;
 import types.TypingException;
@@ -29,10 +30,10 @@ public class ASTAdd implements ASTNode {
 	}
 
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, 
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, 
 	DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(env);
-		IValue r = right.eval(env);
+		IValue l = left.eval(env, mem);
+		IValue r = right.eval(env, mem);
 
 		if (l instanceof IntValue && r instanceof IntValue)
 			return new IntValue(((IntValue)l).getValue() + ((IntValue)r).getValue());

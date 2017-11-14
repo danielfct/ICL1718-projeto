@@ -5,34 +5,41 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
+import values.RefValue;
 import values.TypeMismatchException;
 
 public class ASTVar implements ASTNode {
 
-	final ASTNode value;
+	final ASTNode node;
 	private IType type;
 	
-	public ASTVar(ASTNode v) {
-		this.value = v;
+	public ASTVar(ASTNode n) {
+		this.node = n;
 		this.type = null;
 	}
 	
 	
 	@Override
 	public String toString() {
-		return "var(" + value + ")";
+		return "var(" + node + ")";
 	}
 	
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 //		eval(var(E), env, m0) = [ 	(v1 , m1) = eval(E, env, m0);
 //										(ref, m2) = m1.new(v1);
 //										(ref, m2) 
-//								   ]
-		return null;
+//								 ]
+		Eval evaluation = node.eval(env, mem);
+		IValue value = evaluation.value;
+		MemoryManagement newMem = evaluation.mem;
+		RefValue ref = newMem.var(value);
+		
+		return new Eval(ref, newMem);
 	}
 
 	@Override

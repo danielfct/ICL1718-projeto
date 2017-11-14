@@ -9,6 +9,7 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
+import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
@@ -47,11 +48,11 @@ public class ASTDecl implements ASTNode {
 	}
 
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IEnvironment<IValue> newenv = env.beginScope();	
 		for (Declaration d : declarations)
-			newenv.assoc(d.id, d.def.eval(env));	
-		IValue value = body.eval(newenv);	
+			newenv.assoc(d.id, d.def.eval(env, mem));	
+		IValue value = body.eval(newenv, mem);	
 		env.endScope();
 		
 		return value;

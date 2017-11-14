@@ -4,9 +4,9 @@ import values.IValue;
 import values.RefValue;
 
 public class Memory implements MemoryManagement {
-
+	
 	@Override
-	public RefValue newVar(IValue value) {
+	public RefValue var(IValue value) {
 		return new MemoryCell(value);
 	}
 
