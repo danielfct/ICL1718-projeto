@@ -48,7 +48,7 @@ TOKEN :
   	|
   	< AND : "&&" >
   	|
-  	< EQ : "==" >
+  	< COMPARE : "==" >
  	|
  	< NEQ : "!=" >
  	|
@@ -64,7 +64,7 @@ TOKEN :
   	|
 	< DECL : "decl" >
 	|
-	< ASSIGN : "=" >
+	< EQ : "=" >
 	|
 	< IN : "in" >
 	|
@@ -75,6 +75,8 @@ TOKEN :
 	< SEMICOLON : ";" >
 	|
 	< VAR : "var" >
+	|
+	< ASSIGN : ":=" >
 	|
 	< WHILE : "while" >
 	|
@@ -111,7 +113,7 @@ ASTNode Assign() :
 {
 	e1 = Exp()
  	[
-  		<SEMICOLON > e2 = Assign() { e1 = new ASTAssign(e1, e2); } 
+  		<ASSIGN > e2 = Assign() { e1 = new ASTAssign(e1, e2); } 
   	]
   	{ return e1; }
 }
@@ -148,7 +150,7 @@ ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 {
 	e1 = ArithmeticExp()
 	(
-		<EQ> e2 = ArithmeticExp() { e1 = new ASTEqual(e1, e2); }
+		<COMPARE> e2 = ArithmeticExp() { e1 = new ASTEqual(e1, e2); }
 	  	|
 	  	<NEQ> e2 = ArithmeticExp() { e1 = new ASTNotEqual(e1, e2); }
 	  	|
@@ -197,7 +199,7 @@ ASTNode Fact() :
  	|
 	<DECL> { d = new ASTDecl(); }
 		(
-	  		x = <ID> <ASSIGN> e1 = Exp() { d.newBinding(x.image, e1); }
+	  		x = <ID> <EQ> e1 = Exp() { d.newBinding(x.image, e1); }
 		)+
 		<IN> e2 = Exp() <END> { d.addBody(e2); return d; }
 	|
