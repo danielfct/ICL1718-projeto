@@ -62,4 +62,27 @@ public class InterpreterTests {
 		testNegativeCase("decl x = 1 in x+1 end + x", 0);
 		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y+x end\n", 5);		
 	}
+
+	@Test
+	public void testsLabClass07() throws Exception {
+		testCase("*var(0)",0);
+		testCase("*var(99)",99);
+		testCase("var(0):=1",1);
+		testCase("decl x = var(0) in x := 1; *x end",1);
+		testCase("decl x = var(0) in decl y = x in x := 1; *y end end",1);
+		testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end",0);
+		testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end end end",20);
+		testCase("if true then 1 else 2", 1);
+		testCase("if false then 1 else 2", 2);
+		testNegativeCase("if true then true else 1", 0); // type test
+		testCase("decl x = var(3) in "
+				+ "decl y = var(1) in "
+				+ "while *x > 0 do "
+				+ "  y := *y * *x; "
+				+ "  x := *x - 1 "
+				+ "end "
+				+ "end "
+				+ "end",6);
+	}
+
 }
