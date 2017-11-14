@@ -8,17 +8,17 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Set 11-15** - Parsing of an expression language.
 
->**Set 18-22** - Interpretation of an expression language.
+>**Set 18-22** - Interpretation of an expression language. Dynamic typing.
 
->**Set 25-29** - Extending the language with boolean values. Typing an expression language.
-
->**Project assignment: announcement**
+>**Set 25-29** - Static typing of an expression language.
 
 >**Out 2-6**  - Compiling arithmetic expressions to the JVM.
 
->**Out 9-13** - Type-directed compilation. Compiling boolean expressions to the JVM.
+>**Out 9-13** - Implementing an interpreter with binding and scope.
 
->**Out 16-20** - Implementing an interpreter with binding and scope.
+>**Project assignment: announcement**
+
+>**Out 16-20** - Type-directed compilation. Compiling binding and scope.
 
 >**Project assignment: 1st phase** (exact date awaiting approval)
 
@@ -42,8 +42,118 @@ This is the list of lab assignments for the course. We first have the complete l
 
 
 
+## Lab 7 - Implementing an imperative language
 
-## Lab 2 - Interpretation of an expression 
+Implement the interpreter, type system and compiler for a language with the following extra expressions:
+
+~~~
+exp ::= ... 
+    | 'var' '(' exp ')' 
+    | exp ':=' exp 
+    | '*' exp
+    | exp ';' exp 
+    | 'while' exp 'do' exp 'end' 
+    | 'if' exp 'then' exp 'else' exp 'end' 
+~~~
+
+You will have to go through the usual implementation steps: extend the parser knowing that the least priority is given to the sequence operator (';'); implement the nodes of the AST, and corresponding semantics.
+
+To implement the semantics you will need to implement different kinds of values (Integers, Booleans, and References) as an inductive type. This is composed by an interface `IValue`, and the corresponding case classes (inductive constructors), for `IntValue`, `BoolValue`, and `RefValue`. 
+
+Memory cells are implemented by Java objects. Follow the lecture slides for reference on how to implement the interpreter, type system, and compiler for all expressions. 
+
+## Project assignment (1st phase)
+
+The first project assignment consists on the implementation of the parser, interpreter, compiler, and corresponding tests of the previous labs.
+
+### Important dates
+
+The project is due on Nov 5th. You may use a total of 2 late days without penalty in the whole semestre.
+
+### Teams 
+
+The teams should be of at most 2 elements
+
+## Lab 6 - Compiling with stackframes
+
+The goal of this lab is to implement the compiler for name declarations introduced in Lab 5.
+
+## Lab 5 - Binding and Scope
+
+This lab extends the language with name declarations. You need to extend the interpreter and typechecker with an environment based semantics. (See slides).
+
+Extend the language with the (multiple) declaration expression
+
+```
+decl x1=E1 x2=E2 ... xn=En in E end
+```
+
+and the identifier usage expression 
+
+```
+x
+```
+
+The steps you need to follow are:
+
+1. Implement the two new expressions in the parser (`Parser.jj`)
+
+2. Create the classes `ASTDecl` and `ASTId` with the corresponding inner structure and constructor.
+
+3. Add an extra parameter to all `eval` functions in all classes implementing interface `ASTNode`.
+
+4. Implement function `eval` on the new classes.
+
+5. Implement function `typecheck` on the new classes.
+
+### Starter code
+
+Consider the `IEnvironment` interface and `Environment` class, and implement the changes in the parser and the corresponding classes for the new AST nodes (`ASTDecl` and `ASTId`)
+
+## Lab 4 - Compiling to the JVM
+
+This Lab is focused on the implementation of your first compiler to the JVM. You will have to implement a semantic function that will have as result a sequence of JVM instructions that should have the same behaviour as the interpreter for the same expression.
+
+### Starter code for compiling
+
+Commit, sync, and pull the code to your local repository. uncomment the compile method in ASTNode. Use class `CodeBlock` as a repository for instructions. It already implements the basic functionality that you need, and all tests are in place for you to test the toolchain.
+
+### Goal 1
+
+To implement the compiler for the language with arithmetic expressions. 
+
+### Goal 2
+
+Extend your compiler to support the boolean expressions. Take into account the implementation that the actual Java compiler does.
+
+### Goal 3
+
+Test your compiler using JUnit. Make sure that you are actually running the compiled code.
+
+
+## Lab 3 - Static typing of expressions. Compiling to the JVM
+
+This Lab is focused on the implementation of a type checker for the expression language, and in the first compiler to the JVM. This lab starts with the definition of two semantic functions. The first semantic function will associate a type to all expressions of the language, the second one will have as result a sequence of JVM instructions that should have the same behaviour as the interpreter for the same expression.
+
+### Starter code for typing
+
+Commit, sync, and pull the new code to your local repository. The typing function has one of three possible outcomes, `int`, `bool`, and type `none` which can be represented by throwing an exception. Follow the same approach taken to implement values, and implement a sum type for types. Consider the interface `IType` and the new method in interface `ASTNode` named `typecheck`.
+
+
+
+### Goal 1
+
+To implement the typechecker and intersect the execution of every ill-typed program.
+
+### Goal 2
+
+Make some more tests for your typechecker for both positive and negative cases
+
+
+
+
+
+## Lab 2 - Interpretation of an expression. Dynamic Typing.
 
 This lab assignment is focused on the implementation of an interpreter for the expression language developed in Lab 1. We will define an abstract representation for our programs (expressions) and will define an interpretation function on all objects.
 

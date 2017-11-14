@@ -64,5 +64,4 @@ public class ASTMul implements ASTNode {
 		return type;
 	}
 
-
 }
