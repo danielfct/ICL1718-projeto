@@ -2,12 +2,12 @@ package ast;
 
 import compiler.CodeBlock;
 import compiler.StackFrame;
+import environment.DuplicateIdentifierException;
+import environment.ICompilationEnvironment;
+import environment.IEnvironment;
+import environment.UndeclaredIdentifierException;
 import types.IType;
 import types.TypingException;
-import util.DuplicateIdentifierException;
-import util.ICompilationEnvironment;
-import util.IEnvironment;
-import util.UndeclaredIdentifierException;
 import values.IValue;
 
 public class ASTId implements ASTNode {

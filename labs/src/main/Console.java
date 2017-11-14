@@ -3,12 +3,12 @@ package main;
 import java.io.ByteArrayInputStream;
 
 import ast.ASTNode;
+import environment.DuplicateIdentifierException;
+import environment.Environment;
+import environment.UndeclaredIdentifierException;
 import parser.ParseException;
 import parser.Parser;
 import parser.TokenMgrError;
-import util.DuplicateIdentifierException;
-import util.Environment;
-import util.UndeclaredIdentifierException;
 import types.IType;
 import types.TypingException;
 import values.IValue;

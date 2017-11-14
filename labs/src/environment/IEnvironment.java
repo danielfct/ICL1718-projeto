@@ -1,4 +1,4 @@
-package util;
+package environment;
 
 public interface IEnvironment<T> {
 	

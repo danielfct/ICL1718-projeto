@@ -1,13 +1,13 @@
 package ast;
 
 import compiler.CodeBlock;
+import environment.DuplicateIdentifierException;
+import environment.ICompilationEnvironment;
+import environment.IEnvironment;
+import environment.UndeclaredIdentifierException;
 import types.IType;
 import types.IntType;
 import types.TypingException;
-import util.DuplicateIdentifierException;
-import util.ICompilationEnvironment;
-import util.IEnvironment;
-import util.UndeclaredIdentifierException;
 import values.IValue;
 import values.IntValue;
 import values.TypeMismatchException;

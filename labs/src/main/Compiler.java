@@ -1,15 +1,14 @@
 package main;
 
 import compiler.*;
+import environment.CompilationEnvironment;
+import environment.DuplicateIdentifierException;
+import environment.Environment;
+import environment.UndeclaredIdentifierException;
 import parser.ParseException;
 import parser.Parser;
 import parser.TokenMgrError;
 import types.TypingException;
-import util.CompilationEnvironment;
-import util.DuplicateIdentifierException;
-import util.Environment;
-import util.UndeclaredIdentifierException;
-
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;

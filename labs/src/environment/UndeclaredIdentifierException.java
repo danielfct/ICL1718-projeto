@@ -1,4 +1,4 @@
-package util;
+package environment;
 
 public class UndeclaredIdentifierException extends Exception {
 

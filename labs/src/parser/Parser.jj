@@ -101,7 +101,7 @@ ASTNode Seq():
   	// left-associative: Exp() ( < SEMICOLON > Exp() )*
 	e1 = Assign()
   	[
-  		<SEMICOLON > e2 = Seq() { e1 = new ASTSeq(e1,e2); } 
+  		<SEMICOLON > e2 = Seq() { e1 = new ASTSeq(e1, e2); } 
  	] // right associative tree
   	{ return e1; }
 }
@@ -111,7 +111,7 @@ ASTNode Assign() :
 {
 	e1 = Exp()
  	[
-  		<SEMICOLON > e2 = Assign() { e1 = new ASTAssign(e1,e2); } 
+  		<SEMICOLON > e2 = Assign() { e1 = new ASTAssign(e1, e2); } 
   	]
   	{ return e1; }
 }
@@ -189,7 +189,7 @@ ASTNode Term() :
 
 
 ASTNode Fact() :
-{ Token x; ASTDecl d; ASTNode e1, e2; }
+{ Token x; ASTDecl d; ASTNode e1, e2, e3; }
 {
   	<MINUS> e1 = Fact() { return new ASTSub(new ASTNum(0), e1); }
 	|
