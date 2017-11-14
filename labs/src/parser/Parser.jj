@@ -15,16 +15,18 @@ PARSER_END(Parser)
 
 SKIP :
 {
-  " "
+  	" "
 	|
 	"\t"
 	|
 	"\r"
+	|
+	"\n"
 }
 
 TOKEN :
 {
-  	< Num: (["0"-"9"]) + >
+  	< NUM : (["0"-"9"]) + >
   	|
   	< PLUS : "+" >
   	|
@@ -46,37 +48,79 @@ TOKEN :
   	|
   	< AND : "&&" >
   	|
-  	< EQ : "==" >	
- 	  |
- 	  < NEQ : "!=" >
- 	  |
- 	  < LEQ : "<=" >
+  	< EQ : "==" >
+ 	|
+ 	< NEQ : "!=" >
+ 	|
+ 	< LEQ : "<=" >
   	|
-  	< GEQ: ">=" >
+  	< GEQ : ">=" >
   	|
   	< LT : "<" >
   	|
   	< GT : ">" >
   	|
-  	< NOT: "!" >
+  	< NOT : "!" >
   	|
-	  < DECL : "decl" >
-	  |
-	  < ASSIGN : "=" >
-	  | 
-	  < IN : "in" >
-	  | 
-	  < END: "end" >
-  	|
- 	  < EOL : "\n" >
-  	| 
-  	< ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+	< DECL : "decl" >
+	|
+	< ASSIGN : "=" >
+	|
+	< IN : "in" >
+	|
+	< END : "end" >
+	|
+	< EL : ";;" >
+	|
+	< SEMICOLON : ";" >
+	|
+	< VAR : "var" >
+	|
+	< WHILE : "while" >
+	|
+	< DO : "do" >
+	|
+	< IF : "if" >
+	|
+	< THEN : "then" >
+	|
+	< ELSE : "else" >
+ 	|
+  	< ID : ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
 
 ASTNode Start():
 { ASTNode e; }
 {
-   	e = Disjunction() <EOL>  { return e; }
+	e = Seq() <EL>  { return e; }
+}
+
+ASTNode Seq():
+{ ASTNode e1, e2; }
+{
+  	// left-associative: Exp() ( < SEMICOLON > Exp() )*
+	e1 = Assign()
+  	[
+  		<SEMICOLON > e2 = Seq() { e1 = new ASTSeq(e1,e2); } 
+ 	] // right associative tree
+  	{ return e1; }
+}
+
+ASTNode Assign() :
+{ ASTNode e1, e2; }
+{
+	e1 = Exp()
+ 	[
+  		<SEMICOLON > e2 = Assign() { e1 = new ASTAssign(e1,e2); } 
+  	]
+  	{ return e1; }
+}
+
+// Just a wrap up function to make parser more clear
+ASTNode Exp() :
+{ }
+{
+	{ return Disjunction(); }
 }
 
 ASTNode Disjunction(): // D -- > C ( '||' C )*
@@ -102,24 +146,24 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 { ASTNode e1, e2; }
 {
-	e1 = Exp()
+	e1 = ArithmeticExp()
 	(
-		<EQ> e2 = Exp() { e1 = new ASTEqual(e1, e2); }
+		<EQ> e2 = ArithmeticExp() { e1 = new ASTEqual(e1, e2); }
 	  	|
-	  	<NEQ> e2 = Exp() { e1 = new ASTNotEqual(e1, e2); }
+	  	<NEQ> e2 = ArithmeticExp() { e1 = new ASTNotEqual(e1, e2); }
 	  	|
-	  	<LT> e2 = Exp() { e1 = new ASTLesser(e1, e2); }
+	  	<LT> e2 = ArithmeticExp() { e1 = new ASTLesser(e1, e2); }
 	  	|
-	  	<GT> e2 = Exp() { e1 = new ASTGreater(e1, e2); }
+	  	<GT> e2 = ArithmeticExp() { e1 = new ASTGreater(e1, e2); }
 	  	|
-	  	<LEQ> e2 = Exp() { e1 = new ASTLesserEq(e1, e2); }
+	  	<LEQ> e2 = ArithmeticExp() { e1 = new ASTLesserEq(e1, e2); }
 	  	|
-	  	<GEQ> e2 = Exp() { e1 = new ASTGreaterEq(e1, e2); }
+	  	<GEQ> e2 = ArithmeticExp() { e1 = new ASTGreaterEq(e1, e2); }
 	)*
 	{ return e1; }
 }
 
-ASTNode Exp() :
+ASTNode ArithmeticExp() :
 { ASTNode e1, e2; }
 {
    	e1 = Term()
@@ -149,22 +193,33 @@ ASTNode Fact() :
 {
   	<MINUS> e1 = Fact() { return new ASTSub(new ASTNum(0), e1); }
 	|
- 	x = <Num> { return new ASTNum(Integer.parseInt(x.image)); }
+ 	x = <NUM> { return new ASTNum(Integer.parseInt(x.image)); }
  	|
 	<DECL> { d = new ASTDecl(); }
 		(
-	  		x = <ID> <ASSIGN> e1 = Disjunction() { d.newBinding(x.image, e1); }
+	  		x = <ID> <ASSIGN> e1 = Exp() { d.newBinding(x.image, e1); }
 		)+
-		<IN> e2 = Disjunction() <END> { d.addBody(e2); return d; }
+		<IN> e2 = Exp() <END> { d.addBody(e2); return d; }
 	|
 	x = <ID> { return new ASTId(x.image); }
 	| 
-   	<LPAR> e1 = Disjunction() <RPAR> { return e1; }
+   	<LPAR> e1 = Exp() <RPAR> { return e1; }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
 	<FALSE> { return new ASTBool(false); }
 	|
 	<NOT> e1 = BooleanExp() { return new ASTNot(e1); }
-	
+	|
+	<VAR> <LPAR> e1 = Exp() <RPAR> { return new ASTVar(e1); }
+	|
+	// must be changed afterwards, unary operators
+	// *f() <> (*f)()
+	// *a.b == *(a.b)
+	// *a.b <> (*a).b
+	<TIMES> e1 = Fact() { return new ASTDeref(e1); }
+	|
+	<WHILE> e1 = Exp() <DO> e2 = Exp() <END> { return new ASTWhile(e1, e2); }
+	|
+	<IF> e1 = Exp() <THEN> e2 = Exp() <ELSE> e3 = Exp() <END> { return new ASTIf(e1, e2, e3); }
 }

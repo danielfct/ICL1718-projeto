@@ -56,7 +56,7 @@ public class ASTDiv implements ASTNode {
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		left.compile(code, env);
 		right.compile(code, env);
-		code.emit_div();
+		code.emit_div(); 
 	}
 
 	@Override
