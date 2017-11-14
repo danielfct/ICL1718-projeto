@@ -55,6 +55,46 @@ ASTNode Start():
    e = Exp() <EL>  { return e; }
 }
 
+
+/*
+ASTNode Start():
+{ ASTNode e; }
+{
+   e = Seq() <EL>  { return e; }
+}
+
+ASTNode Seq():
+{
+  ASTNode e1, e2;
+}
+{
+  // left-associative: Exp() ( < SEMICOLON > Exp() )*
+  e1 = Assign()
+  	[  
+  		<SEMICOLON > e2 = Seq()
+  		{ e1 = new ASTSeq(e1,e2);} 
+ 	] // right associative tree
+  {
+    return e1;
+  }
+}
+
+ASTNode Assign() :
+{
+  ASTNode e1, e2;
+}
+{
+  e1 = Exp()
+  	[  
+  		<SEMICOLON > e2 = Assign()
+  		{ e1 = new ASTAssign(e1,e2);} 
+ 	] 
+  {
+    return e1;
+  }
+}
+*/
+
 ASTNode Exp() :
 { ASTNode e1, e2; }
 {
@@ -97,7 +137,28 @@ ASTNode Fact() :
 }
 |
 x = < ID > { return new ASTId(x.image); }
-
+/*
+|
+< VAR > <LPAR > e1 = Exp() <RPAR >
+	{ return new ASTVar(e1); }
+|
+< TIMES > e1 = Fact() 
+	{ return new ASTDeref(e1); }
+	// must be changed afterwards, unary operators
+	// *f() <> (*f)()
+	// *a.b == *(a.b)
+	// *a.b <> (*a).b
+| 
+< WHILE > e1 = Exp() < DO > e2 = Exp() < END >
+	{
+	  return new ASTWhile(e1,e2);
+	}
+| 
+< IF > e1 = Exp() < THEN > e2 = Exp() < ELSE > e3 = Exp() < END >
+	{
+	  return new ASTIf(e1,e2,e3);
+	}
+	*/
 }
 
 
