@@ -42,7 +42,7 @@ public class ASTAdd implements ASTNode {
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IType l = left.typecheck(env);
+		IType l = left.typecheck(env); 
 		IType r = right.typecheck(env);
 		
 		if (l == IntType.singleton && r == IntType.singleton)
@@ -58,7 +58,7 @@ public class ASTAdd implements ASTNode {
 		left.compile(code, env);
 		right.compile(code, env);
 		code.emit_add();
-	}
+	} 
 
 	@Override
 	public IType getType() {

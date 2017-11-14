@@ -18,6 +18,6 @@ public interface ASTNode {
 	
 	void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException;
 	
-	IType getType();
+	IType getType(); 
 	
 }

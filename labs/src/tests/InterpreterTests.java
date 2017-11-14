@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import main.Console;
 import parser.ParseException;
-import values.BoolValue;
+import values.BoolValue; 
 import values.IValue;
 import values.IntValue;
 

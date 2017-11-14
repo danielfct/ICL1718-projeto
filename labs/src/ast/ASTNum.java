@@ -41,6 +41,6 @@ public class ASTNum implements ASTNode {
 
 	@Override
 	public IType getType() {
-		return IntType.singleton;
+		return IntType.singleton; 
 	}
 }

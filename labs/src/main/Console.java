@@ -21,7 +21,7 @@ public class Console {
 		while (true) {
 			try {
 				ASTNode n = parser.Start();
-				n.typecheck(new Environment<>());
+				n.typecheck(new Environment<>()); 
 				System.out.println("OK! " + n.eval(new Environment<>()));
 			} catch (TokenMgrError e) {
 				System.out.println("Lexical Error!");

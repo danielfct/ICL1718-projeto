@@ -167,7 +167,7 @@ public class ParserTester {
 		testCase("1-2-3\n");
 		testCase("--1\n"); // == 1, bug ou feature?
 		testNegativeCase("1-\n");
-		testNegativeCase("1-1-\n"); 
+		testNegativeCase("1-1-\n");
 	}
 	
 	@Test

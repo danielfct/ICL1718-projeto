@@ -21,7 +21,7 @@ public class ASTDecl implements ASTNode {
 		
 		String id;
 		ASTNode def;
-		
+
 		public Declaration(String id, ASTNode def) {
 			this.id = id;
 			this.def = def;
@@ -74,7 +74,7 @@ public class ASTDecl implements ASTNode {
 		StackFrame frame = code.newFrame();
 		
 		// x=1 , x=y+1, x=decl y=1 in x+y end, etc
-		ICompilationEnvironment newEnv = env.beginScope();
+		ICompilationEnvironment newEnv = env.beginScope(); 
 		for (Declaration d : declarations) {
 			int location = frame.nextLocation();
 			newEnv.assoc(d.id, location);

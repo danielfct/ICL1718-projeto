@@ -14,7 +14,7 @@ public class ASTId implements ASTNode {
 
 	public static class Address { 
 		final int jumps; 
-		final int location;
+		final int location; 
 
 		public Address(int jumps, int location) {
 			this.jumps = jumps;

@@ -18,7 +18,7 @@ public class ASTSub implements ASTNode {
 	private IType type;
 
 	public ASTSub(ASTNode left, ASTNode right) {
-		this.left = left;
+		this.left = left; 
 		this.right = right;
 		this.type = null;
 	}

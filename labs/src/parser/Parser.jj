@@ -11,11 +11,11 @@ public class Parser {
 
 }
 
-PARSER_END(Parser)
+PARSER_END(Parser) 
 
 SKIP :
 {
-  	" "
+  " "
 	|
 	"\t"
 	|
@@ -47,10 +47,10 @@ TOKEN :
   	< AND : "&&" >
   	|
   	< EQ : "==" >	
- 	|
- 	< NEQ : "!=" >
- 	|
- 	< LEQ : "<=" >
+ 	  |
+ 	  < NEQ : "!=" >
+ 	  |
+ 	  < LEQ : "<=" >
   	|
   	< GEQ: ">=" >
   	|
@@ -60,15 +60,15 @@ TOKEN :
   	|
   	< NOT: "!" >
   	|
-	< DECL : "decl" >
-	|
-	< ASSIGN : "=" >
-	| 
-	< IN : "in" >
-	| 
-	< END: "end" >
+	  < DECL : "decl" >
+	  |
+	  < ASSIGN : "=" >
+	  | 
+	  < IN : "in" >
+	  | 
+	  < END: "end" >
   	|
- 	< EOL : "\n" >
+ 	  < EOL : "\n" >
   	| 
   	< ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
@@ -78,7 +78,6 @@ ASTNode Start():
 {
    	e = Disjunction() <EOL>  { return e; }
 }
-
 
 ASTNode Disjunction(): // D -- > C ( '||' C )*
 { ASTNode e1, e2; }
@@ -119,7 +118,6 @@ ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 	)*
 	{ return e1; }
 }
-
 
 ASTNode Exp() :
 { ASTNode e1, e2; }
