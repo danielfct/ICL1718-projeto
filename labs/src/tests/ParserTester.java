@@ -218,6 +218,7 @@ public class ParserTester {
 	public void testSeq() throws Exception {
 		testCase("1 ; 2 ; 3;;");
 		testCase("true ; true ; false;;");
+		testCase("decl x = 1; 2 in x end;;");
 	}
 	
 	@Test

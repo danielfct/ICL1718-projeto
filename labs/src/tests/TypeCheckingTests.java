@@ -223,7 +223,7 @@ public class TypeCheckingTests {
 		testCase("var(var(1)) := var(2);;", new RefType(IntType.singleton));
 		testCase("var(var(true)) := var(false);;", new RefType(BoolType.singleton));
 		testNegativeCase("var(0) := 1;;", new RefType(BoolType.singleton));
-		testNegativeCase("var(0) := 1;;", IntType.singleton);
+		testNegativeCase("var(0) := 1;;", BoolType.singleton);
 		testExceptionCase("x := 1;;");
 		testExceptionCase("var(0) := true;;");
 	}
@@ -285,10 +285,42 @@ public class TypeCheckingTests {
 		testCase("1+2*3+2/2;;", IntType.singleton);
 		testCase("true || false != false && false;;", BoolType.singleton);
 		testCase("(20+20)/(4*5);;", IntType.singleton);
+        testCase("decl x = var(0) in x := 1; *x end;;", IntType.singleton);
+        testCase("decl x = var(0) in decl y = x in x := 1; *y end end;;", IntType.singleton);
+        testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end;;", IntType.singleton);
+        testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end; *y end end;;", IntType.singleton);
+        testCase("decl x = var(3) in "
+                + "decl y = var(1) in "
+                + "while *x > 0 do "
+                + "  y := *y * *x; "
+                + "  x := *x - 1 "
+                + "end; "
+                + "*y "
+                + "end "
+                + "end;;", IntType.singleton);
+        testCase("decl x = var(3) in\n"
+                + "decl y = var(1) in\n"
+                + "while *x > 0 do\n"
+                + "  y := *y * *x;\n"
+                + "  x := *x - 1\n"
+                + "end;\n"
+                + "*y\n"
+                + "end\n"
+                + "end;;", IntType.singleton);
+        testCase("decl x = 2;var(0;1) in (2;x) := *x+1; *x end;;", IntType.singleton);
+        testCase("***var(var(var(1)));;", IntType.singleton);	
+        testCase("decl x = var(3) in "
+                + "decl y = var(1) in "
+                + "while *x > 0 do "
+                + "  y := *y * *x; "
+                + "  x := *x - 1 "
+                + "end; "
+                + "*y > *x "
+                + "end "
+                + "end;;", BoolType.singleton);
 		testNegativeCase("(20+20)/(4*5);;", BoolType.singleton);
 		testNegativeCase("true || false != false && false;;", IntType.singleton);
 		testExceptionCase("1+2 && true != false;;");
-		// TODO mixed imperative nodes
 	}
 	
 }
