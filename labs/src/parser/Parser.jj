@@ -1,3 +1,26 @@
+/*
+
+Start ::= Seq
+
+Seq ::= Assign | Assign ';' Seq
+
+Assign ::= Disjunction | Disjunction ':=' Assign
+
+Disjunction ::= Conjunction | Disjunction '||' Conjunction
+
+Conjunction ::= BooleanExp | Conjunction '&&' BooleanExp
+
+BooleanExp ::= ArithmeticExp | BooleanExp '<' ArithmeticExp | BooleanExp '>' ArithmeticExp |
+			   BooleanExp '>=' ArithmeticExp | BooleanExp '<=' ArithmeticExp | BooleanExp '==' ArithmeticExp
+
+ArithmeticExp ::= Term | ArithmeticExp '+' Term | ArithmeticExp '-' Term
+
+Term ::= Fact | Term '*' Fact | Term '/' Fact
+
+Fact ::= id | (...) | var | decl-end | ... | -Fact | *Fact | !BooleanExp
+
+*/
+
 options {
   STATIC=false;
 }
@@ -199,13 +222,13 @@ ASTNode Fact() :
  	|
 	<DECL> { d = new ASTDecl(); }
 		(
-	  		x = <ID> <EQ> e1 = Exp() { d.newBinding(x.image, e1); }
+	  		x = <ID> <EQ> e1 = Seq() { d.newBinding(x.image, e1); }
 		)+
-		<IN> e2 = Exp() <END> { d.addBody(e2); return d; }
+		<IN> e2 = Seq() <END> { d.addBody(e2); return d; }
 	|
 	x = <ID> { return new ASTId(x.image); }
 	| 
-   	<LPAR> e1 = Exp() <RPAR> { return e1; }
+   	<LPAR> e1 = Seq() <RPAR> { return e1; }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
@@ -213,7 +236,7 @@ ASTNode Fact() :
 	|
 	<NOT> e1 = BooleanExp() { return new ASTNot(e1); }
 	|
-	<VAR> <LPAR> e1 = Exp() <RPAR> { return new ASTVar(e1); }
+	<VAR> <LPAR> e1 = Seq() <RPAR> { return new ASTVar(e1); }
 	|
 	// must be changed afterwards, unary operators
 	// *f() <> (*f)()
@@ -221,7 +244,7 @@ ASTNode Fact() :
 	// *a.b <> (*a).b
 	<TIMES> e1 = Fact() { return new ASTDeref(e1); }
 	|
-	<WHILE> e1 = Exp() <DO> e2 = Exp() <END> { return new ASTWhile(e1, e2); }
+	<WHILE> e1 = Exp() <DO> e2 = Seq() <END> { return new ASTWhile(e1, e2); }
 	|
-	<IF> e1 = Exp() <THEN> e2 = Exp() <ELSE> e3 = Exp() <END> { return new ASTIf(e1, e2, e3); }
+	<IF> e1 = Exp() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
 }

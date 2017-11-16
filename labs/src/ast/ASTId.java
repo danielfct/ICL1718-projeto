@@ -6,7 +6,6 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
 import types.IType;
 import types.TypingException;
 import values.IValue;
@@ -32,7 +31,7 @@ public class ASTId implements ASTNode {
 	}
 
 	@Override 
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws UndeclaredIdentifierException {	
+	public IValue eval(IEnvironment<IValue> env) throws UndeclaredIdentifierException {	
 		return env.find(id);
 	}
 

@@ -5,20 +5,21 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
+import types.BoolType;
 import types.IType;
 import types.TypingException;
+import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTIf implements ASTNode {
+public class ASTIfThenElse implements ASTNode {
 
 	final ASTNode condition;
 	final ASTNode ifExpression;
 	final ASTNode elseExpression;
 	private IType type;
 	
-	public ASTIf(ASTNode condition, ASTNode ifExpression, ASTNode elseExpression ) {
+	public ASTIfThenElse(ASTNode condition, ASTNode ifExpression, ASTNode elseExpression) {
 		this.condition = condition;
 		this.ifExpression = ifExpression;
 		this.elseExpression = elseExpression;
@@ -31,31 +32,31 @@ public class ASTIf implements ASTNode {
 	}
 	
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		eval(if(E1, E2, E3), env, m0) = [		(v1, m1) = eval(E1, env, m0);
-//												if (v1 = T) then 
-//													(v2, m2) = eval(E2, env, m1);
-//												else 
-//													(v2 , m2) = eval(E3, env, m1);
-//												(v2 , m2) 
-//										 ]
-		return null;
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		IValue c = condition.eval(env);
+		
+		if (c instanceof BoolValue) {
+			if (((BoolValue)c).getValue())
+				return ifExpression.eval(env);
+			else
+				return elseExpression.eval(env);
+		}
+		else
+			throw new TypeMismatchException("Wrong type on If then else condition: If (" + c + ") then ... else ...");
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		typecheck(if(E1, E2, E3), env ) = [ 	t1 = typecheck(E1, env );
-//												if (t1 != bool) then 
-//													none
-//												else [
-//													  t2 = typecheck(E2, env);
-//													  t3 = typecheck(E3, env);
-//													  if (t2 == none) or (t3 == none) or (t2 != t3) then 
-//															none
-//													  else t2 
-//												] 
-//											]
-		return null;
+		IType c = condition.typecheck(env);
+		IType i = ifExpression.typecheck(env);
+		IType e = elseExpression.typecheck(env);
+		
+		if (c == BoolType.singleton && i == e)
+			type = i;
+		else
+			throw new TypingException("Wrong type on If then else statement: If (" + c + ") then (" + i + ") else " + "(" + e + ")");
+		
+		return type;
 	}
 
 	@Override

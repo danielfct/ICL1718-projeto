@@ -5,7 +5,6 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
 import types.IType;
 import types.IntType;
 import types.TypingException;
@@ -26,7 +25,7 @@ public class ASTNum implements ASTNode {
 	}
 
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public IValue eval(IEnvironment<IValue> env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		return new IntValue(value);
 	}
 

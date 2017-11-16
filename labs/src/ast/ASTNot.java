@@ -5,7 +5,6 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
 import types.BoolType;
 import types.IType;
 import types.TypingException;
@@ -29,8 +28,8 @@ public class ASTNot implements ASTNode {
 	}
 
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, UndeclaredIdentifierException, DuplicateIdentifierException {
-		IValue v = value.eval(env, mem);
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, UndeclaredIdentifierException, DuplicateIdentifierException {
+		IValue v = value.eval(env);
 		
 		if (v instanceof BoolValue)
 			return new BoolValue(!((BoolValue)v).getValue());

@@ -5,8 +5,9 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
+import memory.Memory;
 import types.IType;
+import types.RefType;
 import types.TypingException;
 import values.IValue;
 import values.RefValue;
@@ -28,24 +29,25 @@ public class ASTDeref implements ASTNode {
 	}
 	
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		eval(deref(E), env, m0) = [ 	(ref, m1) = eval(E, env, m0);
-//										(m1.get(ref), m1) 
-//								   ]
-		Eval evaluation = node.eval(env, mem);
-		IValue ref = evaluation.value;
-		MemoryManagement newMem = evaluation.mem;
-		IValue value = newMem.get((RefValue)ref);
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		IValue v = node.eval(env);
 		
-		return new Eval(value, newMem);
+		if (v instanceof RefValue)
+			return Memory.singleton.get((RefValue)v);
+		else
+			throw new TypeMismatchException("Wrong type on Deref Operation: Deref(" + v + ")");
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		typecheck(deref(E), env) = [ 	ref{t} = typecheck(E, env ); 
-//										t
-//									]
-		return null;
+		IType t = node.typecheck(env);
+		
+		if (t instanceof RefType)
+			type = ((RefType)t).getType();
+		else
+			throw new TypingException("Wrong type on Deref Operation: Deref(" + t + ")");
+		
+		return type;
 	}
 
 	@Override

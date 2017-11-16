@@ -5,11 +5,11 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
+import memory.Memory;
 import types.IType;
+import types.RefType;
 import types.TypingException;
 import values.IValue;
-import values.RefValue;
 import values.TypeMismatchException;
 
 public class ASTVar implements ASTNode {
@@ -29,25 +29,19 @@ public class ASTVar implements ASTNode {
 	}
 	
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		eval(var(E), env, m0) = [ 	(v1 , m1) = eval(E, env, m0);
-//										(ref, m2) = m1.new(v1);
-//										(ref, m2) 
-//								 ]
-		Eval evaluation = node.eval(env, mem);
-		IValue value = evaluation.value;
-		MemoryManagement newMem = evaluation.mem;
-		RefValue ref = newMem.var(value);
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		IValue v = node.eval(env);
 		
-		return new Eval(ref, newMem);
+		return Memory.singleton.var(v);
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-//		typecheck(var(E), env ) = [ 	t = typecheck( E, env ); 
-//										ref{t}
-//								   ]
-		return null;
+		IType t = node.typecheck(env);
+		
+		type = new RefType(t);	
+		
+		return type;
 	}
 
 	@Override

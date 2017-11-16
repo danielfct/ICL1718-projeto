@@ -6,7 +6,6 @@ import ast.ASTNode;
 import environment.DuplicateIdentifierException;
 import environment.Environment;
 import environment.UndeclaredIdentifierException;
-import memory.Memory;
 import parser.ParseException;
 import parser.Parser;
 import parser.TokenMgrError;
@@ -23,7 +22,7 @@ public class Console {
 			try {
 				ASTNode n = parser.Start();
 				n.typecheck(new Environment<>()); 
-				System.out.println("OK! " + n.eval(new Environment<>(), new Memory()));
+				System.out.println("OK! " + n.eval(new Environment<>()));
 			} catch (TokenMgrError e) {
 				System.out.println("Lexical Error!");
 				e.printStackTrace();
@@ -64,7 +63,7 @@ public class Console {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.eval(new Environment<>(), new Memory()).equals(value);
+			return n.eval(new Environment<>()).equals(value);
 		} catch (Exception e) {
 			return false;
 		}

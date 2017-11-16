@@ -5,6 +5,10 @@ import values.RefValue;
 
 public class Memory implements MemoryManagement {
 	
+	public static final Memory singleton = new Memory();
+	
+	private Memory() { }
+	
 	@Override
 	public RefValue var(IValue value) {
 		return new MemoryCell(value);

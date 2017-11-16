@@ -14,7 +14,12 @@ public class RefType implements IType {
 	
 	@Override
 	public String toString() {
-		// TODO
-		return null;
+		 // TODO mudar quando for feita a compilação dos nós imperativos
+		return "Ref(" + type + ")";
+	}
+	
+	@Override
+	public boolean equals(Object other) {	
+		return other instanceof RefType && this.type.equals(((RefType) other).getType());
 	}
 }

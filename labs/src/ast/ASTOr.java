@@ -5,7 +5,6 @@ import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
 import environment.UndeclaredIdentifierException;
-import memory.MemoryManagement;
 import types.BoolType;
 import types.IType;
 import types.TypingException;
@@ -30,9 +29,9 @@ public class ASTOr implements ASTNode {
 	}
 
 	@Override
-	public Eval eval(IEnvironment<IValue> env, MemoryManagement mem) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(env, mem);
-		IValue r = right.eval(env, mem);
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		IValue l = left.eval(env);
+		IValue r = right.eval(env);
 
 		if (l instanceof BoolValue && r instanceof BoolValue)
 			return new BoolValue(((BoolValue)l).getValue() || ((BoolValue)r).getValue());
