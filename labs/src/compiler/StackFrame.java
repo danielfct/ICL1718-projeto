@@ -10,11 +10,11 @@ import main.Compiler;
 
 public class StackFrame implements IStackFrame {
 
-	private final String filename;
-	
 	public final int id;
 	public final StackFrame ancestor;
-	private List<String> locations; // e.g. loc_00 I
+	private List<String> locations; // e.g. posicao 0 com um valor do tipo I (inteiro) = loc_00 I
+									//		posicao 1 com um valor do tipo Z (booleano) = loc_01 Z
+	private final String filename;
 
 	public StackFrame(int id, StackFrame ancestor) {
 		this.id = id;

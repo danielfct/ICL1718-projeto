@@ -8,6 +8,7 @@ import environment.UndeclaredIdentifierException;
 import parser.ParseException;
 import parser.Parser;
 import parser.TokenMgrError;
+import types.IType;
 import types.TypingException;
 
 import java.io.ByteArrayInputStream;
@@ -37,10 +38,10 @@ public class Compiler {
 		Parser parser = new Parser(is);
 		try {
 			ASTNode n = parser.Start();
+			IType t = n.typecheck(new Environment<IType>());
 			CodeBlock code = new CodeBlock();
-			n.typecheck(new Environment<>());
 			n.compile(code, new CompilationEnvironment());
-			code.dump(dir + "Demo.j");
+			code.dump(dir + "Demo.j", t.toJasmin());
 		} catch (TokenMgrError e) {
 			System.out.println("Lexical Error!");
 			e.printStackTrace();
@@ -51,8 +52,10 @@ public class Compiler {
 			System.out.println("Typing Error!");
 			e.printStackTrace();
 		} catch (UndeclaredIdentifierException e) {
+			System.out.println("Undeclared Identifier!");
 			e.printStackTrace();
 		} catch (DuplicateIdentifierException e) {
+			System.out.println("Duplicate Identifier!");
 			e.printStackTrace();
 		}
 	}

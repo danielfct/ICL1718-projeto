@@ -1,6 +1,6 @@
 package types;
 
-public class IntType implements IType {
+public class IntType implements IPrimitiveType {
 
 	public static final IntType singleton = new IntType();
 	
@@ -8,6 +8,11 @@ public class IntType implements IType {
 	
 	@Override
 	public String toString() {
+		return "Integer";
+	}
+	
+	@Override
+	public String toJasmin() {
 		return "I";
 	}
 	

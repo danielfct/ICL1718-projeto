@@ -30,24 +30,26 @@ public class ASTSeq implements ASTNode {
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		left.eval(env);
-		IValue v = right.eval(env);
+		IValue value = right.eval(env);
 		
-		return v;
+		return value;
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		left.typecheck(env);
 		type = right.typecheck(env);
-		
-		// TODO verificar se está correto
-		
+
 		return type;
 	}
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// TODO Auto-generated method stub
+		code.emit_comment("Starting " + this);
+		left.compile(code, env);
+		code.emit_pop();
+		right.compile(code, env);
+		code.emit_comment("Ending " + this);
 	}
 
 	@Override

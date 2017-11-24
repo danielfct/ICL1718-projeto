@@ -1,9 +1,9 @@
 package memory;
 
 import values.IValue;
-import values.RefValue;
+import values.IRefValue;
 
-public class MemoryCell implements RefValue {
+public class MemoryCell implements IRefValue {
 
 	IValue value;
 

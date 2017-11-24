@@ -4,19 +4,28 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import types.IType;
+import types.IPrimitiveType;
+import types.RefType;
+
 import static main.Compiler.SL;
 
 public class CodeBlock {
 	
 	private List<String> code;
 	private List<StackFrame> frames;
+	private Map<IType, Reference> references;
 	private StackFrame currentFrame;
 	public final LabelFactory labelFactory;
 
 	public CodeBlock() {
 		this.code = new ArrayList<String>(100);
 		this.frames = new ArrayList<StackFrame>(10);
+		this.references = new HashMap<IType, Reference>(10);
 		this.currentFrame = null;
 		this.labelFactory = new LabelFactory();
 	}
@@ -43,7 +52,7 @@ public class CodeBlock {
 		out.println("       ;    1 - the PrintStream object held in java.lang.out");
 		out.println("       getstatic java/lang/System/out Ljava/io/PrintStream;");
 		out.println("");
-		out.println("       ; 	START");
+		out.println("       ; START");
 	}
 
 	private void dumpCode(PrintStream out) {
@@ -51,12 +60,12 @@ public class CodeBlock {
 			out.println("       " + s);
 	}
 
-	private void dumpFooter(PrintStream out) {
-		out.println("       ; 	END");
+	private void dumpFooter(PrintStream out, String resultType) {
+		out.println("       ; END");
 		out.println("");
 		out.println("");		
 		out.println("       ; convert to String;");
-		out.println("       invokestatic java/lang/String/valueOf(I)Ljava/lang/String;");
+		out.println("       invokestatic java/lang/String/valueOf(" + resultType + ")Ljava/lang/String;");
 		out.println("       ; call println ");
 		out.println("       invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
 		out.println("");		
@@ -70,33 +79,30 @@ public class CodeBlock {
 			frame.dump();
 	}
 
-	public void dump(String filename) throws FileNotFoundException {
+	private void dumpReferences() throws FileNotFoundException {
+		for (Reference ref : references.values()) {
+			ref.dump();
+		}
+	}
+
+	public void dump(String filename, String resultType) throws FileNotFoundException {
 		PrintStream out = new PrintStream(new FileOutputStream(filename));
 		dumpHeader(out);
 		dumpCode(out);
-		dumpFooter(out);
+		dumpFooter(out, resultType);
 		out.close();
 		dumpFrames();
+		dumpReferences();
 	}
-	
+
 	public StackFrame newFrame() {
-		// Create and initialize the stackframe in the compiler
+		// Create a new StackFrame in the compiler
 		StackFrame frame = new StackFrame(frames.size() + 1, currentFrame);
 		frames.add(frame);
-		emit_comment("Initialize frame " + frame.id);
-		emit_new("Frame_" + frame.id);
-		emit_dup();
-		emit_invokespecial("Frame_" + frame.id, "<init>", "()V");
-		// Initialize Static Linker in the stackframe
-		if (frame.ancestor != null) {
-			emit_dup();
-			emit_aload(SL);
-			emit_putfield("Frame_" + frame.id, "SL", "LFrame_" + frame.ancestor.id + ";");
-		}
-		
+
 		return frame;
 	}
-	
+
 	public void setCurrentFrame(StackFrame frame) {
 		currentFrame = frame;
 	}
@@ -105,7 +111,20 @@ public class CodeBlock {
 		return currentFrame;
 	}
 
-	public void endScope() {
+	public Reference newReference(IType type) {
+		Reference ref = new Reference("Ref_" + (references.size() + 1));
+		Reference currentRef = references.putIfAbsent(type, ref);
+		if (currentRef != null)
+			ref = currentRef;
+		
+		return ref;
+	}
+
+	public Reference getReference(IType type) {
+		return references.get(type);
+	}
+
+	public void emit_endscope() {
 		if (currentFrame.ancestor != null) {
 			emit_aload(SL);
 			emit_checkcast("Frame_" + currentFrame.id);
@@ -118,13 +137,17 @@ public class CodeBlock {
 		setCurrentFrame(currentFrame.ancestor);
 	}
 
+	public String toJasmin(IType t) {
+		return t instanceof IPrimitiveType ? ((IPrimitiveType)t).toJasmin() : references.get(((RefType)t).getType()).toJasmin();
+	}
+
 	// Bytecode instructions
 
 	// make a comment
 	public void emit_comment(String comment) {
-		code.add(" ; " + comment);
+		code.add("; " + comment);
 	}
-	
+
 	// pushes stack pointer onto the operand stack 
 	public void emit_SP() {
 		if (currentFrame != null) {
@@ -132,23 +155,23 @@ public class CodeBlock {
 			emit_checkcast("Frame_" + currentFrame.id);
 		}
 	}
-	
+
 	// create new object
 	public void emit_new(String classname) {
 		code.add("new " + classname);
 	}
-	
+
 	// invoke instance method; special handling for superclass, private, and instance initialization method invocations
 	public void emit_invokespecial(String classname, String methodname, String descriptor) {
 		code.add("invokespecial " + classname + "/" + methodname + descriptor);
 	}
-	
+
 	public void emit_null() {
 		code.add("aconst_null");
 	}
 
-	// getfield pops objectref (a reference to an object) from the stack, retrieves the value of the field identified by <field-spec> from objectref, 
-	// and pushes the one-word or two-word value onto the operand stack.
+	// getfield pops objectref (a reference to an object) from the stack, retrieves the value of the field identified by <classname/fieldname> 
+	// from objectref, and pushes the one-word or two-word value onto the operand stack
 	// Examples:
 	// 		getfield Frame_n1/SL LFrame_n;
 	// 		getfield Frame_1/loc_X I
@@ -180,7 +203,7 @@ public class CodeBlock {
 	public void emit_aload(int n) {
 		code.add("aload_" + n); 
 	}
-	
+
 	// checks that the top item on the operand stack (a reference to an object or array) can be cast to a given type
 	public void emit_checkcast(String t) {
 		code.add("checkcast " + t);
@@ -290,6 +313,16 @@ public class CodeBlock {
 	// bitwise int OR
 	public void emit_or() {
 		code.add("ior");
+	}
+	
+	// pop the value on top of the stack
+	public void emit_pop() {
+		code.add("pop");
+	}
+	
+	// swap the top 2 values on stack
+	public void emit_swap() {
+		code.add("swap");
 	}
 
 }

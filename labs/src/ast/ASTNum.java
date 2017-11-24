@@ -36,7 +36,9 @@ public class ASTNum implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+		code.emit_comment("Starting " + this );
 		code.emit_push(value);
+		code.emit_comment("Ending " + this);
 	}
 
 	@Override

@@ -9,16 +9,13 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
+import compiler.Reference;
 import main.Compiler;
 
 public class CompilerTests {
 
 	// Directory in which jasmin.jar resides
 	private static final File dir = new File(System.getProperty("user.dir") + "/src/");
-	
-	// Define true and false values
-	private static final int TRUE = 1;
-	private static final int FALSE = 0;
 
 	private String getResult(String expression) throws IOException, InterruptedException {
 		
@@ -55,206 +52,276 @@ public class CompilerTests {
 		while ((line = reader.readLine()) != null) {
 			output.append(line + "\n");
 		}
-		System.out.print("Input: " + expression);
-		System.out.print("Output: " + output.toString() + "\n\n");
+		System.out.println("Input: " + expression);
+		System.out.println("Output: " + output.toString() + "\n");
 
 		return output.toString();
 		
 	}
 
-	private void testCase(String expression, int value) throws IOException, InterruptedException {
+	private void testCase(String expression, Object value) throws IOException, InterruptedException {
 		assertTrue(getResult(expression).equals(value + "\n"));
 	}
 	
-	private void testNegativeCase(String expression, int value) throws IOException, InterruptedException {
+	private void testNegativeCase(String expression, Object value) throws IOException, InterruptedException {
 		assertFalse(getResult(expression).equals(value + "\n"));
 	}
 	
 	@Test
 	public void testAdd() throws Exception {
 		System.out.println("\n====== ADD ======\n");
-		testCase("1+2\n", 3);
-		testCase("1+2+3\n", 6);
-		testCase("(1+2)+4\n", 7);
-		testCase("1+(2+4)+5\n", 12);
-		testNegativeCase("1+1\n", 0);
-		testNegativeCase("1+2\n", 0);
-		testNegativeCase("(1+2)+1\n", 0);
+		testCase("1+2;;", 3);
+		testCase("1+2+3;;", 6);
+		testCase("(1+2)+4;;", 7);
+		testCase("1+(2+4)+5;;", 12);
+		testNegativeCase("1+1;;", 0);
+		testNegativeCase("1+2;;", 0);
+		testNegativeCase("(1+2)+1;;", 0);
 	}
 	
 	@Test
 	public void testAnd() throws Exception {
 		System.out.println("\n====== AND ======\n");
-		testCase("true && true\n", TRUE);
-		testCase("true && false\n", FALSE);
-		testCase("false && false\n", FALSE);
-		testCase("true && (true && false)\n", FALSE);
-		testNegativeCase("true && true\n", FALSE);
-		testNegativeCase("true && false\n", TRUE);
-		testNegativeCase("false && false\n", TRUE);
-		testNegativeCase("true && (true && false)\n", TRUE);
+		testCase("true && true;;", true);
+		testCase("true && false;;", false);
+		testCase("false && false;;", false);
+		testCase("true && (true && false);;", false);
+		testNegativeCase("true && true;;", false);
+		testNegativeCase("true && false;;", true);
+		testNegativeCase("false && false;;", true);
+		testNegativeCase("true && (true && false);;", true);
 	}
 	
 	@Test
 	public void testBool() throws Exception {
 		System.out.println("\n====== BOOL ======\n");
-		testCase("true\n", TRUE);
-		testCase("false\n", FALSE);
-		testNegativeCase("true\n", FALSE);
-		testNegativeCase("false\n", TRUE);
+		testCase("true;;", true);
+		testCase("false;;", false);
+		testNegativeCase("true;;", false);
+		testNegativeCase("false;;", true);
 	}
 	
 	@Test
 	public void testDiv() throws Exception {
 		System.out.println("\n====== DIV ======\n");
-		testCase("1/1\n", 1);
-		testCase("6/3/2\n", 1);
-		testCase("4/2/2\n", 1);
-		testNegativeCase("1/1\n", 0);
+		testCase("1/1;;", 1);
+		testCase("6/3/2;;", 1);
+		testCase("4/2/2;;", 1);
+		testNegativeCase("1/1;;", 0);
 	}
 	
 	@Test
 	public void testEqual() throws Exception {
 		System.out.println("\n====== EQUAL ======\n");
-		testCase("1 == 1\n", TRUE);
-		testCase("1 == 2\n", FALSE);
-		testCase("true == true\n", TRUE);
-		testCase("true == false\n", FALSE);
-		testNegativeCase("1 == 1\n", FALSE);
-		testNegativeCase("true == true\n", FALSE);
+		testCase("1 == 1;;", true);
+		testCase("1 == 2;;", false);
+		testCase("true == true;;", true);
+		testCase("true == false;;", false);
+		testNegativeCase("1 == 1;;", false);
+		testNegativeCase("true == true;;", false);
 	}
 	
 	@Test
 	public void testGreater() throws Exception {
 		System.out.println("\n====== GREATER ======\n");
-		testCase("2 > 1\n", TRUE);
-		testCase("3 > 2 && 2 > 1\n", TRUE);
-		testCase("3 > 1 && 1 > 2\n", FALSE);
-		testNegativeCase("10 > 1\n", FALSE);
-		testNegativeCase("1 > 10\n", TRUE);
+		testCase("2 > 1;;", true);
+		testCase("3 > 2 && 2 > 1;;", true);
+		testCase("3 > 1 && 1 > 2;;", false);
+		testNegativeCase("10 > 1;;", false);
+		testNegativeCase("1 > 10;;", true);
 	}
 	
 	@Test
 	public void testGreaterEq() throws Exception {
 		System.out.println("\n====== GREATER OR EQUAL ======\n");
-		testCase("1 >= 1\n", TRUE);
-		testCase("2 >= 1\n", TRUE);
-		testCase("1 >= 2\n", FALSE);
-		testNegativeCase("1 >= 1\n", FALSE);
-		testNegativeCase("1 >= 2\n", TRUE);
+		testCase("1 >= 1;;", true);
+		testCase("2 >= 1;;", true);
+		testCase("1 >= 2;;", false);
+		testNegativeCase("1 >= 1;;", false);
+		testNegativeCase("1 >= 2;;", true);
 	}
 	
 	@Test
 	public void testLesser() throws Exception {
 		System.out.println("\n====== LESSER ======\n");
-		testCase("1 < 2\n", TRUE);
-		testCase("1 < 2 && 2 < 3\n", TRUE);
-		testCase("2 < 1\n", FALSE);
-		testCase("1 < 2 && 2 < 1\n", FALSE);
-		testNegativeCase("1 < 2\n", FALSE);
-		testNegativeCase("1 < 2 && 2 < 1\n", TRUE);
+		testCase("1 < 2;;", true);
+		testCase("1 < 2 && 2 < 3;;", true);
+		testCase("2 < 1;;", false);
+		testCase("1 < 2 && 2 < 1;;", false);
+		testNegativeCase("1 < 2;;", false);
+		testNegativeCase("1 < 2 && 2 < 1;;", true);
 	}
 	
 	@Test
 	public void testLesserEq() throws Exception {
 		System.out.println("\n====== LESSER OR EQUAL ======\n");
-		testCase("1 <= 1\n", TRUE);
-		testCase("1 <= 2\n", TRUE);
-		testCase("2 <= 1\n", FALSE);
-		testNegativeCase("1 <= 1\n", FALSE);
+		testCase("1 <= 1;;", true);
+		testCase("1 <= 2;;", true);
+		testCase("2 <= 1;;", false);
+		testNegativeCase("1 <= 1;;", false);
 	}
 	
 	@Test
 	public void testMul() throws Exception {
 		System.out.println("\n====== MUL ======\n");
-		testCase("4*2\n", 8);
-		testCase("4*2*2\n", 16);
-		testNegativeCase("1*1\n", 0);
-		testNegativeCase("1*1*0\n", 1);
+		testCase("4*2;;", 8);
+		testCase("4*2*2;;", 16);
+		testNegativeCase("1*1;;", 0);
+		testNegativeCase("1*1*0;;", 1);
 	}
 	
 	@Test
 	public void testNot() throws Exception {
 		System.out.println("\n====== NOT ======\n");
-		testCase("!false\n", TRUE);
-		testCase("!true\n", FALSE);
-		testCase("!(false)\n", TRUE);
-		testCase("!(false && true)\n", TRUE);
-		testCase("!(false || true)\n", FALSE);
-		testNegativeCase("!false\n", FALSE);
-		testNegativeCase("!true\n", TRUE);
+		testCase("!false;;", true);
+		testCase("!true;;", false);
+		testCase("!(false);;", true);
+		testCase("!(false && true);;", true);
+		testCase("!(false || true);;", false);
+		testNegativeCase("!false;;", false);
+		testNegativeCase("!true;;", true);
 	}
 	
 	@Test
 	public void testNotEqual() throws Exception {
 		System.out.println("\n====== NOT EQUAL ======\n");
-		testCase("1 != 2\n", TRUE);
-		testCase("1 != 1\n", FALSE);
-		testCase("true != false\n", TRUE);
-		testCase("true != true\n", FALSE);
-		testNegativeCase("1 != 2\n", FALSE);
-		testNegativeCase("true != true\n", TRUE);
+		testCase("1 != 2;;", true);
+		testCase("1 != 1;;", false);
+		testCase("true != false;;", true);
+		testCase("true != true;;", false);
+		testNegativeCase("1 != 2;;", false);
+		testNegativeCase("true != true;;", true);
 	}
 	
 	@Test
 	public void testNum() throws Exception {
 		System.out.println("\n====== NUM ======\n");
-		testCase("1\n", 1);
-		testCase("10\n", 10);
-		testCase("-1\n", -1);
-		testNegativeCase("1\n", 0);
+		testCase("1;;", 1);
+		testCase("10;;", 10);
+		testCase("-1;;", -1);
+		testNegativeCase("1;;", 0);
 	}
 	
 	@Test
 	public void testOr() throws Exception {
 		System.out.println("\n====== OR ======\n");
-		testCase("true || true\n", TRUE);
-		testCase("true || false\n", TRUE);
-		testCase("false || true\n", TRUE);
-		testCase("false || false\n", FALSE);
-		testNegativeCase("true || true\n", FALSE);
-		testNegativeCase("true || false\n", FALSE);
-		testNegativeCase("false || true\n", FALSE);
-		testNegativeCase("false || false\n", TRUE);
+		testCase("true || true;;", true);
+		testCase("true || false;;", true);
+		testCase("false || true;;", true);
+		testCase("false || false;;", false);
+		testNegativeCase("true || true;;", false);
+		testNegativeCase("true || false;;", false);
+		testNegativeCase("false || true;;", false);
+		testNegativeCase("false || false;;", true);
 	}
 	
 	@Test
 	public void testSub() throws Exception {
 		System.out.println("\n====== SUB ======\n");
-		testCase("1-1\n", 0);
-		testCase("1-2-3\n", -4);
-		testNegativeCase("1-1\n", -1);
-		testNegativeCase("1-1-1\n", 0);
+		testCase("1-1;;", 0);
+		testCase("1-2-3;;", -4);
+		testNegativeCase("1-1;;", -1);
+		testNegativeCase("1-1-1;;", 0);
 	}
 	
 	@Test
 	public void testDecl() throws Exception {
-		System.out.println("\n====== DECL ======\n");
-		testCase("decl x = 1 in x+1 end\n", 2);
-		testCase("decl x = 1 in decl y = 2 in x+y end end\n", 3);
-		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end\n", 6);
-		testCase("decl x = decl x = 1 in x+2 end y = decl x = 34 in x/17 end in decl z = 3 in (x+y)*z end end\n", 15);
-		testCase("decl y = decl x = 3 in x * 4 end in y + 2 end\n", 14);
-		testCase("decl x = 6 in decl x = 3 y = decl z = 7 + x in z * x end in y + x end end\n", 81);
-		testCase("decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end\n", 86);
-		testCase("decl x = true in x && false end\n", FALSE);
-		testCase("decl x = false in decl y = true in x || y end end\n", TRUE);
-		testCase("decl x = decl y = 3 in y != 2 end in x && true end\n", TRUE);
-		testCase("decl x = 1 in x < 2 end && decl y = 1 in 2 <= y end\n", FALSE);
-		testCase("decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end\n", FALSE);
-		testCase("decl x = !true y = false in !(x || y) end\n", TRUE);
-		testCase("decl x = decl z = 2 in !(2 <= z) end y = !true in !(x || y) end\n", TRUE);
-		testCase("decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end\n", TRUE);
-		testNegativeCase("decl x = 1 in x+1 end\n", 0);
+		System.out.println("\n====== DECL ======;;");
+		testCase("decl x = 1 in x+1 end;;", 2);
+		testCase("decl x = 1 in decl y = 2 in x+y end end;;", 3);
+		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end;;", 6);
+		testCase("decl x = decl x = 1 in x+2 end y = decl x = 34 in x/17 end in decl z = 3 in (x+y)*z end end;;", 15);
+		testCase("decl y = decl x = 3 in x * 4 end in y + 2 end;;", 14);
+		testCase("decl x = 6 in decl x = 3 y = decl z = 7 + x in z * x end in y + x end end;;", 81);
+		testCase("decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end;;", 86);
+		testCase("decl x = true in x && false end;;", false);
+		testCase("decl x = false in decl y = true in x || y end end;;", true);
+		testCase("decl x = decl y = 3 in y != 2 end in x && true end;;", true);
+		testCase("decl x = 1 in x < 2 end && decl y = 1 in 2 <= y end;;", false);
+		testCase("decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end;;", false);
+		testCase("decl x = !true y = false in !(x || y) end;;", true);
+		testCase("decl x = decl z = 2 in !(2 <= z) end y = !true in !(x || y) end;;", true);
+		testCase("decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end;;", true);
+		testNegativeCase("decl x = 1 in x+1 end;;", 0);
+	}
+	
+	@Test
+	public void testAssign() throws Exception {
+		testCase("var(1) := 0;;", 0);
+		testCase("var(0) := var(0) := 1;;", 1);
+		testCase("var(var(1)) := var(2);;", new Reference("Ref_3", "I"));
+		testCase("var(var(true)) := var(false);;", new Reference("Ref_3", "Z"));
+		testNegativeCase("var(0) := 1;;", 2);
+		testNegativeCase("var(true) := false", true);
+	}
+	
+	@Test
+	public void testDeref() throws Exception {
+		testCase("*var(0);;", 0);
+		testCase("*var(99);;", 99);
+		testCase("*var(true);;", true);
+		testCase("*var(*var(1));;", 1);
+		testCase("*var(var(0));;", new Reference("Ref_2", "I"));
+		testCase("*var(var(var(0)));;", new Reference("Ref_2", "LRef_3;"));
+		testCase("*var(*var(true));;", true);
+		testNegativeCase("*var(0);;", 1);
+		testNegativeCase("*var(true);;", 0);
+	}
+	
+	@Test
+	public void testVar() throws Exception {
+		testCase("var(0);;", new Reference("Ref_1", "I"));
+		testCase("var(true);;", new Reference("Ref_1", "Z"));
+		testNegativeCase("var(false);;", false);
+		testNegativeCase("var(1);;", 1);
+	}
+	
+	@Test
+	public void testWhile() throws Exception {
+		// by default, while statement always returns false
+		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", false); 
+		testCase("decl i = var(1) in " 
+				+"		decl x = while *i > 0 do "
+				+"      			i := *i - 1 "
+				+"           	 end "
+				+"		in "
+				+"			x "
+				+"		end "
+				+"end;;", false);
+		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", true);
+		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", 2);
+	}
+	
+	@Test
+	public void testSeq() throws Exception {
+		testCase("1 ; 2 ; 3;;", 3);
+		testCase("true ; true ; false;;", false);
+		testCase("1 ; 2 ; true;;", true);
+		testCase("decl x = 1; 2 in x end;;", 2);
+		testNegativeCase("1 ; 2 ; 3;;", 1);
+		testNegativeCase("1 ; 2 ; true;;", false);
+	}
+	
+	@Test
+	public void testIfThenElse() throws Exception {
+		testCase("if true then 1 else 0 end;;", 1);
+		testCase("if false then 1 else 0 end;;", 0);
+		testCase("if true then false else true end;;", false);
+		testCase("if false then false else true end;;", true);
+		testNegativeCase("if true then false else true end;;", true);
+		testNegativeCase("if false then false else true end;;", false);
+		testNegativeCase("if true then false else true end;;", 1);
+		testNegativeCase("if false then false else true end;;", 2);
 	}
 	
 	@Test
 	public void testMixed() throws Exception {
 		System.out.println("\n====== MIXED ======\n");
-		testCase("1+2*3 > 1/1*1\n", TRUE);
-		testCase("1+2*3+2/2\n", 8);
-		testCase("true || false != false && false\n", TRUE);
-		testCase("(20+20)/(4*5)\n", 2);
+		testCase("1+2*3 > 1/1*1;;", true);
+		testCase("1+2*3+2/2;;", 8);
+		testCase("true || false != false && false;;", true);
+		testCase("(20+20)/(4*5);;", 2);
+		// TODO add imperative testes
 	}
 	
 }

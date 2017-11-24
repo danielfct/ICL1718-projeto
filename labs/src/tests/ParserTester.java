@@ -188,6 +188,7 @@ public class ParserTester {
 		testCase("var(0) := 1;;");
 		testCase("var(1) := 0;;");
 		testCase("var(0) := true;;");
+		testCase("var(0) := var(0) := 1;;");
 		testNegativeCase("var(0) = 1;;");
 	}
 	
@@ -209,6 +210,14 @@ public class ParserTester {
 	public void testWhile() throws Exception {
 		testCase("while true do 1 end;;");
 		testCase("while false do 1 end;;");
+		testCase("decl i = var(1) in " 
+				+"		decl x = while *i > 0 do "
+				+"      			i := *i - 1 "
+				+"           	 end "
+				+"		in "
+				+"			x "
+				+"		end "
+				+"end;;");
 		testNegativeCase("while do 1 end;;");
 		testNegativeCase("while true do end;;");
 		testNegativeCase("while true do 1;;");
@@ -250,21 +259,21 @@ public class ParserTester {
 		testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end;;");
 		testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end end end;;");
 		testCase("decl x = var(3) in "
-				+ "decl y = var(1) in "
-				+ "while *x > 0 do "
-				+ "  y := *y * *x; "
-				+ "  x := *x - 1 "
-				+ "end "
-				+ "end "
+				+ "		decl y = var(1) in "
+				+ "			while *x > 0 do "
+				+ "  			y := *y * *x; "
+				+ "  			x := *x - 1 "
+				+ "			end "
+				+ "		end "
 				+ "end;;");
 		testCase("decl x = var(3) in\n"
-                + "decl y = var(1) in\n"
-                + "while *x > 0 do\n"
-                + "  y := *y * *x;\n"
-                + "  x := *x - 1\n"
-                + "end;\n"
-                + "*y\n"
-                + "end\n"
+                + "		decl y = var(1) in\n"
+                + "			while *x > 0 do\n"
+                + " 			y := *y * *x;\n"
+                + "  			x := *x - 1\n"
+                + "			end;\n"
+                + "			*y\n"
+                + "		end\n"
                 + "end;;");
         testCase("decl x = 2;var(0;1) in (2;x) := *x+1; *x end;;");
         testCase("***var(var(var(1)));;");

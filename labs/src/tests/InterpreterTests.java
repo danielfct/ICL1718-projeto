@@ -182,6 +182,7 @@ public class InterpreterTests {
 		testCase("var(1) := 0;;", new IntValue(0));
 		testCase("var(var(1)) := var(2);;", new MemoryCell(new IntValue(2)));
 		testCase("var(var(true)) := var(false);;", new MemoryCell(new BoolValue(false)));
+		testCase("var(0) := var(0) := 1;;", new IntValue(1));
 		testNegativeCase("var(0) := 1;;", new IntValue(2));
 		testNegativeCase("var(true) := false", new IntValue(0));
 	}
@@ -209,6 +210,14 @@ public class InterpreterTests {
 	@Test
 	public void testWhile() throws Exception {
 		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", new BoolValue(false)); // by default, while statement always returns false
+		testCase("decl i = var(1) in " 
+				+"		decl x = while *i > 0 do "
+				+"      			i := *i - 1 "
+				+"           	 end "
+				+"		in "
+				+"			x "
+				+"		end "
+				+"end;;", new BoolValue(false));
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", new BoolValue(true));
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", new IntValue(0));
 	}

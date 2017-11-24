@@ -1,6 +1,6 @@
 package types;
 
-public class BoolType implements IType {
+public class BoolType implements IPrimitiveType {
 	
 	public static final BoolType singleton = new BoolType();
 	
@@ -8,6 +8,12 @@ public class BoolType implements IType {
 
 	@Override
 	public String toString() {
-		return "I";
+		return "Boolean";
 	}
+	
+	@Override
+	public String toJasmin() {
+		return "Z";
+	}
+	
 }

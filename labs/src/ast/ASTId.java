@@ -60,7 +60,8 @@ public class ASTId implements ASTNode {
 			currentFrame = currentFrame.ancestor;
 		}
 		// Get Id
-		code.emit_getfield("Frame_" + currentFrame.id, "loc_" + String.format("%02d", addr.location), getType().toString());
+		String jasminType = code.toJasmin(getType());
+		code.emit_getfield("Frame_" + currentFrame.id, "loc_" + String.format("%02d", addr.location), jasminType);
 	}
 
 	@Override

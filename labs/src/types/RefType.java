@@ -1,6 +1,6 @@
 package types;
 
-public class RefType implements IType {
+public class RefType implements IReferenceType {
 	
 	private IType type;
 	
@@ -13,13 +13,18 @@ public class RefType implements IType {
 	}
 	
 	@Override
-	public String toString() {
-		 // TODO mudar quando for feita a compilação dos nós imperativos
-		return "Ref(" + type + ")";
-	}
-	
-	@Override
 	public boolean equals(Object other) {	
 		return other instanceof RefType && this.type.equals(((RefType) other).getType());
 	}
+	
+	@Override
+	public String toString() {
+		return "Reference";
+	}
+
+	@Override
+	public String toJasmin() {
+		return "Ljava/lang/Object;";
+	}
+	
 }

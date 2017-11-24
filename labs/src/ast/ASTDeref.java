@@ -1,6 +1,7 @@
 package ast;
 
 import compiler.CodeBlock;
+import compiler.Reference;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -10,7 +11,7 @@ import types.IType;
 import types.RefType;
 import types.TypingException;
 import values.IValue;
-import values.RefValue;
+import values.IRefValue;
 import values.TypeMismatchException;
 
 public class ASTDeref implements ASTNode {
@@ -32,8 +33,8 @@ public class ASTDeref implements ASTNode {
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IValue v = node.eval(env);
 		
-		if (v instanceof RefValue)
-			return Memory.singleton.get((RefValue)v);
+		if (v instanceof IRefValue)
+			return Memory.singleton.get((IRefValue)v);
 		else
 			throw new TypeMismatchException("Wrong type on Deref Operation: Deref(" + v + ")");
 	}
@@ -52,7 +53,10 @@ public class ASTDeref implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// TODO Auto-generated method stub
+		node.compile(code, env);
+		IType type = ((RefType)node.getType()).getType();
+		Reference ref = code.getReference(type);
+		code.emit_getfield(ref.name, "value", ref.getType());	
 	}
 
 	@Override

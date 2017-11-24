@@ -222,10 +222,12 @@ public class TypeCheckingTests {
 		testCase("var(1) := 0;;", IntType.singleton);
 		testCase("var(var(1)) := var(2);;", new RefType(IntType.singleton));
 		testCase("var(var(true)) := var(false);;", new RefType(BoolType.singleton));
+		testCase("var(0) := var(0) := 1;;", IntType.singleton);
 		testNegativeCase("var(0) := 1;;", new RefType(BoolType.singleton));
 		testNegativeCase("var(0) := 1;;", BoolType.singleton);
 		testExceptionCase("x := 1;;");
 		testExceptionCase("var(0) := true;;");
+		testExceptionCase("var(var(0)) := 0");
 	}
 	
 	@Test

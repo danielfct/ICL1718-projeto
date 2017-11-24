@@ -61,7 +61,26 @@ public class ASTWhile implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// TODO Auto-generated method stub
+		String labelStart = code.labelFactory.getLabel();
+		String labelExit = code.labelFactory.getLabel();
+		
+		code.emit_anchor(labelStart);
+		condition.compile(code, env);
+		code.emit_ifeq(labelExit);
+		expression.compile(code, env);
+		code.emit_pop();
+		code.emit_jump(labelStart);
+		code.emit_anchor(labelExit);
+		code.emit_bool(false);
+		
+		// start:
+		// E1
+		// if_eq exit
+		// E2
+		// pop
+		// goto start
+		// exit
+		// sipush false
 	}
 
 	@Override
