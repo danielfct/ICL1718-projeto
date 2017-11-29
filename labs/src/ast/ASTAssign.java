@@ -62,7 +62,7 @@ public class ASTAssign implements ASTNode {
 		expression.compile(code, env);
 		IType type = expression.getType();
 		Reference ref = code.getReference(type);
-		code.emit_putfield(ref.name, "value", ref.getType());
+		code.emit_putfield(ref.name, "value", code.toJasmin(ref.type));
 		//exemplo var(0) := 1
 		// 		var(0)
 		// new ref_0

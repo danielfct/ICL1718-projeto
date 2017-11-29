@@ -1,6 +1,7 @@
 package ast;
 
 import compiler.CodeBlock;
+import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -61,8 +62,8 @@ public class ASTWhile implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		String labelStart = code.labelFactory.getLabel();
-		String labelExit = code.labelFactory.getLabel();
+		String labelStart = "label" + IdFactory.singleton.label();
+		String labelExit = "label" + IdFactory.singleton.label();
 		
 		code.emit_anchor(labelStart);
 		condition.compile(code, env);

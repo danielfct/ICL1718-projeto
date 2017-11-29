@@ -16,22 +16,22 @@ import values.TypeMismatchException;
 
 public class ASTDeref implements ASTNode {
 
-	final ASTNode node;
+	final ASTNode expression;
 	private IType type;
 	
 	public ASTDeref(ASTNode n) {
-		this.node = n;
+		this.expression = n;
 		this.type = null;
 	}
 	
 	@Override
 	public String toString() {
-		return "*" + node;
+		return "*" + expression;
 	}
 	
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue v = node.eval(env);
+		IValue v = expression.eval(env);
 		
 		if (v instanceof IRefValue)
 			return Memory.singleton.get((IRefValue)v);
@@ -41,10 +41,10 @@ public class ASTDeref implements ASTNode {
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IType t = node.typecheck(env);
+		IType t = expression.typecheck(env);
 		
 		if (t instanceof RefType)
-			type = ((RefType)t).getType();
+			type = ((RefType)t).type;
 		else
 			throw new TypingException("Wrong type on Deref Operation: Deref(" + t + ")");
 		
@@ -53,10 +53,10 @@ public class ASTDeref implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		node.compile(code, env);
-		IType type = ((RefType)node.getType()).getType();
+		expression.compile(code, env);
+		IType type = ((RefType)expression.getType()).type;
 		Reference ref = code.getReference(type);
-		code.emit_getfield(ref.name, "value", ref.getType());	
+		code.emit_getfield(ref.name, "value", code.toJasmin(ref.type));	
 	}
 
 	@Override

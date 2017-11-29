@@ -1,26 +1,20 @@
 package compiler;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Compiler;
-
 public class StackFrame implements IStackFrame {
 
-	public final int id;
+	public final String name;
 	public final StackFrame ancestor;
 	private List<String> locations; // e.g. posicao 0 com um valor do tipo I (inteiro) = loc_00 I
 									//		posicao 1 com um valor do tipo Z (booleano) = loc_01 Z
-	private final String filename;
 
-	public StackFrame(int id, StackFrame ancestor) {
-		this.id = id;
+	public StackFrame(StackFrame ancestor) {
+		this.name = "Frame_" + IdFactory.singleton.frame();
 		this.ancestor = ancestor;
 		this.locations = new ArrayList<String>(5);
-		this.filename = "Frame_" + id + ".j";
 	}
 
 	@Override
@@ -37,14 +31,13 @@ public class StackFrame implements IStackFrame {
 	}
 
 	@Override
-	public void dump() throws FileNotFoundException {
-		PrintStream out = new PrintStream(new FileOutputStream(Compiler.dir + filename));
-		out.println(".class Frame_" + id);
+	public void dump(PrintStream out) {
+		out.println(".class " + name);
 		out.println(".super java/lang/Object");
 		out.println();
 		out.println("; variables");
 		if (ancestor != null) 
-			out.println(".field public SL LFrame_" + ancestor.id + ";");
+			out.println(".field public SL " + ancestor.toJasmin());
 		int index = 0;
 		for (String type : locations) {
 			out.println(".field public loc_" + String.format("%02d", index++) + " " + type);
@@ -56,7 +49,25 @@ public class StackFrame implements IStackFrame {
 		out.println("       invokenonvirtual java/lang/Object/<init>()V");
 		out.println("       return");
 		out.println(".end method");
-		out.close();
+	}
+
+	@Override
+	public String toJasmin() {
+		return "L" + name + ";";
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		if (ancestor != null)
+			sb.append(ancestor.name + " <- ");
+		sb.append(name).append("\n");
+		int index = 0;
+		for (String type : locations)
+			sb.append(String.format("%02d", index++) + " " + type).append("\n");
+		
+		return sb.toString();
 	}
 	
 }

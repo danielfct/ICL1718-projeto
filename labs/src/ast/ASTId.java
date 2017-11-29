@@ -56,12 +56,11 @@ public class ASTId implements ASTNode {
 
 		// Get Static Links
 		for (int i = 0; i < addr.jumps; i++) {
-			code.emit_getfield("Frame_" + currentFrame.id, "SL", "LFrame_" + currentFrame.ancestor.id + ";");
+			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 			currentFrame = currentFrame.ancestor;
 		}
 		// Get Id
-		String jasminType = code.toJasmin(getType());
-		code.emit_getfield("Frame_" + currentFrame.id, "loc_" + String.format("%02d", addr.location), jasminType);
+		code.emit_getfield(currentFrame.name, "loc_" + String.format("%02d", addr.location), code.toJasmin(type));
 	}
 
 	@Override

@@ -8,8 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import main.Compiler;
 import types.IType;
-import types.IPrimitiveType;
+import types.IntType;
+import types.BoolType;
+import types.FunType;
 import types.RefType;
 
 import static main.Compiler.SL;
@@ -19,15 +22,17 @@ public class CodeBlock {
 	private List<String> code;
 	private List<StackFrame> frames;
 	private Map<IType, Reference> references;
+	private Map<FunType, TypeSignature> typeSignatures;
+	private Map<FunType, Closure> closures;
 	private StackFrame currentFrame;
-	public final LabelFactory labelFactory;
 
 	public CodeBlock() {
 		this.code = new ArrayList<String>(100);
 		this.frames = new ArrayList<StackFrame>(10);
-		this.references = new HashMap<IType, Reference>(10);
 		this.currentFrame = null;
-		this.labelFactory = new LabelFactory();
+		this.references = new HashMap<IType, Reference>(10);
+		this.typeSignatures = new HashMap<FunType, TypeSignature>(10);
+		this.closures = new HashMap<FunType, Closure>(10);
 	}
 
 	private void dumpHeader(PrintStream out) {
@@ -75,29 +80,50 @@ public class CodeBlock {
 	}
 
 	private void dumpFrames() throws FileNotFoundException {
-		for (StackFrame frame : frames)
-			frame.dump();
-	}
-
-	private void dumpReferences() throws FileNotFoundException {
-		for (Reference ref : references.values()) {
-			ref.dump();
+		for (StackFrame frame : frames) {
+			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + frame.name + ".j"));
+			frame.dump(out);
+			out.close();
 		}
 	}
 
-	public void dump(String filename, String resultType) throws FileNotFoundException {
-		PrintStream out = new PrintStream(new FileOutputStream(filename));
+	private void dumpReferences() throws FileNotFoundException {
+		for (Reference reference : references.values()) {
+			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + reference.name + ".j"));
+			reference.dump(out, toJasmin(reference.type));
+			out.close();
+		}
+	}
+	
+	private void dumpTypeSignatures() throws FileNotFoundException {
+		for (TypeSignature signature : typeSignatures.values()) {
+			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + signature.name + ".j"));
+			signature.dump(out);
+			out.close();
+		}
+	}
+	
+	private void dumpClosures() throws FileNotFoundException {
+		for (Closure closure : closures.values()) {
+			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + closure.name + ".j"));
+			closure.dump(out);
+			out.close();
+		}
+	}
+
+	public void dump(PrintStream out, String resultType) throws FileNotFoundException {
 		dumpHeader(out);
 		dumpCode(out);
 		dumpFooter(out, resultType);
-		out.close();
 		dumpFrames();
 		dumpReferences();
+		dumpTypeSignatures();
+		dumpClosures();
 	}
 
 	public StackFrame newFrame() {
 		// Create a new StackFrame in the compiler
-		StackFrame frame = new StackFrame(frames.size() + 1, currentFrame);
+		StackFrame frame = new StackFrame(currentFrame);
 		frames.add(frame);
 
 		return frame;
@@ -111,13 +137,13 @@ public class CodeBlock {
 		return currentFrame;
 	}
 
-	public Reference newReference(IType type) {
-		Reference ref = new Reference("Ref_" + (references.size() + 1));
-		Reference currentRef = references.putIfAbsent(type, ref);
-		if (currentRef != null)
-			ref = currentRef;
-		
-		return ref;
+	public Reference requestReference(IType type) {
+		Reference reference = this.getReference(type);
+		if (reference == null) {
+			reference = new Reference(type);
+			references.put(type, reference);
+		}
+		return reference;
 	}
 
 	public Reference getReference(IType type) {
@@ -127,8 +153,8 @@ public class CodeBlock {
 	public void emit_endscope() {
 		if (currentFrame.ancestor != null) {
 			emit_aload(SL);
-			emit_checkcast("Frame_" + currentFrame.id);
-			emit_getfield("Frame_" + currentFrame.id, "SL", "LFrame_" + currentFrame.ancestor.id + ";");
+			emit_checkcast(currentFrame.name);
+			emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 		}
 		else {
 			emit_null();
@@ -136,9 +162,18 @@ public class CodeBlock {
 		emit_astore(SL);
 		setCurrentFrame(currentFrame.ancestor);
 	}
-
+	
+	// TODO tentar melhorar
 	public String toJasmin(IType t) {
-		return t instanceof IPrimitiveType ? ((IPrimitiveType)t).toJasmin() : references.get(((RefType)t).getType()).toJasmin();
+		if (t == IntType.singleton)
+			return ((IntType)t).toJasmin();
+		else if (t == BoolType.singleton)
+			return ((BoolType)t).toJasmin();
+		else if (t instanceof RefType)
+			return references.get(((RefType)t).type).toJasmin();
+		else if (t instanceof FunType)
+			return closures.get((FunType)t).toJasmin();
+		return null;
 	}
 
 	// Bytecode instructions
@@ -152,7 +187,7 @@ public class CodeBlock {
 	public void emit_SP() {
 		if (currentFrame != null) {
 			emit_aload(SL);
-			emit_checkcast("Frame_" + currentFrame.id);
+			emit_checkcast(currentFrame.name);
 		}
 	}
 
@@ -255,7 +290,7 @@ public class CodeBlock {
 			code.add("iconst_" + val);
 	}
 
-	// compare is two integer values are equal, if so, jump to given label
+	// compare if two integer values are equal, if so, jump to given label
 	public void emit_icmpeq(String label) {
 		code.add("if_icmpeq " + label);
 	}

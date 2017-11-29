@@ -1,20 +1,16 @@
 package types;
 
-public class RefType implements IReferenceType {
+public class RefType implements IType {
 	
-	private IType type;
+	public final IType type;
 	
 	public RefType(IType type) { 
 		this.type = type; 
 	}
 	
-	public IType getType() { 
-		return type; 
-	}
-	
 	@Override
 	public boolean equals(Object other) {	
-		return other instanceof RefType && this.type.equals(((RefType) other).getType());
+		return other instanceof RefType && this.type.equals(((RefType) other).type);
 	}
 	
 	@Override

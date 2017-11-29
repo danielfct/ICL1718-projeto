@@ -1,10 +1,10 @@
 package compiler;
 
-import java.io.FileNotFoundException;
+import java.io.PrintStream;
 
 public interface IReference {
 	
-	void dump() throws FileNotFoundException;
+	void dump(PrintStream out, String fieldType);
 	
 	String toJasmin();
 	

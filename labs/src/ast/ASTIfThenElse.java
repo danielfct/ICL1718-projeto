@@ -1,6 +1,7 @@
 package ast;
 
 import compiler.CodeBlock;
+import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -51,7 +52,7 @@ public class ASTIfThenElse implements ASTNode {
 		IType i = ifExpression.typecheck(env);
 		IType e = elseExpression.typecheck(env);
 
-		if (c == BoolType.singleton && i == e)
+		if (c == BoolType.singleton && i.equals(e))
 			type = i;
 		else
 			throw new TypingException("Wrong type on If then else statement: If (" + c + ") then (" + i + ") else " + "(" + e + ")");
@@ -61,8 +62,8 @@ public class ASTIfThenElse implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		String labelFalse = code.labelFactory.getLabel();
-		String labelExit = code.labelFactory.getLabel();
+		String labelFalse = "label" + IdFactory.singleton.label();
+		String labelExit = "label" + IdFactory.singleton.label();
 
 		condition.compile(code, env);			
 		code.emit_ifeq(labelFalse);	

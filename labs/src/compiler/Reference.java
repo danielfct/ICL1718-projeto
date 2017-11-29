@@ -1,41 +1,26 @@
 package compiler;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 
-import main.Compiler;
+import types.IType;
 
 public class Reference implements IReference {
 
 	public final String name;
-	private String type;
+	public final IType type;
 
-	public Reference(String name) {
-		this(name, null);
-	}	
-	
-	public Reference(String name, String type) {
-		this.name = name;
+	public Reference(IType type) {
+		this.name = "Ref_" + IdFactory.singleton.reference();
 		this.type = type;
-	}
-	
-	public void setType(String type) {
-		this.type = type;
-	}
-	
-	public String getType() {
-		return type;
 	}
 
 	@Override
-	public void dump() throws FileNotFoundException {
-		PrintStream out = new PrintStream(new FileOutputStream(Compiler.dir + name + ".j"));
+	public void dump(PrintStream out, String fieldType) {
 		out.println(".class " + name);
 		out.println(".super java/lang/Object");
 		out.println();
 		out.println("; variables");
-		out.println(".field public value " + type);
+		out.println(".field public value " + fieldType);
 		out.println();
 		out.println("; standard initializer");
 		out.println(".method public <init>()V");
@@ -49,14 +34,13 @@ public class Reference implements IReference {
 		out.println("		ldc \"" + this + "\"");
 		out.println("		areturn");
 		out.println(".end method");
-		out.close();
 	}
-	
+
 	@Override
 	public String toJasmin() {
 		return "L" + name + ";";
 	}
-	
+
 	@Override
 	public String toString() {
 		return name + " " + type;

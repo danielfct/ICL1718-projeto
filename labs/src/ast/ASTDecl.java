@@ -70,18 +70,18 @@ public class ASTDecl implements ASTNode {
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+		code.emit_comment("Starting " + this);
 		// 			decl
 		// Create a new StackFrame in the compiler
 		StackFrame frame = code.newFrame();
-		code.emit_comment("Initialize frame " + frame.id);
-		code.emit_new("Frame_" + frame.id);
+		code.emit_new(frame.name);
 		code.emit_dup();
-		code.emit_invokespecial("Frame_" + frame.id, "<init>", "()V");
+		code.emit_invokespecial(frame.name, "<init>", "()V");
 		// Initialize Static Linker
 		if (frame.ancestor != null) {
 			code.emit_dup();
 			code.emit_aload(SL);
-			code.emit_putfield("Frame_" + frame.id, "SL", "LFrame_" + frame.ancestor.id + ";");
+			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 
 		// 			x=1 , x=y+1, x=decl y=1 in x+y end, etc
@@ -93,7 +93,7 @@ public class ASTDecl implements ASTNode {
 			newEnv.assoc(d.id, location);
 			String type = code.toJasmin(d.def.getType());
 			frame.setLocation(location, type);
-			code.emit_putfield("Frame_" + frame.id, "loc_" + String.format("%02d", location), type);
+			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
 		// 			in
 		code.setCurrentFrame(frame);
@@ -103,6 +103,8 @@ public class ASTDecl implements ASTNode {
 		// 			end
 		env.endScope();
 		code.emit_endscope();
+		
+		code.emit_comment("Ending " + this);
 	}
 
 	@Override

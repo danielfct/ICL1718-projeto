@@ -1,6 +1,7 @@
 package ast;
 
 import compiler.CodeBlock;
+import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -63,8 +64,8 @@ public class ASTLesser implements ASTNode {
 		//		push value false
 		//		jump to labelExit
 
-		String labelLesser = code.labelFactory.getLabel();
-		String labelExit = code.labelFactory.getLabel();
+		String labelLesser = "label" + IdFactory.singleton.label();
+		String labelExit = "label" + IdFactory.singleton.label();
 
 		left.compile(code, env);
 		right.compile(code, env);

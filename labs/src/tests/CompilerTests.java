@@ -9,13 +9,13 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import compiler.Reference;
+import compiler.IdFactory;
 import main.Compiler;
 
 public class CompilerTests {
 
 	// Directory in which jasmin.jar resides
-	private static final File dir = new File(System.getProperty("user.dir") + "/src/");
+	private static final File dir = new File(System.getProperty("user.dir"));
 
 	private String getResult(String expression) throws IOException, InterruptedException {
 		
@@ -226,7 +226,8 @@ public class CompilerTests {
 	
 	@Test
 	public void testDecl() throws Exception {
-		System.out.println("\n====== DECL ======;;");
+		System.out.println("\n====== DECL ======\n");
+		IdFactory.singleton.init();
 		testCase("decl x = 1 in x+1 end;;", 2);
 		testCase("decl x = 1 in decl y = 2 in x+y end end;;", 3);
 		testCase("decl x = 1 in x+2 end * decl y = 1 in 2*y end;;", 6);
@@ -247,22 +248,26 @@ public class CompilerTests {
 	
 	@Test
 	public void testAssign() throws Exception {
+		System.out.println("\n====== ASSIGN ======\n");
+		IdFactory.singleton.init();
 		testCase("var(1) := 0;;", 0);
 		testCase("var(0) := var(0) := 1;;", 1);
-		testCase("var(var(1)) := var(2);;", new Reference("Ref_3", "I"));
-		testCase("var(var(true)) := var(false);;", new Reference("Ref_3", "Z"));
+		testCase("var(var(1)) := var(2);;", "");
+		testCase("var(var(true)) := var(false);;", "");
 		testNegativeCase("var(0) := 1;;", 2);
 		testNegativeCase("var(true) := false", true);
 	}
 	
 	@Test
 	public void testDeref() throws Exception {
+		System.out.println("\n====== DEREF ======\n");
+		IdFactory.singleton.init();
 		testCase("*var(0);;", 0);
 		testCase("*var(99);;", 99);
 		testCase("*var(true);;", true);
 		testCase("*var(*var(1));;", 1);
-		testCase("*var(var(0));;", new Reference("Ref_2", "I"));
-		testCase("*var(var(var(0)));;", new Reference("Ref_2", "LRef_3;"));
+		testCase("*var(var(0));;", "Ref_5 Integer");
+		testCase("*var(var(var(0)));;", "Ref_7 Reference");
 		testCase("*var(*var(true));;", true);
 		testNegativeCase("*var(0);;", 1);
 		testNegativeCase("*var(true);;", 0);
@@ -270,14 +275,18 @@ public class CompilerTests {
 	
 	@Test
 	public void testVar() throws Exception {
-		testCase("var(0);;", new Reference("Ref_1", "I"));
-		testCase("var(true);;", new Reference("Ref_1", "Z"));
-		testNegativeCase("var(false);;", false);
+		System.out.println("\n====== VAR ======\n");
+		IdFactory.singleton.init();
+		testCase("var(0);;", "Ref_0 Integer");
+		testCase("var(true);;", "Ref_1 Boolean");
+		testNegativeCase("var(false);;", "Ref_2 Integer");
 		testNegativeCase("var(1);;", 1);
 	}
 	
 	@Test
 	public void testWhile() throws Exception {
+		System.out.println("\n====== WHILE ======\n");
+		IdFactory.singleton.init();
 		// by default, while statement always returns false
 		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", false); 
 		testCase("decl i = var(1) in " 
@@ -294,20 +303,26 @@ public class CompilerTests {
 	
 	@Test
 	public void testSeq() throws Exception {
+		System.out.println("\n====== SEQUENCE ======\n");
+		IdFactory.singleton.init();
 		testCase("1 ; 2 ; 3;;", 3);
 		testCase("true ; true ; false;;", false);
 		testCase("1 ; 2 ; true;;", true);
 		testCase("decl x = 1; 2 in x end;;", 2);
+		testCase("var(0); var(1);;", "Ref_0 Integer");
 		testNegativeCase("1 ; 2 ; 3;;", 1);
 		testNegativeCase("1 ; 2 ; true;;", false);
 	}
 	
 	@Test
 	public void testIfThenElse() throws Exception {
+		System.out.println("\n====== IF THEN ELSE ======\n");
+		IdFactory.singleton.init();
 		testCase("if true then 1 else 0 end;;", 1);
 		testCase("if false then 1 else 0 end;;", 0);
 		testCase("if true then false else true end;;", false);
 		testCase("if false then false else true end;;", true);
+		testCase("if true then var(1) else var(2) end;;", "Ref_0 Integer");
 		testNegativeCase("if true then false else true end;;", true);
 		testNegativeCase("if false then false else true end;;", false);
 		testNegativeCase("if true then false else true end;;", 1);
@@ -315,8 +330,24 @@ public class CompilerTests {
 	}
 	
 	@Test
+	public void testFun() throws Exception {
+		System.out.println("\n====== FUNCTION DECL ======\n");
+		IdFactory.singleton.init();
+		
+	}
+	
+	@Test
+	public void testCall() throws Exception {
+		System.out.println("\n====== FUNCTION CALL ======\n");
+		IdFactory.singleton.init();
+		
+	}
+	
+	
+	@Test
 	public void testMixed() throws Exception {
 		System.out.println("\n====== MIXED ======\n");
+		IdFactory.singleton.init();
 		testCase("1+2*3 > 1/1*1;;", true);
 		testCase("1+2*3+2/2;;", 8);
 		testCase("true || false != false && false;;", true);
