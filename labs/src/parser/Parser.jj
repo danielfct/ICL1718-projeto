@@ -21,6 +21,8 @@ Fact ::= id | (...) | var | decl-end | ... | -Fact | *Fact | !BooleanExp
 
 */
 
+
+
 options {
   STATIC=false;
 }
@@ -28,7 +30,11 @@ options {
 PARSER_BEGIN(Parser)
 
 package parser;
+import java.util.*;
 import ast.*;
+import ast.ASTFunction.Parameter;
+import types.*;
+
 
 public class Parser {
 
@@ -110,6 +116,20 @@ TOKEN :
 	< THEN : "then" >
 	|
 	< ELSE : "else" >
+	|
+	< COMMA : "," >
+	|
+	< ARROW : "->" >
+	|
+	< FUN : "fun" >
+	|
+	< COLON : ":" >
+	|
+	< INT : "int" >
+	|
+	< BOOL : "bool" >
+	|
+	< FUNCTION : "function" >
  	|
   	< ID : ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
 }
@@ -168,7 +188,7 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 	{ return e1; }
 }
 
-ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
+ASTNode BooleanExp(): // B --> E ('==' | '!=' | '<' | '>' | '<=' | '>=' E )*
 { ASTNode e1, e2; }
 {
 	e1 = ArithmeticExp()
@@ -188,7 +208,7 @@ ASTNode BooleanExp(): // B -- > E ('==' E )* | '!' B
 	{ return e1; }
 }
 
-ASTNode ArithmeticExp() :
+ASTNode ArithmeticExp() : // A --> E ('+' | '-' E)*
 { ASTNode e1, e2; }
 {
    	e1 = Term()
@@ -200,51 +220,116 @@ ASTNode ArithmeticExp() :
     { return e1; }
 }
 
-ASTNode Term() :
+ASTNode Term() : // T --> T ('*' | '/' E)*
 { ASTNode e1, e2; }
 {
-     e1 = Fact()
+     e1 = Unary()
      (
-       	<TIMES> e2 = Fact() { e1 = new ASTMul(e1,e2); }
+     	<TIMES> e2 = Unary() { e1 = new ASTMul(e1, e2); }
      	|
-     	<DIV> e2 = Fact() { e1 = new ASTDiv(e1,e2); }
+     	<DIV> e2 = Unary() { e1 = new ASTDiv(e1, e2); }
      )*
      { return e1; }
 }
 
+/*
+
+Unary := C | *U | !U | -U
+
+Call := F | F( '('EL')' )*
+
+EL := [ E (',' E)* ] Expression list
+
+F := ID | Decl .. | Num | (E) | <FUN> (...)* <ARROW> Seq() <END>
+								fun x1:T1, x2:T2 - > Exp end
+*/
+
+
+ASTNode Unary() :
+/*Unary := C | *U | !U | -U*/
+{ ASTNode e; }
+{
+  	e = Call() 	{ return e; }
+	|
+  	<MINUS> e = Unary() { return new ASTSub(new ASTNum(0), e); }
+	|
+	<NOT> e = Unary() { return new ASTNot(e); }
+	|
+	<TIMES> e = Unary() { return new ASTDeref(e); }
+}
+
+
+ASTNode Call() :
+/* F | F( '('EL')' )* */
+{ ASTNode e1; Collection<ASTNode> args; }
+{
+  	e1 = Fact()
+  	(
+    	<LPAR> args = Arguments() <RPAR> { e1 = new ASTCall(e1, args); }  	)*
+  	{ return e1; }
+}
+
+Collection<ASTNode> Arguments() :
+/* [ E(',' E)* ] */
+{ Collection<ASTNode> args; ASTNode e; }
+{
+	{ args = new ArrayList<ASTNode>(5); }
+  	e = Exp() { args.add(e); }
+  	(
+  	  	<COMMA> e = Exp() { args.add(e); }
+  	)*
+  	{ return args; }
+}
+
 
 ASTNode Fact() :
-{ Token x; ASTDecl d; ASTNode e1, e2, e3; }
+/*ID | Decl | .. | Num | (E)*/
+{ Token x; ASTDecl d; ASTNode e1, e2, e3; Collection<Parameter> params; }
 {
-  	<MINUS> e1 = Fact() { return new ASTSub(new ASTNum(0), e1); }
+ 	x = <ID> { return new ASTId(x.image); }
 	|
- 	x = <NUM> { return new ASTNum(Integer.parseInt(x.image)); }
- 	|
 	<DECL> { d = new ASTDecl(); }
 		(
 	  		x = <ID> <EQ> e1 = Seq() { d.newBinding(x.image, e1); }
 		)+
 		<IN> e2 = Seq() <END> { d.addBody(e2); return d; }
 	|
-	x = <ID> { return new ASTId(x.image); }
-	| 
    	<LPAR> e1 = Seq() <RPAR> { return e1; }
+ 	|
+	<VAR> <LPAR> e1 = Seq() <RPAR> { return new ASTVar(e1); }
+	|
+	<WHILE> e1 = Exp() <DO> e2 = Seq() <END> { return new ASTWhile(e1, e2); }
+	|
+	<IF> e1 = Exp() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
+	|
+	<FUN> params = Parameters() <ARROW> e1 = Seq() <END> { return new ASTFunction(params, e1); }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
 	<FALSE> { return new ASTBool(false); }
 	|
-	<NOT> e1 = BooleanExp() { return new ASTNot(e1); }
-	|
-	<VAR> <LPAR> e1 = Seq() <RPAR> { return new ASTVar(e1); }
-	|
-	// must be changed afterwards, unary operators
-	// *f() <> (*f)()
-	// *a.b == *(a.b)
-	// *a.b <> (*a).b
-	<TIMES> e1 = Fact() { return new ASTDeref(e1); }
-	|
-	<WHILE> e1 = Exp() <DO> e2 = Seq() <END> { return new ASTWhile(e1, e2); }
-	|
-	<IF> e1 = Exp() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
+	x = <NUM> { return new ASTNum(Integer.parseInt(x.image)); }
+}
+
+Collection<Parameter> Parameters() :
+{ Collection<Parameter> params; Token x; }
+{
+ 	{ params = new ArrayList<Parameter>(5); }
+ 	[
+  		x = <ID> <COLON>
+  		(
+  			<INT> { params.add(new Parameter(x.image, IntType.singleton)); }
+  			|
+  			<BOOL> { params.add(new Parameter(x.image, BoolType.singleton)); }
+  		)
+  		(
+  	  		<COMMA> x = <ID> <COLON>
+  	  		(
+  	  			<INT> { params.add(new Parameter(x.image, IntType.singleton)); }
+  				|
+  				<BOOL> { params.add(new Parameter(x.image, BoolType.singleton)); }
+  			)
+  		)*
+  	]
+  { return params; }
 }

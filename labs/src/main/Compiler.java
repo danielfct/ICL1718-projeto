@@ -21,7 +21,7 @@ import ast.ASTNode;
 
 public class Compiler {
 
-	public static final String DIR = System.getProperty("user.dir"); 
+	public static final String DIR = System.getProperty("user.dir");
 	public static final String MAIN_FILE = "Main.j";
 	public static final int SL = 0;
 
@@ -34,9 +34,9 @@ public class Compiler {
 	}
 
 	public static void compile(String program) throws FileNotFoundException {
-		compile(new ByteArrayInputStream(program.getBytes()));	
+		compile(new ByteArrayInputStream(program.getBytes()));
 	}
-	
+
 	public static void compile(InputStream is) throws FileNotFoundException {
 		Parser parser = new Parser(is);
 		try {

@@ -8,8 +8,10 @@ public class StackFrame implements IStackFrame {
 
 	public final String name;
 	public final StackFrame ancestor;
-	private List<String> locations; // e.g. posicao 0 com um valor do tipo I (inteiro) = loc_00 I
-									//		posicao 1 com um valor do tipo Z (booleano) = loc_01 Z
+	private List<String> locations; // e.g. posicao 0 com um valor do tipo I
+									// (inteiro) = loc_00 I
+									// posicao 1 com um valor do tipo Z
+									// (booleano) = loc_01 Z
 
 	public StackFrame(StackFrame ancestor) {
 		this.name = "Frame_" + IdFactory.singleton.frame();
@@ -36,7 +38,7 @@ public class StackFrame implements IStackFrame {
 		out.println(".super java/lang/Object");
 		out.println();
 		out.println("; variables");
-		if (ancestor != null) 
+		if (ancestor != null)
 			out.println(".field public SL " + ancestor.toJasmin());
 		int index = 0;
 		for (String type : locations) {
@@ -55,19 +57,19 @@ public class StackFrame implements IStackFrame {
 	public String toJasmin() {
 		return "L" + name + ";";
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		if (ancestor != null)
 			sb.append(ancestor.name + " <- ");
 		sb.append(name).append("\n");
 		int index = 0;
 		for (String type : locations)
 			sb.append(String.format("%02d", index++) + " " + type).append("\n");
-		
+
 		return sb.toString();
 	}
-	
+
 }

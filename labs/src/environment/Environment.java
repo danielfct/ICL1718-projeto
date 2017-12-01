@@ -12,6 +12,30 @@ public class Environment<T> implements IEnvironment<T> {
 			this.id = id;
 			this.value = value;
 		}
+
+		@Override
+		public String toString() {
+			return id + "=" + value;
+		}
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(id, value);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Assoc<?>))
+				return false;
+			Assoc<?> other = (Assoc<?>) obj;
+			return Objects.equals(id, other.id) &&
+					Objects.equals(value, other.value);
+		}
+		
 	}
 
 	Environment<T> up;
@@ -54,6 +78,29 @@ public class Environment<T> implements IEnvironment<T> {
 			if (assoc.id.equals(id))
 				throw new DuplicateIdentifierException(id);
 		assocs.add(new Assoc<T>(id, value));
+	}
+
+	@Override
+	public String toString() {
+		return (up != null ? up.toString() + "," : "") + assocs.toString();
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(up, assocs);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Environment<?>))
+			return false;
+		Environment<?> other = (Environment<?>) obj;
+		return Objects.equals(up, other.up) &&
+				Objects.equals(assocs, other.assocs);
 	}
 
 }

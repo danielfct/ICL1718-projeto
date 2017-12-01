@@ -18,12 +18,12 @@ import types.RefType;
 import static main.Compiler.SL;
 
 public class CodeBlock {
-	
+
 	private List<String> code;
 	private List<StackFrame> frames;
 	private Map<IType, Reference> references;
 	private Map<FunType, TypeSignature> typeSignatures;
-	private Map<FunType, Closure> closures;
+	private List<Closure> closures;
 	private StackFrame currentFrame;
 
 	public CodeBlock() {
@@ -32,7 +32,7 @@ public class CodeBlock {
 		this.currentFrame = null;
 		this.references = new HashMap<IType, Reference>(10);
 		this.typeSignatures = new HashMap<FunType, TypeSignature>(10);
-		this.closures = new HashMap<FunType, Closure>(10);
+		this.closures = new ArrayList<Closure>(10);
 	}
 
 	private void dumpHeader(PrintStream out) {
@@ -68,14 +68,14 @@ public class CodeBlock {
 	private void dumpFooter(PrintStream out, String resultType) {
 		out.println("       ; END");
 		out.println("");
-		out.println("");		
+		out.println("");
 		out.println("       ; convert to String;");
 		out.println("       invokestatic java/lang/String/valueOf(" + resultType + ")Ljava/lang/String;");
 		out.println("       ; call println ");
 		out.println("       invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
-		out.println("");		
+		out.println("");
 		out.println("       return");
-		out.println("");		
+		out.println("");
 		out.println(".end method");
 	}
 
@@ -94,7 +94,7 @@ public class CodeBlock {
 			out.close();
 		}
 	}
-	
+
 	private void dumpTypeSignatures() throws FileNotFoundException {
 		for (TypeSignature signature : typeSignatures.values()) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + signature.name + ".j"));
@@ -102,9 +102,9 @@ public class CodeBlock {
 			out.close();
 		}
 	}
-	
+
 	private void dumpClosures() throws FileNotFoundException {
-		for (Closure closure : closures.values()) {
+		for (Closure closure : closures) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + closure.name + ".j"));
 			closure.dump(out);
 			out.close();
@@ -155,24 +155,23 @@ public class CodeBlock {
 			emit_aload(SL);
 			emit_checkcast(currentFrame.name);
 			emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
-		}
-		else {
+		} else {
 			emit_null();
 		}
 		emit_astore(SL);
 		setCurrentFrame(currentFrame.ancestor);
 	}
-	
+
 	// TODO tentar melhorar
 	public String toJasmin(IType t) {
 		if (t == IntType.singleton)
-			return ((IntType)t).toJasmin();
+			return ((IntType) t).toJasmin();
 		else if (t == BoolType.singleton)
-			return ((BoolType)t).toJasmin();
+			return ((BoolType) t).toJasmin();
 		else if (t instanceof RefType)
-			return references.get(((RefType)t).type).toJasmin();
-		else if (t instanceof FunType)
-			return closures.get((FunType)t).toJasmin();
+			return references.get(((RefType) t).type).toJasmin();
+		// else if (t instanceof FunType)
+		// return closures.get((FunType)t).toJasmin();
 		return null;
 	}
 
@@ -183,7 +182,7 @@ public class CodeBlock {
 		code.add("; " + comment);
 	}
 
-	// pushes stack pointer onto the operand stack 
+	// pushes stack pointer onto the operand stack
 	public void emit_SP() {
 		if (currentFrame != null) {
 			emit_aload(SL);
@@ -196,7 +195,8 @@ public class CodeBlock {
 		code.add("new " + classname);
 	}
 
-	// invoke instance method; special handling for superclass, private, and instance initialization method invocations
+	// invoke instance method; special handling for superclass, private, and
+	// instance initialization method invocations
 	public void emit_invokespecial(String classname, String methodname, String descriptor) {
 		code.add("invokespecial " + classname + "/" + methodname + descriptor);
 	}
@@ -205,41 +205,48 @@ public class CodeBlock {
 		code.add("aconst_null");
 	}
 
-	// getfield pops objectref (a reference to an object) from the stack, retrieves the value of the field identified by <classname/fieldname> 
-	// from objectref, and pushes the one-word or two-word value onto the operand stack
+	// getfield pops objectref (a reference to an object) from the stack,
+	// retrieves the value of the field identified by <classname/fieldname>
+	// from objectref, and pushes the one-word or two-word value onto the
+	// operand stack
 	// Examples:
-	// 		getfield Frame_n1/SL LFrame_n;
-	// 		getfield Frame_1/loc_X I
+	// getfield Frame_n1/SL LFrame_n;
+	// getfield Frame_1/loc_X I
 	public void emit_getfield(String classname, String fieldname, String descriptor) {
 		code.add("getfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
-	// putfield sets the value of the field identified by <classname/fieldname> in objectref (a reference to an object) 
+	// putfield sets the value of the field identified by <classname/fieldname>
+	// in objectref (a reference to an object)
 	// to the single or double word value on the operand stack
 	// Examples:
-	// 		putfield Frame_n1/SL LFrame_n;
-	// 		putfield Frame_1/loc_X I
+	// putfield Frame_n1/SL LFrame_n;
+	// putfield Frame_1/loc_X I
 	public void emit_putfield(String classname, String fieldname, String descriptor) {
 		code.add("putfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
-	// This pops the top single-word value off the operand stack, and then pushes that value twice 
-	//- i.e. it makes an extra copy of the top item on the stack
+	// This pops the top single-word value off the operand stack, and then
+	// pushes that value twice
+	// - i.e. it makes an extra copy of the top item on the stack
 	public void emit_dup() {
 		code.add("dup");
 	}
 
-	// Pops objectref (a reference to an object or array) off the stack and stores it in local variable <n>
+	// Pops objectref (a reference to an object or array) off the stack and
+	// stores it in local variable <n>
 	public void emit_astore(int n) {
 		code.add("astore_" + n);
 	}
 
-	// retrieves an object reference from a local variable and pushes it onto the operand stack
+	// retrieves an object reference from a local variable and pushes it onto
+	// the operand stack
 	public void emit_aload(int n) {
-		code.add("aload_" + n); 
+		code.add("aload_" + n);
 	}
 
-	// checks that the top item on the operand stack (a reference to an object or array) can be cast to a given type
+	// checks that the top item on the operand stack (a reference to an object
+	// or array) can be cast to a given type
 	public void emit_checkcast(String t) {
 		code.add("checkcast " + t);
 	}
@@ -278,13 +285,13 @@ public class CodeBlock {
 	public void emit_bool(boolean val) {
 		if (val)
 			emit_val(1);
-		else 
+		else
 			emit_val(0);
 	}
 
 	// push a value from -1 to 5 into the stack
 	public void emit_val(int val) {
-		if (val == -1) 
+		if (val == -1)
 			code.add("iconst_m1");
 		else
 			code.add("iconst_" + val);
@@ -300,22 +307,26 @@ public class CodeBlock {
 		code.add("if_icmpne " + label);
 	}
 
-	// compare if first integer value is greater or equal than second integer value, if so, jump to given label
+	// compare if first integer value is greater or equal than second integer
+	// value, if so, jump to given label
 	public void emit_icmpge(String label) {
 		code.add("if_icmpge " + label);
 	}
 
-	// compare if first integer value is greater than second integer value, if so, jump to given label
+	// compare if first integer value is greater than second integer value, if
+	// so, jump to given label
 	public void emit_icmpgt(String label) {
 		code.add("if_icmpgt " + label);
 	}
 
-	// compare if first integer value is lesser or equal than second integer value, if so, jump to given label
+	// compare if first integer value is lesser or equal than second integer
+	// value, if so, jump to given label
 	public void emit_icmple(String label) {
 		code.add("if_icmple " + label);
 	}
 
-	// compare if first ineger value is lesser than second integer value, if so, jump to given label
+	// compare if first ineger value is lesser than second integer value, if so,
+	// jump to given label
 	public void emit_icmplt(String label) {
 		code.add("if_icmplt " + label);
 	}
@@ -325,7 +336,7 @@ public class CodeBlock {
 		code.add("ifeq " + label);
 	}
 
-	// check if value on top of stack is diferent than 0 
+	// check if value on top of stack is diferent than 0
 	public void emit_ifne(String label) {
 		code.add("ifne " + label);
 	}
@@ -349,12 +360,12 @@ public class CodeBlock {
 	public void emit_or() {
 		code.add("ior");
 	}
-	
+
 	// pop the value on top of the stack
 	public void emit_pop() {
 		code.add("pop");
 	}
-	
+
 	// swap the top 2 values on stack
 	public void emit_swap() {
 		code.add("swap");

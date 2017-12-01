@@ -18,17 +18,17 @@ public class CompilerTests {
 	private static final File dir = new File(System.getProperty("user.dir"));
 
 	private String getResult(String expression) throws IOException, InterruptedException {
-		
+
 		Process p;
 
-		p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "del *.j *.class"}, null, dir);
+		p = Runtime.getRuntime().exec(new String[] { "cmd", "/c", "del *.j *.class" }, null, dir);
 		p.waitFor();
 
 		System.out.println("Compiling to Jasmin source code");
 		Compiler.compile(expression);
 
 		System.out.println("Compiling to Jasmin bytecode");
-		p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "java -jar jasmin.jar *.j"}, null, dir);
+		p = Runtime.getRuntime().exec(new String[] { "cmd", "/c", "java -jar jasmin.jar *.j" }, null, dir);
 		p.waitFor();
 
 		assertTrue("Compiled to Jasmin bytecode", p.exitValue() == 0);
@@ -36,19 +36,19 @@ public class CompilerTests {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
 		StringBuffer output = new StringBuffer();
-		String line = "";			
+		String line = "";
 		while ((line = reader.readLine()) != null) {
 			output.append(line + "\n");
 		}
 		System.out.print(output.toString());
 
-		p = Runtime.getRuntime().exec(new String[] {"cmd","/c", "java Demo"}, null, dir);
+		p = Runtime.getRuntime().exec(new String[] { "cmd", "/c", "java Demo" }, null, dir);
 		p.waitFor();
 
 		reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
 		output = new StringBuffer();
-		line = "";			
+		line = "";
 		while ((line = reader.readLine()) != null) {
 			output.append(line + "\n");
 		}
@@ -56,17 +56,17 @@ public class CompilerTests {
 		System.out.println("Output: " + output.toString() + "\n");
 
 		return output.toString();
-		
+
 	}
 
 	private void testCase(String expression, Object value) throws IOException, InterruptedException {
 		assertTrue(getResult(expression).equals(value + "\n"));
 	}
-	
+
 	private void testNegativeCase(String expression, Object value) throws IOException, InterruptedException {
 		assertFalse(getResult(expression).equals(value + "\n"));
 	}
-	
+
 	@Test
 	public void testAdd() throws Exception {
 		System.out.println("\n====== ADD ======\n");
@@ -78,7 +78,7 @@ public class CompilerTests {
 		testNegativeCase("1+2;;", 0);
 		testNegativeCase("(1+2)+1;;", 0);
 	}
-	
+
 	@Test
 	public void testAnd() throws Exception {
 		System.out.println("\n====== AND ======\n");
@@ -91,7 +91,7 @@ public class CompilerTests {
 		testNegativeCase("false && false;;", true);
 		testNegativeCase("true && (true && false);;", true);
 	}
-	
+
 	@Test
 	public void testBool() throws Exception {
 		System.out.println("\n====== BOOL ======\n");
@@ -100,7 +100,7 @@ public class CompilerTests {
 		testNegativeCase("true;;", false);
 		testNegativeCase("false;;", true);
 	}
-	
+
 	@Test
 	public void testDiv() throws Exception {
 		System.out.println("\n====== DIV ======\n");
@@ -109,7 +109,7 @@ public class CompilerTests {
 		testCase("4/2/2;;", 1);
 		testNegativeCase("1/1;;", 0);
 	}
-	
+
 	@Test
 	public void testEqual() throws Exception {
 		System.out.println("\n====== EQUAL ======\n");
@@ -120,7 +120,7 @@ public class CompilerTests {
 		testNegativeCase("1 == 1;;", false);
 		testNegativeCase("true == true;;", false);
 	}
-	
+
 	@Test
 	public void testGreater() throws Exception {
 		System.out.println("\n====== GREATER ======\n");
@@ -130,7 +130,7 @@ public class CompilerTests {
 		testNegativeCase("10 > 1;;", false);
 		testNegativeCase("1 > 10;;", true);
 	}
-	
+
 	@Test
 	public void testGreaterEq() throws Exception {
 		System.out.println("\n====== GREATER OR EQUAL ======\n");
@@ -140,7 +140,7 @@ public class CompilerTests {
 		testNegativeCase("1 >= 1;;", false);
 		testNegativeCase("1 >= 2;;", true);
 	}
-	
+
 	@Test
 	public void testLesser() throws Exception {
 		System.out.println("\n====== LESSER ======\n");
@@ -151,7 +151,7 @@ public class CompilerTests {
 		testNegativeCase("1 < 2;;", false);
 		testNegativeCase("1 < 2 && 2 < 1;;", true);
 	}
-	
+
 	@Test
 	public void testLesserEq() throws Exception {
 		System.out.println("\n====== LESSER OR EQUAL ======\n");
@@ -160,7 +160,7 @@ public class CompilerTests {
 		testCase("2 <= 1;;", false);
 		testNegativeCase("1 <= 1;;", false);
 	}
-	
+
 	@Test
 	public void testMul() throws Exception {
 		System.out.println("\n====== MUL ======\n");
@@ -169,7 +169,7 @@ public class CompilerTests {
 		testNegativeCase("1*1;;", 0);
 		testNegativeCase("1*1*0;;", 1);
 	}
-	
+
 	@Test
 	public void testNot() throws Exception {
 		System.out.println("\n====== NOT ======\n");
@@ -181,7 +181,7 @@ public class CompilerTests {
 		testNegativeCase("!false;;", false);
 		testNegativeCase("!true;;", true);
 	}
-	
+
 	@Test
 	public void testNotEqual() throws Exception {
 		System.out.println("\n====== NOT EQUAL ======\n");
@@ -192,7 +192,7 @@ public class CompilerTests {
 		testNegativeCase("1 != 2;;", false);
 		testNegativeCase("true != true;;", true);
 	}
-	
+
 	@Test
 	public void testNum() throws Exception {
 		System.out.println("\n====== NUM ======\n");
@@ -201,7 +201,7 @@ public class CompilerTests {
 		testCase("-1;;", -1);
 		testNegativeCase("1;;", 0);
 	}
-	
+
 	@Test
 	public void testOr() throws Exception {
 		System.out.println("\n====== OR ======\n");
@@ -214,7 +214,7 @@ public class CompilerTests {
 		testNegativeCase("false || true;;", false);
 		testNegativeCase("false || false;;", true);
 	}
-	
+
 	@Test
 	public void testSub() throws Exception {
 		System.out.println("\n====== SUB ======\n");
@@ -223,7 +223,7 @@ public class CompilerTests {
 		testNegativeCase("1-1;;", -1);
 		testNegativeCase("1-1-1;;", 0);
 	}
-	
+
 	@Test
 	public void testDecl() throws Exception {
 		System.out.println("\n====== DECL ======\n");
@@ -234,30 +234,36 @@ public class CompilerTests {
 		testCase("decl x = decl x = 1 in x+2 end y = decl x = 34 in x/17 end in decl z = 3 in (x+y)*z end end;;", 15);
 		testCase("decl y = decl x = 3 in x * 4 end in y + 2 end;;", 14);
 		testCase("decl x = 6 in decl x = 3 y = decl z = 7 + x in z * x end in y + x end end;;", 81);
-		testCase("decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end;;", 86);
+		testCase(
+				"decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end;;",
+				86);
 		testCase("decl x = true in x && false end;;", false);
 		testCase("decl x = false in decl y = true in x || y end end;;", true);
 		testCase("decl x = decl y = 3 in y != 2 end in x && true end;;", true);
 		testCase("decl x = 1 in x < 2 end && decl y = 1 in 2 <= y end;;", false);
-		testCase("decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end;;", false);
+		testCase(
+				"decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end;;",
+				false);
 		testCase("decl x = !true y = false in !(x || y) end;;", true);
 		testCase("decl x = decl z = 2 in !(2 <= z) end y = !true in !(x || y) end;;", true);
-		testCase("decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end;;", true);
+		testCase(
+				"decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end;;",
+				true);
 		testNegativeCase("decl x = 1 in x+1 end;;", 0);
 	}
-	
+
 	@Test
 	public void testAssign() throws Exception {
 		System.out.println("\n====== ASSIGN ======\n");
 		IdFactory.singleton.init();
 		testCase("var(1) := 0;;", 0);
 		testCase("var(0) := var(0) := 1;;", 1);
-		testCase("var(var(1)) := var(2);;", "");
-		testCase("var(var(true)) := var(false);;", "");
+		testCase("var(var(1)) := var(2);;", "Ref_3 Integer");
+		testCase("var(var(true)) := var(false);;", "Ref_5 Boolean");
 		testNegativeCase("var(0) := 1;;", 2);
-		testNegativeCase("var(true) := false", true);
+		testNegativeCase("var(true) := false;;", true);
 	}
-	
+
 	@Test
 	public void testDeref() throws Exception {
 		System.out.println("\n====== DEREF ======\n");
@@ -267,12 +273,12 @@ public class CompilerTests {
 		testCase("*var(true);;", true);
 		testCase("*var(*var(1));;", 1);
 		testCase("*var(var(0));;", "Ref_5 Integer");
-		testCase("*var(var(var(0)));;", "Ref_7 Reference");
+		testCase("*var(var(var(0)));;", "Ref_7 Ref(Integer)");
 		testCase("*var(*var(true));;", true);
 		testNegativeCase("*var(0);;", 1);
 		testNegativeCase("*var(true);;", 0);
 	}
-	
+
 	@Test
 	public void testVar() throws Exception {
 		System.out.println("\n====== VAR ======\n");
@@ -282,25 +288,19 @@ public class CompilerTests {
 		testNegativeCase("var(false);;", "Ref_2 Integer");
 		testNegativeCase("var(1);;", 1);
 	}
-	
+
 	@Test
 	public void testWhile() throws Exception {
 		System.out.println("\n====== WHILE ======\n");
 		IdFactory.singleton.init();
 		// by default, while statement always returns false
-		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", false); 
-		testCase("decl i = var(1) in " 
-				+"		decl x = while *i > 0 do "
-				+"      			i := *i - 1 "
-				+"           	 end "
-				+"		in "
-				+"			x "
-				+"		end "
-				+"end;;", false);
+		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", false);
+		testCase("decl i = var(1) in " + "		decl x = while *i > 0 do " + "      			i := *i - 1 "
+				+ "           	 end " + "		in " + "			x " + "		end " + "end;;", false);
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", true);
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", 2);
 	}
-	
+
 	@Test
 	public void testSeq() throws Exception {
 		System.out.println("\n====== SEQUENCE ======\n");
@@ -313,7 +313,7 @@ public class CompilerTests {
 		testNegativeCase("1 ; 2 ; 3;;", 1);
 		testNegativeCase("1 ; 2 ; true;;", false);
 	}
-	
+
 	@Test
 	public void testIfThenElse() throws Exception {
 		System.out.println("\n====== IF THEN ELSE ======\n");
@@ -328,22 +328,21 @@ public class CompilerTests {
 		testNegativeCase("if true then false else true end;;", 1);
 		testNegativeCase("if false then false else true end;;", 2);
 	}
-	
+
 	@Test
 	public void testFun() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
-		
+
 	}
-	
+
 	@Test
 	public void testCall() throws Exception {
 		System.out.println("\n====== FUNCTION CALL ======\n");
 		IdFactory.singleton.init();
-		
+
 	}
-	
-	
+
 	@Test
 	public void testMixed() throws Exception {
 		System.out.println("\n====== MIXED ======\n");
@@ -354,5 +353,5 @@ public class CompilerTests {
 		testCase("(20+20)/(4*5);;", 2);
 		// TODO add imperative testes
 	}
-	
+
 }

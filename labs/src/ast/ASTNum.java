@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -14,9 +16,11 @@ import values.IntValue;
 public class ASTNum implements ASTNode {
 
 	final int value;
+	private IType type;
 
-	public ASTNum(int v) {
-		value = v;
+	public ASTNum(int value) {
+		this.value = value;
+		this.type = null;
 	}
 
 	@Override
@@ -31,18 +35,36 @@ public class ASTNum implements ASTNode {
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		return IntType.singleton;
+		type = IntType.singleton;
+		
+		return type;
 	}
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		code.emit_comment("Starting " + this );
 		code.emit_push(value);
-		code.emit_comment("Ending " + this);
 	}
 
 	@Override
 	public IType getType() {
-		return IntType.singleton; 
+		return type;
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTNum))
+			return false;
+		ASTNum other = (ASTNum) obj;
+		return Objects.equals(value, other.value);
+	}
+
 }

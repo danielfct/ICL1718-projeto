@@ -6,17 +6,16 @@ import org.junit.Test;
 import main.Console;
 import parser.ParseException;
 
-
 public class ParserTester {
 
 	private void testCase(String expression) throws ParseException {
-		assertTrue(Console.accept(expression));		
+		assertTrue(Console.accept(expression));
 	}
-	
+
 	private void testNegativeCase(String expression) throws ParseException {
 		assertFalse(Console.accept(expression));
 	}
-	
+
 	@Test
 	public void testAdd() throws Exception {
 		testCase("1+2;;");
@@ -27,7 +26,7 @@ public class ParserTester {
 		testNegativeCase("+1;;");
 		testNegativeCase("1++2;;");
 	}
-	
+
 	@Test
 	public void testAnd() throws Exception {
 		testCase("true && true;;");
@@ -38,13 +37,13 @@ public class ParserTester {
 		testNegativeCase("&& false;;");
 		testNegativeCase("false &&& false;;");
 	}
-	
+
 	@Test
 	public void testBool() throws Exception {
 		testCase("true;;");
 		testCase("false;;");
 	}
-	
+
 	@Test
 	public void testDiv() throws Exception {
 		testCase("1/1;;");
@@ -55,7 +54,7 @@ public class ParserTester {
 		testNegativeCase("1//1;;");
 		testNegativeCase("4/+2/2;;");
 	}
-	
+
 	@Test
 	public void testEqual() throws Exception {
 		testCase("1 == 1;;");
@@ -68,7 +67,7 @@ public class ParserTester {
 		testNegativeCase("false ==;;");
 		testNegativeCase("1 === 1;;");
 	}
-	
+
 	@Test
 	public void testGreater() throws Exception {
 		testCase("2 > 1;;");
@@ -78,7 +77,7 @@ public class ParserTester {
 		testNegativeCase("> 10;;");
 		testNegativeCase("1 >> 10;;");
 	}
-	
+
 	@Test
 	public void testGreaterEq() throws Exception {
 		testCase("1 >= 1;;");
@@ -89,7 +88,7 @@ public class ParserTester {
 		testNegativeCase("1 >>= 2;;");
 		testNegativeCase("1 >== 2;;");
 	}
-	
+
 	@Test
 	public void testLesser() throws Exception {
 		testCase("1 < 2;;");
@@ -100,7 +99,7 @@ public class ParserTester {
 		testNegativeCase("< 2;;");
 		testNegativeCase("1 << 2;;");
 	}
-	
+
 	@Test
 	public void testLesserEq() throws Exception {
 		testCase("1 <= 1;;");
@@ -111,7 +110,7 @@ public class ParserTester {
 		testNegativeCase("1 <<= 1;;");
 		testNegativeCase("1 <== 1;;");
 	}
-	
+
 	@Test
 	public void testMul() throws Exception {
 		testCase("4*2;;");
@@ -119,7 +118,7 @@ public class ParserTester {
 		testCase("-1*3;;");
 		testNegativeCase("1*;;");
 	}
-	
+
 	@Test
 	public void testNot() throws Exception {
 		testCase("!false;;");
@@ -128,7 +127,7 @@ public class ParserTester {
 		testNegativeCase("not false;;");
 		testNegativeCase("!true!;;");
 	}
-	
+
 	@Test
 	public void testNotEqual() throws Exception {
 		testCase("1 != 2;;");
@@ -140,14 +139,14 @@ public class ParserTester {
 		testNegativeCase("true !=;;");
 		testNegativeCase("!= true;;");
 	}
-	
+
 	@Test
 	public void testNum() throws Exception {
 		testCase("1;;");
 		testCase("10;;");
 		testCase("-1;;");
 	}
-	
+
 	@Test
 	public void testOr() throws Exception {
 		testCase("true || true;;");
@@ -158,7 +157,7 @@ public class ParserTester {
 		testNegativeCase("|| false;;");
 		testNegativeCase("false ||| true;;");
 	}
-	
+
 	@Test
 	public void testSub() throws Exception {
 		testCase("1-1;;");
@@ -167,7 +166,7 @@ public class ParserTester {
 		testNegativeCase("1-;;");
 		testNegativeCase("1-1-;;");
 	}
-	
+
 	@Test
 	public void testDecl() throws Exception {
 		testCase("decl x = 1 in x+1 end;;");
@@ -182,7 +181,7 @@ public class ParserTester {
 		testNegativeCase("decl x = decl y = 2 in 2*y in x*3 end;;");
 		testNegativeCase("decl x = 1 in decl y = 2 in x+y end end end;;");
 	}
-	
+
 	@Test
 	public void testAssign() throws Exception {
 		testCase("var(0) := 1;;");
@@ -191,45 +190,39 @@ public class ParserTester {
 		testCase("var(0) := var(0) := 1;;");
 		testNegativeCase("var(0) = 1;;");
 	}
-	
+
 	@Test
 	public void testDeref() throws Exception {
 		testCase("*var(0);;");
 		testCase("*var(99);;");
 		testCase("*var(true);;");
 	}
-	
+
 	@Test
 	public void testVar() throws Exception {
 		testCase("var(0);;");
 		testCase("var(true);;");
 		testNegativeCase("var();;");
 	}
-	
+
 	@Test
 	public void testWhile() throws Exception {
 		testCase("while true do 1 end;;");
 		testCase("while false do 1 end;;");
-		testCase("decl i = var(1) in " 
-				+"		decl x = while *i > 0 do "
-				+"      			i := *i - 1 "
-				+"           	 end "
-				+"		in "
-				+"			x "
-				+"		end "
-				+"end;;");
+		testCase("decl i = var(1) in " + "		decl x = while *i > 0 do " + "      			i := *i - 1 "
+				+ "           	 end " + "		in " + "			x " + "		end " + "end;;");
 		testNegativeCase("while do 1 end;;");
 		testNegativeCase("while true do end;;");
 		testNegativeCase("while true do 1;;");
 	}
-	
+
 	@Test
 	public void testSeq() throws Exception {
 		testCase("1 ; 2 ; 3;;");
 		testCase("true ; true ; false;;");
 		testCase("decl x = 1; 2 in x end;;");
 	}
-	
+
 	@Test
 	public void testIfThenElse() throws Exception {
 		testCase("if true then 1 else 2 end;;");
@@ -240,7 +233,81 @@ public class ParserTester {
 		testNegativeCase("if true then else 2;;");
 		testNegativeCase("if true then 1 else;;");
 	}
-	
+
+	@Test
+	public void testFunction() throws Exception {
+		testCase("fun x:int -> x*x end;;");
+		testCase("fun x:int, y:bool -> if y then x + 1 else x - 1 end end;;");
+		testCase("fun -> true end;;");
+//		testCase("decl FALSE = fun -> true end () in FALSE end;;");
+//		testCase("decl TRUE = fun -> true end () in FALSE end;;");
+		testNegativeCase("f x -> x end;;");
+		testNegativeCase("fun x -> x end;;");
+		testNegativeCase("fun x:int => x end;;");
+	}
+
+	@Test
+	public void testCall() throws Exception {
+		testCase("fun x:int -> x+2 end (4);;");
+		testCase("decl f = fun x:int -> x+1 end in (1) end;;");
+		testCase("decl x=1 in " 
+				+ "		decl f = fun y:int -> y+x end in "
+				+ "			decl g = fun x:int -> x+f(x) end in " 
+				+ "				g(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;");
+		testCase("decl f = fun x:int -> x+1 end in " 
+				+ "		decl g = fun y:int -> f(y)+2 end in "
+				+ "			decl x = g(2) in " 
+				+ "				x+x" 
+				+ "			end " 
+				+ "		end " 
+				+ "end;;");
+		testCase("decl x = fun x:int -> var(x) end in " 
+				+ "		*x(1) " 
+				+ "end;;");
+//		testCase("decl x = 1 f = fun y -> y+x end in "
+//				+ "		decl g = fun x -> f(x)+1 end in "
+//				+ "			decl h = g i = fun y -> fun x -> x end end g(y) in "
+//				+ "				i(f(1)) "
+//				+ "			end "
+//				+ "		end "
+//				+ "end;;");
+//		testCase("decl x = 1 in "
+//				+ "		decl f = fun y:int -> y+x end in "
+//				+ "			decl g = fun h -> h(x)+1 end in "
+//				+ "				g(f) "
+//				+ "			end "
+//				+ "		end "		
+//				+ "end;;");
+//		testCase("decl y = 3 in " 
+//				+ "		decl x = 2*y in " 
+//				+ "			decl f = fun y:int -> y+x end in "
+//				+ "				decl g = fun x -> fun h -> x+h(x) end end in " 
+//				+ "					(g(2))(f) "
+//				+ "				end " 
+//				+ "			end " 
+//				+ "		end " 
+//				+ "end;;");
+//		testCase("decl comp = fun f, g -> fun x -> f(g(x)) end end in " 
+//				+ "		decl inc = fun x -> x+1 end in "
+//				+ "			decl dup = comp(inc, inc) in " 
+//				+ "				dup(2) " 
+//				+ "			end "
+//				+ "		end " 
+//				+ "end;;");
+//		testCase("decl TRUE = fun -> true end () in TRUE end;;");
+//		testCase("decl FALSE = fun -> true end () in FALSE end;;");
+		testCase("decl add = fun x:int, y:int -> x + y end in add end;;");
+		testNegativeCase("decl f = fun x:int -> x+1 end in " 
+						+ "		decl g = fun y:(int, int) -> y(2) end in "
+						+ "			g(f) " 
+						+ "		end " 
+						+ "end;;");
+		// testNegativeCase("decl f = fun x -> x(x) end in f(f) end;;");
+	}
+
 	@Test
 	public void testMixed() throws Exception {
 		testCase("3*5 != 1+2 == true;;");
@@ -258,27 +325,15 @@ public class ParserTester {
 		testCase("decl x = var(0) in decl y = x in x := 1; *y end end;;");
 		testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end;;");
 		testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end end end;;");
-		testCase("decl x = var(3) in "
-				+ "		decl y = var(1) in "
-				+ "			while *x > 0 do "
-				+ "  			y := *y * *x; "
-				+ "  			x := *x - 1 "
-				+ "			end "
-				+ "		end "
+		testCase("decl x = var(3) in " + "		decl y = var(1) in " + "			while *x > 0 do "
+				+ "  			y := *y * *x; " + "  			x := *x - 1 " + "			end " + "		end "
 				+ "end;;");
-		testCase("decl x = var(3) in\n"
-                + "		decl y = var(1) in\n"
-                + "			while *x > 0 do\n"
-                + " 			y := *y * *x;\n"
-                + "  			x := *x - 1\n"
-                + "			end;\n"
-                + "			*y\n"
-                + "		end\n"
-                + "end;;");
-        testCase("decl x = 2;var(0;1) in (2;x) := *x+1; *x end;;");
-        testCase("***var(var(var(1)));;");
-		testNegativeCase("(20+20)(4*5);;");
-		testNegativeCase("true || false != false &&& false;;");	
+		testCase("decl x = var(3) in\n" + "		decl y = var(1) in\n" + "			while *x > 0 do\n"
+				+ " 			y := *y * *x;\n" + "  			x := *x - 1\n" + "			end;\n" + "			*y\n"
+				+ "		end\n" + "end;;");
+		testCase("decl x = 2;var(0;1) in (2;x) := *x+1; *x end;;");
+		testCase("***var(var(var(1)));;");
+		testNegativeCase("true || false != false &&& false;;");
 	}
-	
+
 }

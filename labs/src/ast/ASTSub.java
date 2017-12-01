@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -18,7 +20,7 @@ public class ASTSub implements ASTNode {
 	private IType type;
 
 	public ASTSub(ASTNode left, ASTNode right) {
-		this.left = left; 
+		this.left = left;
 		this.right = right;
 		this.type = null;
 	}
@@ -34,7 +36,7 @@ public class ASTSub implements ASTNode {
 		IValue r = right.eval(env);
 
 		if (l instanceof IntValue && r instanceof IntValue)
-			return new IntValue(((IntValue)l).getValue() - ((IntValue)r).getValue());
+			return new IntValue(((IntValue) l).getValue() - ((IntValue) r).getValue());
 		else
 			throw new TypeMismatchException("Wrong types on Subtraction Operation: Sub(" + l + ", " + r + ")");
 	}
@@ -48,7 +50,7 @@ public class ASTSub implements ASTNode {
 			type = IntType.singleton;
 		else
 			throw new TypingException("Wrong types on Subtraction Operation: Sub(" + l + ", " + r + ")");
-		
+
 		return type;
 	}
 
@@ -62,6 +64,23 @@ public class ASTSub implements ASTNode {
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(left, right);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTSub))
+			return false;
+		ASTSub other = (ASTSub) obj;
+		return Objects.equals(left, other.left) && Objects.equals(right, other.right);
 	}
 
 }

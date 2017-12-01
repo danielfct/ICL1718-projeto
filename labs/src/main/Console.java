@@ -21,7 +21,7 @@ public class Console {
 		while (true) {
 			try {
 				ASTNode n = parser.Start();
-				n.typecheck(new Environment<>()); 
+				n.typecheck(new Environment<>());
 				System.out.println("OK! " + n.eval(new Environment<>()));
 			} catch (TokenMgrError e) {
 				System.out.println("Lexical Error!");
@@ -63,7 +63,7 @@ public class Console {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.eval(new Environment<>()).equals(value);
+			return n.eval(new Environment<IValue>()).equals(value);
 		} catch (Exception e) {
 			return false;
 		}
@@ -73,11 +73,10 @@ public class Console {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
 			ASTNode n = parser.Start();
-			return n.typecheck(new Environment<>()).equals(type);
+			return n.typecheck(new Environment<IType>()).equals(type);
 		} catch (Exception e) {
 			return false;
 		}
 	}
-
 
 }

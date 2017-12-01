@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
@@ -33,18 +35,17 @@ public class ASTWhile implements ASTNode {
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IValue c = condition.eval(env);
-
+		
 		if (c instanceof BoolValue) {
-			if (((BoolValue)c).getValue()) {
+			if (((BoolValue) c).getValue()) {
 				expression.eval(env);
 				return eval(env);
-			}
-			else
+			} else {
 				return new BoolValue(false);
-		}
-		else
+			}
+		} else {
 			throw new TypeMismatchException("Wrong type on While condition: While (" + c + ") do ...");
-
+		}
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class ASTWhile implements ASTNode {
 
 		if (c == BoolType.singleton)
 			type = BoolType.singleton;
-		else 
+		else
 			throw new TypingException("Wrong type on While statement: While(" + c + ") do (" + e + ")");
 
 		return type;
@@ -64,7 +65,7 @@ public class ASTWhile implements ASTNode {
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		String labelStart = "label" + IdFactory.singleton.label();
 		String labelExit = "label" + IdFactory.singleton.label();
-		
+
 		code.emit_anchor(labelStart);
 		condition.compile(code, env);
 		code.emit_ifeq(labelExit);
@@ -73,20 +74,28 @@ public class ASTWhile implements ASTNode {
 		code.emit_jump(labelStart);
 		code.emit_anchor(labelExit);
 		code.emit_bool(false);
-		
-		// start:
-		// E1
-		// if_eq exit
-		// E2
-		// pop
-		// goto start
-		// exit
-		// sipush false
 	}
 
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(condition, expression);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTWhile))
+			return false;
+		ASTWhile other = (ASTWhile) obj;
+		return Objects.equals(condition, other.condition) && Objects.equals(expression, other.expression);
 	}
 
 }

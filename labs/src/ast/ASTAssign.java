@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import compiler.Reference;
 import environment.DuplicateIdentifierException;
@@ -35,9 +37,9 @@ public class ASTAssign implements ASTNode {
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IValue ref = reference.eval(env);
 		IValue v = expression.eval(env);
-		
+
 		if (ref instanceof IRefValue)
-			return Memory.singleton.set((IRefValue)ref, v);
+			return Memory.singleton.set((IRefValue) ref, v);
 		else
 			throw new TypeMismatchException("Wrong types on Assign Operation: :=(" + ref + ", " + v + ")");
 	}
@@ -63,25 +65,29 @@ public class ASTAssign implements ASTNode {
 		IType type = expression.getType();
 		Reference ref = code.getReference(type);
 		code.emit_putfield(ref.name, "value", code.toJasmin(ref.type));
-		//exemplo var(0) := 1
-		// 		var(0)
-		// new ref_0
-		// dup
-		// init
-		// dup
-		// sipush 0
-		// putfield
-		
-		// dup
-		
-		//		:= 1
-		// sipush 1
-		// putfield
+		code.emit_getfield(ref.name, "value", code.toJasmin(ref.type));
 	}
 
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(reference, expression);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTAssign))
+			return false;
+		ASTAssign other = (ASTAssign) obj;
+		return Objects.equals(reference, other.reference) && Objects.equals(expression, other.expression);
 	}
 
 }

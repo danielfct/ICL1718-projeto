@@ -1,30 +1,37 @@
 package types;
 
+import java.util.Collection;
+import java.util.Objects;
+
 public class FunType implements IType {
 
-	public final IType parameterType;
-	public final IType returnType;
-	
-	public FunType(IType parameterType, IType returnType) {
-		this.parameterType = parameterType;
-		this.returnType = returnType;
+	public final Collection<IType> parameters;
+	public final IType ret;
+
+	public FunType(Collection<IType> parameters, IType ret) {
+		this.parameters = parameters;
+		this.ret = ret;
 	}
-	
+
 	@Override
-	public boolean equals(Object other) {	
-		return other instanceof FunType && 
-				this.parameterType.equals(((FunType) other).parameterType) &&
-				this.returnType.equals(((FunType) other).returnType);
+	public int hashCode() {
+		return Objects.hash(parameters, ret);
 	}
-	
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof FunType && this.parameters.equals(((FunType) other).parameters)
+				&& this.ret.equals(((FunType) other).ret);
+	}
+
 	@Override
 	public String toString() {
-		return "Function";
+		return "Function(" + parameters + " -> " + ret + ")"; // TODO
 	}
 
 	@Override
 	public String toJasmin() {
 		return "Ljava/lang/Object;";
 	}
-	
+
 }

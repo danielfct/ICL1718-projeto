@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import compiler.Reference;
 import environment.DuplicateIdentifierException;
@@ -17,36 +19,35 @@ public class ASTVar implements ASTNode {
 
 	final ASTNode expression;
 	private IType type;
-	
-	public ASTVar(ASTNode n) {
-		this.expression = n;
+
+	public ASTVar(ASTNode expression) {
+		this.expression = expression;
 		this.type = null;
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		return "var(" + expression + ")";
 	}
-	
+
 	@Override
-	public IValue eval(IEnvironment<IValue> env) 
-			throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IValue v = expression.eval(env);
+
 		return Memory.singleton.newVar(v);
 	}
 
 	@Override
-	public IType typecheck(IEnvironment<IType> env) 
-			throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
+	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType t = expression.typecheck(env);
-		return type = new RefType(t);	
+		
+		type = new RefType(t);
+
+		return type;
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) 
-			throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		code.emit_comment("Starting " + this);
+	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		// Get or create a new Reference in the compiler
 		IType type = expression.getType();
 		Reference ref = code.requestReference(type);
@@ -57,12 +58,28 @@ public class ASTVar implements ASTNode {
 		expression.compile(code, env);
 		// Associate the value on top of stack with the new reference
 		code.emit_putfield(ref.name, "value", code.toJasmin(ref.type));
-		code.emit_comment("Ending " + this);
 	}
 
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(expression);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTVar))
+			return false;
+		ASTVar other = (ASTVar) obj;
+		return expression.equals(other.expression);
 	}
 
 }

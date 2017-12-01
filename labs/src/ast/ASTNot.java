@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -30,9 +32,9 @@ public class ASTNot implements ASTNode {
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, UndeclaredIdentifierException, DuplicateIdentifierException {
 		IValue v = value.eval(env);
-		
+
 		if (v instanceof BoolValue)
-			return new BoolValue(!((BoolValue)v).getValue());
+			return new BoolValue(!((BoolValue) v).getValue());
 		else
 			throw new TypeMismatchException("Wrong type on Not Operation: Not(" + v + ")");
 	}
@@ -40,12 +42,12 @@ public class ASTNot implements ASTNode {
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType v = value.typecheck(env);
-		
+
 		if (v == BoolType.singleton)
 			type = BoolType.singleton;
 		else
 			throw new TypingException("Wrong type on Not Operation: Not(" + v + ")");
-		
+
 		return type;
 	}
 
@@ -54,7 +56,7 @@ public class ASTNot implements ASTNode {
 		// Since false is represented by an integer of value 0 and
 		// true is represented by an integer of value 1, a not operation can be
 		// achieved with a xor operation. !B = B^1
-		
+
 		value.compile(code, env);
 		code.emit_bool(true);
 		code.emit_xor();
@@ -63,6 +65,23 @@ public class ASTNot implements ASTNode {
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTNot))
+			return false;
+		ASTNot other = (ASTNot) obj;
+		return Objects.equals(value, other.value);
 	}
 
 }

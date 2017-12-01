@@ -16,7 +16,7 @@ public class BoolValue implements IValue {
 	public String toString() {
 		return Boolean.toString(value);
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof BoolValue && this.value == ((BoolValue) other).getValue();

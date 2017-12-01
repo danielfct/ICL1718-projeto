@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
@@ -16,20 +18,20 @@ import values.TypeMismatchException;
 public class ASTIfThenElse implements ASTNode {
 
 	final ASTNode condition;
-	final ASTNode ifExpression;
+	final ASTNode thenExpression;
 	final ASTNode elseExpression;
 	private IType type;
 
-	public ASTIfThenElse(ASTNode condition, ASTNode ifExpression, ASTNode elseExpression) {
+	public ASTIfThenElse(ASTNode condition, ASTNode thenExpression, ASTNode elseExpression) {
 		this.condition = condition;
-		this.ifExpression = ifExpression;
+		this.thenExpression = thenExpression;
 		this.elseExpression = elseExpression;
 		this.type = null;
 	}
 
 	@Override
 	public String toString() {
-		return "if " + condition + " then " + ifExpression + " else " + elseExpression + " end";
+		return "if " + condition + " then " + thenExpression + " else " + elseExpression + " end";
 	}
 
 	@Override
@@ -37,19 +39,18 @@ public class ASTIfThenElse implements ASTNode {
 		IValue c = condition.eval(env);
 
 		if (c instanceof BoolValue) {
-			if (((BoolValue)c).getValue())
-				return ifExpression.eval(env);
+			if (((BoolValue) c).getValue())
+				return thenExpression.eval(env);
 			else
 				return elseExpression.eval(env);
-		}
-		else
+		} else
 			throw new TypeMismatchException("Wrong type on If then else condition: If (" + c + ") then ... else ...");
 	}
 
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType c = condition.typecheck(env);
-		IType i = ifExpression.typecheck(env);
+		IType i = thenExpression.typecheck(env);
 		IType e = elseExpression.typecheck(env);
 
 		if (c == BoolType.singleton && i.equals(e))
@@ -65,25 +66,36 @@ public class ASTIfThenElse implements ASTNode {
 		String labelFalse = "label" + IdFactory.singleton.label();
 		String labelExit = "label" + IdFactory.singleton.label();
 
-		condition.compile(code, env);			
-		code.emit_ifeq(labelFalse);	
-		ifExpression.compile(code, env);		 					
-		code.emit_jump(labelExit);	
+		condition.compile(code, env);
+		code.emit_ifeq(labelFalse);
+		thenExpression.compile(code, env);
+		code.emit_jump(labelExit);
 		code.emit_anchor(labelFalse);
-		elseExpression.compile(code, env);	
+		elseExpression.compile(code, env);
 		code.emit_anchor(labelExit);
-		//[|E1|]
-		//if_eq false
-		//[|E2|]
-		//goto exit
-		//false:
-		//	[|E3]
-		//exit
 	}
 
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(condition, thenExpression, elseExpression);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTIfThenElse))
+			return false;
+		ASTIfThenElse other = (ASTIfThenElse) obj;
+		return Objects.equals(condition, other.condition) && Objects.equals(thenExpression, other.thenExpression)
+				&& Objects.equals(elseExpression, other.elseExpression);
 	}
 
 }

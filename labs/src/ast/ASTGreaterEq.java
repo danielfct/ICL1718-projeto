@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.Objects;
+
 import compiler.CodeBlock;
 import compiler.IdFactory;
 import environment.DuplicateIdentifierException;
@@ -35,9 +37,9 @@ public class ASTGreaterEq implements ASTNode {
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IValue l = left.eval(env);
 		IValue r = right.eval(env);
-		
+
 		if (l instanceof IntValue && r instanceof IntValue)
-			return new BoolValue(((IntValue)l).getValue() >= ((IntValue)r).getValue());
+			return new BoolValue(((IntValue) l).getValue() >= ((IntValue) r).getValue());
 		else
 			throw new TypeMismatchException("Wrong types on Greater or Equal Operation: Ge(" + l + ", " + r + ")");
 	}
@@ -46,24 +48,17 @@ public class ASTGreaterEq implements ASTNode {
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IType l = left.typecheck(env);
 		IType r = right.typecheck(env);
-		
+
 		if (l == IntType.singleton && r == IntType.singleton)
 			type = BoolType.singleton;
 		else
 			throw new TypingException("Wrong types on Greater or Equal Operation: Ge(" + l + ", " + r + ")");
-		
+
 		return type;
 	}
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// if (value1 >= value2)
-		//		jump to labelEqual
-		//		push value true
-		//	else
-		//		push value false
-		//		jump to labelExit
-
 		String labelGreaterEq = "label" + IdFactory.singleton.label();
 		String labelExit = "label" + IdFactory.singleton.label();
 
@@ -80,6 +75,23 @@ public class ASTGreaterEq implements ASTNode {
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(left, right);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTGreaterEq))
+			return false;
+		ASTGreaterEq other = (ASTGreaterEq) obj;
+		return Objects.equals(left, other.left) && Objects.equals(right, other.right);
 	}
 
 }

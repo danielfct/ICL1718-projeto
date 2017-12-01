@@ -6,16 +6,16 @@ import ast.ASTId.Address;
 public class CompilationEnvironment extends Environment<Integer> implements ICompilationEnvironment {
 
 	private CompilationEnvironment up;
-	
+
 	public CompilationEnvironment() {
 		this(null);
 	}
-	
+
 	public CompilationEnvironment(CompilationEnvironment up) {
 		this.up = up;
 		this.assocs = new ArrayList<Assoc<Integer>>();
 	}
-	
+
 	@Override
 	public CompilationEnvironment beginScope() {
 		return new CompilationEnvironment(this);
@@ -25,7 +25,7 @@ public class CompilationEnvironment extends Environment<Integer> implements ICom
 	public CompilationEnvironment endScope() {
 		return up;
 	}
-	
+
 	@Override
 	public Address lookup(String id) throws UndeclaredIdentifierException {
 		int jumps = 0;
@@ -39,5 +39,5 @@ public class CompilationEnvironment extends Environment<Integer> implements ICom
 		}
 		throw new UndeclaredIdentifierException(id);
 	}
-	
+
 }

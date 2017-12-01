@@ -2,6 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import compiler.CodeBlock;
 import compiler.StackFrame;
@@ -18,7 +19,6 @@ import static main.Compiler.SL;
 public class ASTDecl implements ASTNode {
 
 	static class Declaration {
-
 		String id;
 		ASTNode def;
 
@@ -27,6 +27,27 @@ public class ASTDecl implements ASTNode {
 			this.def = def;
 		}
 
+		@Override
+		public String toString() {
+			return id + " = " + def.toString();
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(id, def);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Declaration))
+				return false;
+			Declaration other = (Declaration) obj;
+			return Objects.equals(id, other.id) && Objects.equals(def, other.def);
+		}
 	}
 
 	List<Declaration> declarations;
@@ -48,10 +69,10 @@ public class ASTDecl implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IEnvironment<IValue> newenv = env.beginScope();	
+		IEnvironment<IValue> newenv = env.beginScope();
 		for (Declaration d : declarations)
-			newenv.assoc(d.id, d.def.eval(env));	
-		IValue value = body.eval(newenv);	
+			newenv.assoc(d.id, d.def.eval(env));
+		IValue value = body.eval(newenv);
 		env.endScope();
 
 		return value;
@@ -65,13 +86,12 @@ public class ASTDecl implements ASTNode {
 		type = body.typecheck(newEnv);
 		env.endScope();
 
-		return type;	
+		return type;
 	}
 
 	@Override
 	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		code.emit_comment("Starting " + this);
-		// 			decl
+		// decl
 		// Create a new StackFrame in the compiler
 		StackFrame frame = code.newFrame();
 		code.emit_new(frame.name);
@@ -84,8 +104,8 @@ public class ASTDecl implements ASTNode {
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 
-		// 			x=1 , x=y+1, x=decl y=1 in x+y end, etc
-		ICompilationEnvironment newEnv = env.beginScope(); 
+		// x=1 , x=y+1, x=decl y=1 in x+y end, etc
+		ICompilationEnvironment newEnv = env.beginScope();
 		for (Declaration d : declarations) {
 			code.emit_dup();
 			d.def.compile(code, env);
@@ -95,21 +115,36 @@ public class ASTDecl implements ASTNode {
 			frame.setLocation(location, type);
 			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
-		// 			in
+		// in
 		code.setCurrentFrame(frame);
 		code.emit_astore(SL);
 		body.compile(code, newEnv);
 
-		// 			end
+		// end
 		env.endScope();
 		code.emit_endscope();
-		
-		code.emit_comment("Ending " + this);
 	}
 
 	@Override
 	public IType getType() {
 		return type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(declarations, body);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ASTDecl))
+			return false;
+		ASTDecl other = (ASTDecl) obj;
+		return Objects.equals(declarations, other.declarations) && Objects.equals(body, other.body);
 	}
 
 }

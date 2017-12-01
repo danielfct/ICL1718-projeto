@@ -7,5 +7,5 @@ public interface IClosure {
 	void dump(PrintStream out);
 
 	String toJasmin();
-	
+
 }

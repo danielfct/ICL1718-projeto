@@ -4,11 +4,12 @@ import values.IValue;
 import values.IRefValue;
 
 public class Memory implements MemoryManagement {
-	
+
 	public static final Memory singleton = new Memory();
-	
-	private Memory() { }
-	
+
+	private Memory() {
+	}
+
 	@Override
 	public IRefValue newVar(IValue value) {
 		return new MemoryCell(value);
@@ -23,5 +24,5 @@ public class Memory implements MemoryManagement {
 	public IValue set(IRefValue reference, IValue value) {
 		return ((MemoryCell) reference).value = value;
 	}
-	
+
 }
