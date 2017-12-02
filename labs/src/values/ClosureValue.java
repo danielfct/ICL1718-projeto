@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import ast.ASTFunction.Parameter;
+import ast.ASTFun.Parameter;
 import ast.ASTNode;
 import environment.IEnvironment;
 

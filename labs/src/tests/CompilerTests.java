@@ -258,7 +258,7 @@ public class CompilerTests {
 		IdFactory.singleton.init();
 		testCase("var(1) := 0;;", 0);
 		testCase("var(0) := var(0) := 1;;", 1);
-		testCase("var(var(1)) := var(2);;", "Ref_3 Integer");
+		testCase("var(var(1)) := var(2);;", "Ref_3 int");
 		testCase("var(var(true)) := var(false);;", "Ref_5 Boolean");
 		testNegativeCase("var(0) := 1;;", 2);
 		testNegativeCase("var(true) := false;;", true);
@@ -272,8 +272,8 @@ public class CompilerTests {
 		testCase("*var(99);;", 99);
 		testCase("*var(true);;", true);
 		testCase("*var(*var(1));;", 1);
-		testCase("*var(var(0));;", "Ref_5 Integer");
-		testCase("*var(var(var(0)));;", "Ref_7 Ref(Integer)");
+		testCase("*var(var(0));;", "Ref_5 int");
+		testCase("*var(var(var(0)));;", "Ref_7 Ref(int)");
 		testCase("*var(*var(true));;", true);
 		testNegativeCase("*var(0);;", 1);
 		testNegativeCase("*var(true);;", 0);
@@ -283,9 +283,9 @@ public class CompilerTests {
 	public void testVar() throws Exception {
 		System.out.println("\n====== VAR ======\n");
 		IdFactory.singleton.init();
-		testCase("var(0);;", "Ref_0 Integer");
+		testCase("var(0);;", "Ref_0 int");
 		testCase("var(true);;", "Ref_1 Boolean");
-		testNegativeCase("var(false);;", "Ref_2 Integer");
+		testNegativeCase("var(false);;", "Ref_2 int");
 		testNegativeCase("var(1);;", 1);
 	}
 
@@ -309,7 +309,7 @@ public class CompilerTests {
 		testCase("true ; true ; false;;", false);
 		testCase("1 ; 2 ; true;;", true);
 		testCase("decl x = 1; 2 in x end;;", 2);
-		testCase("var(0); var(1);;", "Ref_0 Integer");
+		testCase("var(0); var(1);;", "Ref_0 int");
 		testNegativeCase("1 ; 2 ; 3;;", 1);
 		testNegativeCase("1 ; 2 ; true;;", false);
 	}
@@ -322,7 +322,7 @@ public class CompilerTests {
 		testCase("if false then 1 else 0 end;;", 0);
 		testCase("if true then false else true end;;", false);
 		testCase("if false then false else true end;;", true);
-		testCase("if true then var(1) else var(2) end;;", "Ref_0 Integer");
+		testCase("if true then var(1) else var(2) end;;", "Ref_0 int");
 		testNegativeCase("if true then false else true end;;", true);
 		testNegativeCase("if false then false else true end;;", false);
 		testNegativeCase("if true then false else true end;;", 1);
@@ -330,10 +330,10 @@ public class CompilerTests {
 	}
 
 	@Test
-	public void testFun() throws Exception {
+	public void testFunction() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
-
+		testCase("decl x = 1 in fun x:int -> x+1 end (1) end;;", 2);
 	}
 
 	@Test

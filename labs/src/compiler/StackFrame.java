@@ -12,6 +12,7 @@ public class StackFrame implements IStackFrame {
 									// (inteiro) = loc_00 I
 									// posicao 1 com um valor do tipo Z
 									// (booleano) = loc_01 Z
+	
 
 	public StackFrame(StackFrame ancestor) {
 		this.name = "Frame_" + IdFactory.singleton.frame();
@@ -30,6 +31,11 @@ public class StackFrame implements IStackFrame {
 			locations.add(type);
 		else
 			locations.set(location, type);
+	}
+	
+	@Override
+	public void addLocation(String type) {
+		setLocation(nextLocation(), type);
 	}
 
 	@Override
@@ -63,12 +69,11 @@ public class StackFrame implements IStackFrame {
 		StringBuilder sb = new StringBuilder();
 
 		if (ancestor != null)
-			sb.append(ancestor.name + " <- ");
-		sb.append(name).append("\n");
-		int index = 0;
-		for (String type : locations)
-			sb.append(String.format("%02d", index++) + " " + type).append("\n");
-
+			sb.append(ancestor.name + " -> ");
+		sb.append(name);
+		sb.append(" [");
+		sb.append(String.join(", ", locations));
+		sb.append("]");
 		return sb.toString();
 	}
 

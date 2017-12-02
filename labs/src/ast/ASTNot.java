@@ -2,7 +2,7 @@ package ast;
 
 import java.util.Objects;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -52,7 +52,7 @@ public class ASTNot implements ASTNode {
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		// Since false is represented by an integer of value 0 and
 		// true is represented by an integer of value 1, a not operation can be
 		// achieved with a xor operation. !B = B^1

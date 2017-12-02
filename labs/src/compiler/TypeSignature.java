@@ -30,5 +30,10 @@ public class TypeSignature implements ITypeSignature {
 	public String toString() {
 		return params + "->" + ret;
 	}
+	
+	@Override
+	public String toJasmin() {
+		return "(" + String.join("", params) + ")" + ret;
+	}
 
 }

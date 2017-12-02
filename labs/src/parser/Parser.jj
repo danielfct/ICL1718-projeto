@@ -32,7 +32,7 @@ PARSER_BEGIN(Parser)
 package parser;
 import java.util.*;
 import ast.*;
-import ast.ASTFunction.Parameter;
+import ast.ASTFun.Parameter;
 import types.*;
 
 
@@ -124,14 +124,28 @@ TOKEN :
 	< FUN : "fun" >
 	|
 	< COLON : ":" >
-	|
-	< INT : "int" >
+ 	|
+ 	< INT : "int" >
 	|
 	< BOOL : "bool" >
 	|
-	< FUNCTION : "function" >
- 	|
+	< REF : "ref" >
+	|
+	< FUNT : "funt" >
+	|
   	< ID : ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+}
+
+IType Type():
+{ IType t; Collection<IType> types = new ArrayList<IType>(5); }
+{
+    <INT> { return IntType.singleton; }
+    | 
+    <BOOL> { return BoolType.singleton; }
+    | 
+    <REF> <LPAR> t = Type() <RPAR> { return new RefType(t); }
+    | 
+    <FUNT> <LPAR> (t = Type() { types.add(t); })+ <RPAR> { return new FunType(types); }
 }
 
 ASTNode Start():
@@ -271,13 +285,14 @@ ASTNode Call() :
 
 Collection<ASTNode> Arguments() :
 /* [ E(',' E)* ] */
-{ Collection<ASTNode> args; ASTNode e; }
+{ 	Collection<ASTNode> args = new ArrayList<ASTNode>(5); ASTNode e; }
 {
-	{ args = new ArrayList<ASTNode>(5); }
-  	e = Exp() { args.add(e); }
-  	(
-  	  	<COMMA> e = Exp() { args.add(e); }
-  	)*
+// 	[
+  		e = Seq() { args.add(e); }
+  		(
+  	  		<COMMA> e = Seq() { args.add(e); }
+  		)*
+// 	]
   	{ return args; }
 }
 
@@ -302,7 +317,7 @@ ASTNode Fact() :
 	|
 	<IF> e1 = Exp() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
 	|
-	<FUN> params = Parameters() <ARROW> e1 = Seq() <END> { return new ASTFunction(params, e1); }
+	<FUN> params = Parameters() <ARROW> e1 = Seq() <END> { return new ASTFun(params, e1); }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
@@ -312,24 +327,13 @@ ASTNode Fact() :
 }
 
 Collection<Parameter> Parameters() :
-{ Collection<Parameter> params; Token x; }
+{ Collection<Parameter> params = new ArrayList<Parameter>(5); Token x; IType t; }
 {
- 	{ params = new ArrayList<Parameter>(5); }
  	[
-  		x = <ID> <COLON>
+  		x = <ID> <COLON> t = Type() { params.add(new Parameter(x.image, t)); }
   		(
-  			<INT> { params.add(new Parameter(x.image, IntType.singleton)); }
-  			|
-  			<BOOL> { params.add(new Parameter(x.image, BoolType.singleton)); }
-  		)
-  		(
-  	  		<COMMA> x = <ID> <COLON>
-  	  		(
-  	  			<INT> { params.add(new Parameter(x.image, IntType.singleton)); }
-  				|
-  				<BOOL> { params.add(new Parameter(x.image, BoolType.singleton)); }
-  			)
+  	  		<COMMA> x = <ID> <COLON> Type() { params.add(new Parameter(x.image, t)); }
   		)*
   	]
-  { return params; }
+  	{ return params; }
 }

@@ -1,6 +1,6 @@
 package ast;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
 import environment.IEnvironment;
@@ -16,7 +16,7 @@ public interface ASTNode {
 
 	IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException;
 
-	void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException;
+	void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException;
 
 	IType getType();
 

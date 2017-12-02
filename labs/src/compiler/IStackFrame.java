@@ -11,5 +11,7 @@ public interface IStackFrame {
 	int nextLocation();
 
 	void setLocation(int location, String type);
+	
+	void addLocation(String type);
 
 }

@@ -209,8 +209,14 @@ public class ParserTester {
 	public void testWhile() throws Exception {
 		testCase("while true do 1 end;;");
 		testCase("while false do 1 end;;");
-		testCase("decl i = var(1) in " + "		decl x = while *i > 0 do " + "      			i := *i - 1 "
-				+ "           	 end " + "		in " + "			x " + "		end " + "end;;");
+		testCase("decl i = var(1) in " 
+				+ "		decl x = while *i > 0 do " 
+				+ "      			i := *i - 1 "
+				+ "           	 end " 
+				+ "		in " 
+				+ "			x " 
+				+ "		end " 
+				+ "end;;");
 		testNegativeCase("while do 1 end;;");
 		testNegativeCase("while true do end;;");
 		testNegativeCase("while true do 1;;");
@@ -239,6 +245,7 @@ public class ParserTester {
 		testCase("fun x:int -> x*x end;;");
 		testCase("fun x:int, y:bool -> if y then x + 1 else x - 1 end end;;");
 		testCase("fun -> true end;;");
+		testCase("decl add = fun x:int, y:int -> x + y end in add end;;");
 //		testCase("decl FALSE = fun -> true end () in FALSE end;;");
 //		testCase("decl TRUE = fun -> true end () in FALSE end;;");
 		testNegativeCase("f x -> x end;;");
@@ -267,45 +274,55 @@ public class ParserTester {
 		testCase("decl x = fun x:int -> var(x) end in " 
 				+ "		*x(1) " 
 				+ "end;;");
-//		testCase("decl x = 1 f = fun y -> y+x end in "
-//				+ "		decl g = fun x -> f(x)+1 end in "
-//				+ "			decl h = g i = fun y -> fun x -> x end end g(y) in "
-//				+ "				i(f(1)) "
-//				+ "			end "
-//				+ "		end "
-//				+ "end;;");
-//		testCase("decl x = 1 in "
-//				+ "		decl f = fun y:int -> y+x end in "
-//				+ "			decl g = fun h -> h(x)+1 end in "
-//				+ "				g(f) "
-//				+ "			end "
-//				+ "		end "		
-//				+ "end;;");
-//		testCase("decl y = 3 in " 
-//				+ "		decl x = 2*y in " 
-//				+ "			decl f = fun y:int -> y+x end in "
-//				+ "				decl g = fun x -> fun h -> x+h(x) end end in " 
-//				+ "					(g(2))(f) "
-//				+ "				end " 
-//				+ "			end " 
-//				+ "		end " 
-//				+ "end;;");
-//		testCase("decl comp = fun f, g -> fun x -> f(g(x)) end end in " 
-//				+ "		decl inc = fun x -> x+1 end in "
-//				+ "			decl dup = comp(inc, inc) in " 
-//				+ "				dup(2) " 
-//				+ "			end "
-//				+ "		end " 
-//				+ "end;;");
+		testCase("decl f = fun y:int -> y+1 end in "
+				+ "		decl g = fun x:int -> f(x)+1 end in "
+				+ "			decl h = g i = fun y:int -> fun x:int -> x end (g(y)) end in "
+				+ "				i(f(1)) "
+				+ "			end "
+				+ "		end "
+				+ "end;;");
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in "
+				+ "			decl g = fun h:funt(int) -> h(x)+1 end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "		end "		
+				+ "end;;");
+		testCase("decl y = 3 in " 
+				+ "		decl x = 2*y in " 
+				+ "			decl f = fun y:int -> y+x end in "
+				+ "				decl g = fun x:int -> fun h:funt(int) -> x+h(x) end end in " 
+				+ "					(g(2))(f) "
+				+ "				end " 
+				+ "			end " 
+				+ "		end " 
+				+ "end;;");
+		testCase("decl comp = fun f:funt(funt(int)), g:funt(int) -> fun x:int -> f(g(x)) end end in " 
+				+ "		decl inc = fun x:int -> x+1 end in "
+				+ "			decl dup = comp(inc, inc) in " 
+				+ "				dup(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;");
 //		testCase("decl TRUE = fun -> true end () in TRUE end;;");
 //		testCase("decl FALSE = fun -> true end () in FALSE end;;");
-		testCase("decl add = fun x:int, y:int -> x + y end in add end;;");
+		testCase("decl f = fun x:int, y:int -> "
+				+ "			decl i = var(y) res = var(0) in "
+				+ "				while *i > 0 do "
+				+ "					res := *res + x * y; "
+				+ "					i := *i - 1 "
+				+ "				end;"
+				+ "				*res "
+				+ "			end " 	
+				+ "		end"
+				+ "in "
+				+ "		f(3, 2) "
+				+ "end;;");
 		testNegativeCase("decl f = fun x:int -> x+1 end in " 
 						+ "		decl g = fun y:(int, int) -> y(2) end in "
 						+ "			g(f) " 
 						+ "		end " 
 						+ "end;;");
-		// testNegativeCase("decl f = fun x -> x(x) end in f(f) end;;");
 	}
 
 	@Test
@@ -321,17 +338,48 @@ public class ParserTester {
 		testCase("!(1 == 2) && xpto;;");
 		testCase("1 == 2 || 3 == 4 && xpto;;");
 		testCase("!(1 == 2) && xpto;;");
-		testCase("decl x = var(0) in x := 1; *x end;;");
-		testCase("decl x = var(0) in decl y = x in x := 1; *y end end;;");
-		testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end;;");
-		testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end end end;;");
-		testCase("decl x = var(3) in " + "		decl y = var(1) in " + "			while *x > 0 do "
-				+ "  			y := *y * *x; " + "  			x := *x - 1 " + "			end " + "		end "
+		testCase("decl x = var(0) in "
+				+ "		x := 1; *x "
 				+ "end;;");
-		testCase("decl x = var(3) in\n" + "		decl y = var(1) in\n" + "			while *x > 0 do\n"
-				+ " 			y := *y * *x;\n" + "  			x := *x - 1\n" + "			end;\n" + "			*y\n"
-				+ "		end\n" + "end;;");
-		testCase("decl x = 2;var(0;1) in (2;x) := *x+1; *x end;;");
+		testCase("decl x = var(0) in "
+				+ "		decl y = x in "
+				+ "			x := 1; *y "
+				+ "		end "
+				+ "end;;");
+		testCase("decl x = var(0) in "
+				+ "		decl y = var(0) in "
+				+ "			x := 1; *y "
+				+ "		end "
+				+ "end;;");
+		testCase("decl x = var(0) in "
+				+ "		decl y = var(0) in "
+				+ "			while *x < 10 do "
+				+ "				y := *y + 2; "
+				+ "				x := *x + 1 "
+				+ "			end "
+				+ "		end "
+				+ "end;;");
+		testCase("decl x = var(3) in " 
+				+ "		decl y = var(1) in " 
+				+ "			while *x > 0 do "
+				+ "  			y := *y * *x; " 
+				+ "  			x := *x - 1 " 
+				+ "			end " 
+				+ "		end "
+				+ "end;;");
+		testCase("decl x = var(3) in\n" 
+				+ "		decl y = var(1) in\n" 
+				+ "			while *x > 0 do\n"
+				+ " 			y := *y * *x;\n" 
+				+ "  			x := *x - 1\n" 
+				+ "			end;\n" 
+				+ "			*y\n"
+				+ "		end\n" 
+				+ "end;;");
+		testCase("decl x = 2; var(0; 1) in "
+				+ "		(2; x) := *x+1; "
+				+ "		*x "
+				+ "end;;");
 		testCase("***var(var(var(1)));;");
 		testNegativeCase("true || false != false &&& false;;");
 	}

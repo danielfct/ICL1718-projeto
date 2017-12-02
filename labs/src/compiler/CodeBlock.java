@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import main.Compiler;
 import types.IType;
@@ -15,11 +16,11 @@ import types.BoolType;
 import types.FunType;
 import types.RefType;
 
-import static main.Compiler.SL;
+public class CodeBlock implements ICodeBuilder {
 
-public class CodeBlock {
-
-	private List<String> code;
+	public static final int FRAME_SL = 1;
+	
+	List<String> code;
 	private List<StackFrame> frames;
 	private Map<IType, Reference> references;
 	private Map<FunType, TypeSignature> typeSignatures;
@@ -29,10 +30,10 @@ public class CodeBlock {
 	public CodeBlock() {
 		this.code = new ArrayList<String>(100);
 		this.frames = new ArrayList<StackFrame>(10);
-		this.currentFrame = null;
 		this.references = new HashMap<IType, Reference>(10);
 		this.typeSignatures = new HashMap<FunType, TypeSignature>(10);
 		this.closures = new ArrayList<Closure>(10);
+		this.currentFrame = null;
 	}
 
 	private void dumpHeader(PrintStream out) {
@@ -106,11 +107,12 @@ public class CodeBlock {
 	private void dumpClosures() throws FileNotFoundException {
 		for (Closure closure : closures) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + closure.name + ".j"));
-			closure.dump(out);
+			closure.dump(out, ""); // TODO
 			out.close();
 		}
 	}
 
+	@Override
 	public void dump(PrintStream out, String resultType) throws FileNotFoundException {
 		dumpHeader(out);
 		dumpCode(out);
@@ -121,6 +123,7 @@ public class CodeBlock {
 		dumpClosures();
 	}
 
+	@Override
 	public StackFrame newFrame() {
 		// Create a new StackFrame in the compiler
 		StackFrame frame = new StackFrame(currentFrame);
@@ -129,14 +132,17 @@ public class CodeBlock {
 		return frame;
 	}
 
+	@Override
 	public void setCurrentFrame(StackFrame frame) {
 		currentFrame = frame;
 	}
 
+	@Override
 	public StackFrame getCurrentFrame() {
 		return currentFrame;
 	}
 
+	@Override
 	public Reference requestReference(IType type) {
 		Reference reference = this.getReference(type);
 		if (reference == null) {
@@ -146,23 +152,48 @@ public class CodeBlock {
 		return reference;
 	}
 
+	@Override
 	public Reference getReference(IType type) {
 		return references.get(type);
 	}
+	
+	private TypeSignature requestSignature(FunType funType) {
+		TypeSignature signature = this.getSignature(funType);
+		if (signature == null) {
+			signature = new TypeSignature(funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList()), toJasmin(funType.getRetType()));
+			typeSignatures.put(funType, signature);
+		}
+		return signature;
+	}
+	
+	@Override
+	public TypeSignature getSignature(FunType type) {
+		return typeSignatures.get(type);
+	}
+	
+	@Override
+	public Closure newClosure(FunType funType) {
+		TypeSignature signature = this.requestSignature(funType);
+		Closure closure = new Closure(currentFrame, signature, this);
+		closures.add(closure);
+		return closure;
+	}
 
-	public void emit_endscope() {
+	@Override
+	public void endScope() {
 		if (currentFrame.ancestor != null) {
-			emit_aload(SL);
+			emit_aload(FRAME_SL);
 			emit_checkcast(currentFrame.name);
 			emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 		} else {
 			emit_null();
 		}
-		emit_astore(SL);
+		emit_astore(FRAME_SL);
 		setCurrentFrame(currentFrame.ancestor);
 	}
 
 	// TODO tentar melhorar
+	@Override
 	public String toJasmin(IType t) {
 		if (t == IntType.singleton)
 			return ((IntType) t).toJasmin();
@@ -175,113 +206,107 @@ public class CodeBlock {
 		return null;
 	}
 
+	@Override
+	public void loadSP() {
+		if (currentFrame != null) {
+			emit_aload(1);
+			emit_checkcast(currentFrame.name);
+		}
+	}
+	
 	// Bytecode instructions
-
-	// make a comment
+	
+	@Override
 	public void emit_comment(String comment) {
 		code.add("; " + comment);
 	}
 
-	// pushes stack pointer onto the operand stack
-	public void emit_SP() {
-		if (currentFrame != null) {
-			emit_aload(SL);
-			emit_checkcast(currentFrame.name);
-		}
+	@Override
+	public void emit_newline() {
+		code.add("\n");
 	}
-
-	// create new object
+	
+	@Override
 	public void emit_new(String classname) {
 		code.add("new " + classname);
 	}
 
-	// invoke instance method; special handling for superclass, private, and
-	// instance initialization method invocations
+	@Override
 	public void emit_invokespecial(String classname, String methodname, String descriptor) {
 		code.add("invokespecial " + classname + "/" + methodname + descriptor);
 	}
+	
+	@Override
+	public void emit_invokeinterface(String interfacename, String methodname, String descriptor) {
+		code.add("invokeinterface " + interfacename + "/" + methodname + descriptor);
+	}
 
+	@Override
 	public void emit_null() {
 		code.add("aconst_null");
 	}
 
-	// getfield pops objectref (a reference to an object) from the stack,
-	// retrieves the value of the field identified by <classname/fieldname>
-	// from objectref, and pushes the one-word or two-word value onto the
-	// operand stack
-	// Examples:
-	// getfield Frame_n1/SL LFrame_n;
-	// getfield Frame_1/loc_X I
+	@Override
 	public void emit_getfield(String classname, String fieldname, String descriptor) {
 		code.add("getfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
-	// putfield sets the value of the field identified by <classname/fieldname>
-	// in objectref (a reference to an object)
-	// to the single or double word value on the operand stack
-	// Examples:
-	// putfield Frame_n1/SL LFrame_n;
-	// putfield Frame_1/loc_X I
+	@Override
 	public void emit_putfield(String classname, String fieldname, String descriptor) {
 		code.add("putfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
-	// This pops the top single-word value off the operand stack, and then
-	// pushes that value twice
-	// - i.e. it makes an extra copy of the top item on the stack
+	@Override
 	public void emit_dup() {
 		code.add("dup");
 	}
 
-	// Pops objectref (a reference to an object or array) off the stack and
-	// stores it in local variable <n>
+	@Override
 	public void emit_astore(int n) {
 		code.add("astore_" + n);
 	}
 
-	// retrieves an object reference from a local variable and pushes it onto
-	// the operand stack
+	@Override
 	public void emit_aload(int n) {
 		code.add("aload_" + n);
 	}
 
-	// checks that the top item on the operand stack (a reference to an object
-	// or array) can be cast to a given type
+	@Override
 	public void emit_checkcast(String t) {
 		code.add("checkcast " + t);
 	}
 
-	// push value into the stack
+	@Override
 	public void emit_push(int n) {
 		code.add("sipush " + n);
 	}
 
-	// add the two top integer values on stack
+	@Override
 	public void emit_add() {
 		code.add("iadd");
 	}
 
-	// multiple the two top integer values on stack
+	@Override
 	public void emit_mul() {
 		code.add("imul");
 	}
 
-	// divide the two top integer values on stack
+	@Override
 	public void emit_div() {
 		code.add("idiv");
 	}
 
-	// subtract the two top integer values on stack
+	@Override
 	public void emit_sub() {
 		code.add("isub");
 	}
 
-	// xor between the two top integer values on stack
+	@Override
 	public void emit_xor() {
 		code.add("ixor");
 	}
 
-	// push 0 or 1 into the stack
+	@Override
 	public void emit_bool(boolean val) {
 		if (val)
 			emit_val(1);
@@ -289,7 +314,7 @@ public class CodeBlock {
 			emit_val(0);
 	}
 
-	// push a value from -1 to 5 into the stack
+	@Override
 	public void emit_val(int val) {
 		if (val == -1)
 			code.add("iconst_m1");
@@ -297,78 +322,79 @@ public class CodeBlock {
 			code.add("iconst_" + val);
 	}
 
-	// compare if two integer values are equal, if so, jump to given label
+	@Override
 	public void emit_icmpeq(String label) {
 		code.add("if_icmpeq " + label);
 	}
 
-	// compare if two integer values are not equal, if so, jump to given label
+	@Override
 	public void emit_icmpne(String label) {
 		code.add("if_icmpne " + label);
 	}
 
-	// compare if first integer value is greater or equal than second integer
-	// value, if so, jump to given label
+	@Override
 	public void emit_icmpge(String label) {
 		code.add("if_icmpge " + label);
 	}
-
-	// compare if first integer value is greater than second integer value, if
-	// so, jump to given label
+	
+	@Override
 	public void emit_icmpgt(String label) {
 		code.add("if_icmpgt " + label);
 	}
 
-	// compare if first integer value is lesser or equal than second integer
-	// value, if so, jump to given label
+	@Override
 	public void emit_icmple(String label) {
 		code.add("if_icmple " + label);
 	}
 
-	// compare if first ineger value is lesser than second integer value, if so,
-	// jump to given label
+	@Override
 	public void emit_icmplt(String label) {
 		code.add("if_icmplt " + label);
 	}
 
-	// compare value on top of stack with 0, if equal, jumpo to given label
+	@Override
 	public void emit_ifeq(String label) {
 		code.add("ifeq " + label);
 	}
 
-	// check if value on top of stack is diferent than 0
+	@Override
 	public void emit_ifne(String label) {
 		code.add("ifne " + label);
 	}
 
-	// jump to given label
+	@Override
 	public void emit_jump(String label) {
 		code.add("goto " + label);
 	}
 
-	// anchor the given label
+	@Override
 	public void emit_anchor(String label) {
 		code.add(label + ":");
 	}
 
-	// bitwise int AND
+	@Override
 	public void emit_and() {
 		code.add("iand");
 	}
 
-	// bitwise int OR
+	@Override
 	public void emit_or() {
 		code.add("ior");
 	}
 
-	// pop the value on top of the stack
+	@Override
 	public void emit_pop() {
 		code.add("pop");
 	}
 
-	// swap the top 2 values on stack
+	@Override
 	public void emit_swap() {
 		code.add("swap");
+	}
+	
+	@Override
+	public void emit_iload(int position) {
+		code.add("iload_" + position);
 	}
 
 }

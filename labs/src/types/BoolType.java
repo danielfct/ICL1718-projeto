@@ -9,7 +9,7 @@ public class BoolType implements IType {
 
 	@Override
 	public String toString() {
-		return "Boolean";
+		return "bool";
 	}
 
 	@Override

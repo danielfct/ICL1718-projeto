@@ -2,7 +2,7 @@ package ast;
 
 import java.util.Objects;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import compiler.Reference;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -54,7 +54,7 @@ public class ASTDeref implements ASTNode {
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		expression.compile(code, env);
 		IType type = ((RefType) expression.getType()).type;
 		Reference ref = code.getReference(type);

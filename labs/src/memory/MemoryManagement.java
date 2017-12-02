@@ -11,7 +11,6 @@ public interface MemoryManagement {
 
 	IValue set(IRefValue reference, IValue value);
 
-	// void free(RefValue reference); // Unnecessary because java gc does it for
-	// us
+	// void free(RefValue reference); // Unnecessary because java gc does it for us
 
 }

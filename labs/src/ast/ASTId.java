@@ -2,7 +2,7 @@ package ast;
 
 import java.util.Objects;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import compiler.StackFrame;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -22,6 +22,29 @@ public class ASTId implements ASTNode {
 			this.jumps = jumps;
 			this.location = location;
 		}
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(jumps, location);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Address))
+				return false;
+			Address other = (Address) obj;
+			return Objects.equals(jumps, other.jumps) && Objects.equals(location, other.location);
+		}
+		
+		@Override
+		public String toString() {
+			return "jumps: " + jumps + ", location: " + location;
+		}
+		
 	}
 
 	final String id;
@@ -30,11 +53,6 @@ public class ASTId implements ASTNode {
 	public ASTId(String id) {
 		this.id = id;
 		this.type = null;
-	}
-
-	@Override
-	public String toString() {
-		return id;
 	}
 
 	@Override
@@ -50,14 +68,15 @@ public class ASTId implements ASTNode {
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		// Get the stack pointer
-		code.emit_SP();
+		code.loadSP();
 		// Ask code for the current frame
 		StackFrame currentFrame = code.getCurrentFrame();
 		code.emit_comment("Get " + id);
 		// Ask Environment for the address (num jumps, location)
 		Address addr = env.lookup(id);
+		System.out.println(addr);
 		// Get Static Links
 		for (int i = 0; i < addr.jumps; i++) {
 			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
@@ -87,6 +106,11 @@ public class ASTId implements ASTNode {
 			return false;
 		ASTId other = (ASTId) obj;
 		return Objects.equals(id, other.id) && Objects.equals(type, other.getType());
+	}
+	
+	@Override
+	public String toString() {
+		return id;
 	}
 
 }

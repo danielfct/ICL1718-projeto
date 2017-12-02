@@ -5,33 +5,49 @@ import java.util.Objects;
 
 public class FunType implements IType {
 
-	public final Collection<IType> parameters;
-	public final IType ret;
+	public final Collection<IType> paramsType;
+	private IType retType;
 
-	public FunType(Collection<IType> parameters, IType ret) {
-		this.parameters = parameters;
-		this.ret = ret;
+	public FunType(Collection<IType> paramsType) {
+		this(paramsType, null);
 	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(parameters, ret);
+	
+	public FunType(Collection<IType> paramsType, IType ret) {
+		this.paramsType = paramsType;
+		this.retType = ret;
 	}
-
-	@Override
-	public boolean equals(Object other) {
-		return other instanceof FunType && this.parameters.equals(((FunType) other).parameters)
-				&& this.ret.equals(((FunType) other).ret);
+	
+	public IType getRetType() {
+		return retType;
 	}
-
-	@Override
-	public String toString() {
-		return "Function(" + parameters + " -> " + ret + ")"; // TODO
-	}
-
+	
 	@Override
 	public String toJasmin() {
 		return "Ljava/lang/Object;";
 	}
 
+	
+	@Override
+	public String toString() {
+		return "Function(" + paramsType + " -> " + retType + ")"; // TODO
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(paramsType, retType);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof FunType))
+			return false;
+		FunType other = (FunType) obj;
+		return Objects.equals(paramsType, other.paramsType) && Objects.equals(retType, other.retType);
+	}
+
+	
 }

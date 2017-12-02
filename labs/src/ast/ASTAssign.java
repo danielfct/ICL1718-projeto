@@ -2,7 +2,7 @@ package ast;
 
 import java.util.Objects;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import compiler.Reference;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -58,7 +58,7 @@ public class ASTAssign implements ASTNode {
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
 		reference.compile(code, env);
 		code.emit_dup();
 		expression.compile(code, env);

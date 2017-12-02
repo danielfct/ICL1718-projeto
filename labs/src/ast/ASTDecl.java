@@ -3,8 +3,9 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import compiler.CodeBlock;
+import compiler.ICodeBuilder;
 import compiler.StackFrame;
 import environment.DuplicateIdentifierException;
 import environment.ICompilationEnvironment;
@@ -14,7 +15,7 @@ import types.IType;
 import types.TypingException;
 import values.IValue;
 import values.TypeMismatchException;
-import static main.Compiler.SL;
+import static compiler.CodeBlock.FRAME_SL;
 
 public class ASTDecl implements ASTNode {
 
@@ -66,7 +67,7 @@ public class ASTDecl implements ASTNode {
 	public void newBinding(String id, ASTNode e) {
 		declarations.add(new Declaration(id, e));
 	}
-
+	
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IEnvironment<IValue> newenv = env.beginScope();
@@ -90,9 +91,10 @@ public class ASTDecl implements ASTNode {
 	}
 
 	@Override
-	public void compile(CodeBlock code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// decl
+	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
+		System.out.println("compiling: " + this);
 		// Create a new StackFrame in the compiler
+		code.emit_comment("decl");
 		StackFrame frame = code.newFrame();
 		code.emit_new(frame.name);
 		code.emit_dup();
@@ -100,13 +102,14 @@ public class ASTDecl implements ASTNode {
 		// Initialize Static Linker
 		if (frame.ancestor != null) {
 			code.emit_dup();
-			code.emit_aload(SL);
+			code.emit_aload(FRAME_SL);
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 
-		// x=1 , x=y+1, x=decl y=1 in x+y end, etc
+		// x=1, x=y+1, x=decl y=1 in x+y end, etc
 		ICompilationEnvironment newEnv = env.beginScope();
 		for (Declaration d : declarations) {
+			code.emit_comment(d.id);
 			code.emit_dup();
 			d.def.compile(code, env);
 			int location = frame.nextLocation();
@@ -115,14 +118,14 @@ public class ASTDecl implements ASTNode {
 			frame.setLocation(location, type);
 			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
-		// in
 		code.setCurrentFrame(frame);
-		code.emit_astore(SL);
+		code.emit_astore(FRAME_SL);
+		code.emit_comment("in");
 		body.compile(code, newEnv);
 
-		// end
+		code.emit_comment("end");
 		env.endScope();
-		code.emit_endscope();
+		code.endScope();
 	}
 
 	@Override
@@ -145,6 +148,11 @@ public class ASTDecl implements ASTNode {
 			return false;
 		ASTDecl other = (ASTDecl) obj;
 		return Objects.equals(declarations, other.declarations) && Objects.equals(body, other.body);
+	}
+	
+	@Override
+	public String toString() {
+		return "decl " + String.join(", ", declarations.stream().map(Declaration::toString).collect(Collectors.toList())) + " in " + body + " end ";
 	}
 
 }

@@ -1,10 +1,7 @@
 package compiler;
 
-import java.io.PrintStream;
 
-public interface IClosure {
-
-	void dump(PrintStream out);
+public interface IClosure extends ICodeBuilder {
 
 	String toJasmin();
 

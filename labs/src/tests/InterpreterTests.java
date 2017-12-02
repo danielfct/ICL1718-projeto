@@ -18,7 +18,7 @@ import values.IValue;
 import values.IntValue;
 import ast.ASTAdd;
 import ast.ASTBool;
-import ast.ASTFunction.Parameter;
+import ast.ASTFun.Parameter;
 import ast.ASTId;
 import ast.ASTIfThenElse;
 import ast.ASTMul;

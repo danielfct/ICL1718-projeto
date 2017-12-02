@@ -9,7 +9,7 @@ public class IntType implements IType {
 
 	@Override
 	public String toString() {
-		return "Integer";
+		return "int";
 	}
 
 	@Override
