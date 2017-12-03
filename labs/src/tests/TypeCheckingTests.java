@@ -294,6 +294,7 @@ public class TypeCheckingTests {
 		testCase("fun x:int -> x end;;", new FunType(Arrays.asList(IntType.singleton), IntType.singleton));
 		testNegativeCase("fun x:int -> x end;;", new FunType(Arrays.asList(BoolType.singleton), IntType.singleton));
 		testNegativeCase("fun x:int -> x end;;", new FunType(Arrays.asList(IntType.singleton), BoolType.singleton));
+		testExceptionCase("fun x:funt -> x end;;");
 		testExceptionCase("fun x:int, x:int -> x+x end;;");
 		testExceptionCase("fun -> x end;;");
 	}
@@ -322,59 +323,68 @@ public class TypeCheckingTests {
 				+ "		*x(1) " 
 				+ "end;;",
 				IntType.singleton);
-//		testCase("decl x = 1 f = fun y -> y+x end in "
-//				+ "		decl g = fun x -> f(x)+1 end in "
-//				+ "			decl h = g i = fun y -> fun x -> x end end g(y) in "
-//				+ "				i(f(1)) "
-//				+ "			end "
-//				+ "		end "
-//				+ "end;;");
-//		testCase("decl x = 1 in "
-//				+ "		decl f = fun y:int -> y+x end in "
-//				+ "			decl g = fun h -> h(x)+1 end in "
-//				+ "				g(f) "
-//				+ "			end "
-//				+ "		end "		
-//				+ "end;;");
-//		testCase("decl y = 3 in " 
-//				+ "		decl x = 2*y in " 
-//				+ "			decl f = fun y:int -> y+x end in "
-//				+ "				decl g = fun x -> fun h -> x+h(x) end end in " 
-//				+ "					(g(2))(f) "
-//				+ "				end " 
-//				+ "			end " 
-//				+ "		end " 
-//				+ "end;;");
-//		testCase("decl comp = fun f, g -> (fun x:int -> f(g(x) end) end in " 
-//				+ "		decl inc = fun x -> x+1 end in "
-//				+ "			decl dup = comp(inc, inc) in " 
-//				+ "				dup(2) " 
-//				+ "			end "
-//				+ "		end " 
-//				+ "end;;",
-//				IntType.singleton);
-//		testCase("decl TRUE = fun -> true end () in "
-//				+ "		TRUE "
-//				+ "end;;",
-//				BoolType.singleton);
-//		testCase("decl FALSE = fun -> true end () in "
-//				+ "		FALSE "
-//				+ "end;;",
-//				BoolType.singleton);
-//		testNegativeCase("decl f = fun x:int -> x+1 end in " 
-//				+ "				decl g = fun y:(int, int) -> y(2) end in "
-//				+ "					g(f) " 
-//				+ "				end " 
-//				+ "		 end;;");
+		testCase("decl f = fun y:int -> y+1 end in "
+				+ "		decl g = fun x:int -> f(x)+1 end in "
+				+ "			decl h = g i = fun y:int -> fun x:int -> x end (g(y)) end in "
+				+ "				i(f(1)) "
+				+ "			end "
+				+ "		end "
+				+ "end;;",
+				IntType.singleton);
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in "
+				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "		end "		
+				+ "end;;",
+				IntType.singleton);
+		testCase("decl y = 3 in " 
+				+ "		decl x = 2*y in " 
+				+ "			decl f = fun y:int -> y+x end in "
+				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
+				+ "					(g(2))(f) "
+				+ "				end " 
+				+ "			end " 
+				+ "		end " 
+				+ "end;;",
+				IntType.singleton);
+		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in " 
+				+ "		decl inc = fun x:int -> x+1 end in "
+				+ "			decl dup = comp(inc, inc) in " 
+				+ "				dup(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;",
+				IntType.singleton);
+		testCase("decl f = fun x:int, y:int -> "
+				+ "			decl i = var(y) res = var(0) in "
+				+ "				while *i > 0 do "
+				+ "					res := *res + x * y; "
+				+ "					i := *i - 1 "
+				+ "				end;"
+				+ "				*res "
+				+ "			end " 	
+				+ "		end "
+				+ "in "
+				+ "		f(3, 2) "
+				+ "end;;",
+				IntType.singleton);
 		testCase("decl add = fun x:int, y:int -> x + y end in "
-				+ "		add(1, 1) "
+				+ "		add(1, 2) "
 				+ "end;;", 
 				IntType.singleton);
-		// testNegativeCase("decl f = fun x -> x(x) end in f(f) end;;");
+		testCase("decl and = fun x:bool, y:bool -> x && y end in "
+				+ "		and(true, true) "
+				+ "end;;", 
+				BoolType.singleton);
+//		testCase("decl TRUE = fun -> true end () in TRUE end;;", BoolType.singleton);
+//		testCase("decl FALSE = fun -> true end () in FALSE end;;", BoolType.singleton);
 		testNegativeCase("decl f = fun x -> x+1 end in "
 				+ "				f(1) "
 				+ "		  end;;", 
 				BoolType.singleton);
+		 testExceptionCase("decl f = fun x -> x(x) end in f(f) end;;");
 	}
 
 	@Test

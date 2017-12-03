@@ -137,15 +137,19 @@ TOKEN :
 }
 
 IType Type():
-{ IType t; Collection<IType> types = new ArrayList<IType>(5); }
+{ IType t; List<IType> types = new ArrayList<IType>(5); }
 {
-    <INT> { return IntType.singleton; }
+    <INT>
+    { return IntType.singleton; }
     | 
-    <BOOL> { return BoolType.singleton; }
+    <BOOL>
+    { return BoolType.singleton; }
     | 
-    <REF> <LPAR> t = Type() <RPAR> { return new RefType(t); }
+    <REF> <LPAR> t = Type() <RPAR>
+    { return new RefType(t); }
     | 
-    <FUNT> <LPAR> (t = Type() { types.add(t); })+ <RPAR> { return new FunType(types); }
+    <FUNT> <LPAR> (t = Type() { types.add(t); })+ <RPAR>
+    { final int size = types.size(); return new FunType(types.subList(0, size-1), types.get(size-1)); }
 }
 
 ASTNode Start():
@@ -275,7 +279,7 @@ ASTNode Unary() :
 
 ASTNode Call() :
 /* F | F( '('EL')' )* */
-{ ASTNode e1; Collection<ASTNode> args; }
+{ ASTNode e1; List<ASTNode> args; }
 {
   	e1 = Fact()
   	(
@@ -283,9 +287,9 @@ ASTNode Call() :
   	{ return e1; }
 }
 
-Collection<ASTNode> Arguments() :
+List<ASTNode> Arguments() :
 /* [ E(',' E)* ] */
-{ 	Collection<ASTNode> args = new ArrayList<ASTNode>(5); ASTNode e; }
+{ 	List<ASTNode> args = new ArrayList<ASTNode>(5); ASTNode e; }
 {
 // 	[
   		e = Seq() { args.add(e); }
@@ -299,7 +303,7 @@ Collection<ASTNode> Arguments() :
 
 ASTNode Fact() :
 /*ID | Decl | .. | Num | (E)*/
-{ Token x; ASTDecl d; ASTNode e1, e2, e3; Collection<Parameter> params; }
+{ Token x; ASTDecl d; ASTNode e1, e2, e3; List<Parameter> params; }
 {
  	x = <ID> { return new ASTId(x.image); }
 	|
@@ -326,13 +330,13 @@ ASTNode Fact() :
 	x = <NUM> { return new ASTNum(Integer.parseInt(x.image)); }
 }
 
-Collection<Parameter> Parameters() :
-{ Collection<Parameter> params = new ArrayList<Parameter>(5); Token x; IType t; }
+List<Parameter> Parameters() :
+{ List<Parameter> params = new ArrayList<Parameter>(5); Token x; IType t; }
 {
  	[
   		x = <ID> <COLON> t = Type() { params.add(new Parameter(x.image, t)); }
   		(
-  	  		<COMMA> x = <ID> <COLON> Type() { params.add(new Parameter(x.image, t)); }
+  	  		<COMMA> x = <ID> <COLON> t = Type() { params.add(new Parameter(x.image, t)); }
   		)*
   	]
   	{ return params; }

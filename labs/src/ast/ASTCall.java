@@ -1,7 +1,7 @@
 package ast;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -21,10 +21,10 @@ import values.TypeMismatchException;
 public class ASTCall implements ASTNode {
 
 	final ASTNode function;
-	final Collection<ASTNode> arguments;
+	final List<ASTNode> arguments;
 	private IType type;
 
-	public ASTCall(ASTNode function, Collection<ASTNode> arguments) {
+	public ASTCall(ASTNode function, List<ASTNode> arguments) {
 		this.function = function;
 		this.arguments = arguments;
 		this.type = null;
@@ -32,7 +32,7 @@ public class ASTCall implements ASTNode {
 
 	@Override
 	public String toString() {
-		return function + " (" + String.join(",", arguments.stream().map(ASTNode::toString).collect(Collectors.toList())) + ")";
+		return function + "(" + String.join(",", arguments.stream().map(ASTNode::toString).collect(Collectors.toList())) + ")";
 	}
 	
 	@Override
@@ -70,7 +70,7 @@ public class ASTCall implements ASTNode {
 				if (!params.next().equals(args.next().typecheck(env)))
 					throw new TypingException("Function expecting arguments of type " + fun.paramsType + " and got " + arguments + ".");
 			}
-			type = fun.getRetType();
+			type = fun.retType;
 		} else {
 			throw new TypingException(f + " is not a function.");
 		}

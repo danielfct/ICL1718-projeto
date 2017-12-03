@@ -1,24 +1,16 @@
 package types;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class FunType implements IType {
 
-	public final Collection<IType> paramsType;
-	private IType retType;
-
-	public FunType(Collection<IType> paramsType) {
-		this(paramsType, null);
-	}
+	public final List<IType> paramsType;
+	public final IType retType;
 	
-	public FunType(Collection<IType> paramsType, IType ret) {
+	public FunType(List<IType> paramsType, IType retType) {
 		this.paramsType = paramsType;
-		this.retType = ret;
-	}
-	
-	public IType getRetType() {
-		return retType;
+		this.retType = retType;
 	}
 	
 	@Override
@@ -29,7 +21,7 @@ public class FunType implements IType {
 	
 	@Override
 	public String toString() {
-		return "Function(" + paramsType + " -> " + retType + ")"; // TODO
+		return "Funt(" + paramsType + " -> " + retType + ")";
 	}
 
 	@Override

@@ -246,8 +246,6 @@ public class ParserTester {
 		testCase("fun x:int, y:bool -> if y then x + 1 else x - 1 end end;;");
 		testCase("fun -> true end;;");
 		testCase("decl add = fun x:int, y:int -> x + y end in add end;;");
-//		testCase("decl FALSE = fun -> true end () in FALSE end;;");
-//		testCase("decl TRUE = fun -> true end () in FALSE end;;");
 		testNegativeCase("f x -> x end;;");
 		testNegativeCase("fun x -> x end;;");
 		testNegativeCase("fun x:int => x end;;");
@@ -283,7 +281,7 @@ public class ParserTester {
 				+ "end;;");
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in "
-				+ "			decl g = fun h:funt(int) -> h(x)+1 end in "
+				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "		end "		
@@ -291,21 +289,19 @@ public class ParserTester {
 		testCase("decl y = 3 in " 
 				+ "		decl x = 2*y in " 
 				+ "			decl f = fun y:int -> y+x end in "
-				+ "				decl g = fun x:int -> fun h:funt(int) -> x+h(x) end end in " 
+				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
 				+ "					(g(2))(f) "
 				+ "				end " 
 				+ "			end " 
 				+ "		end " 
 				+ "end;;");
-		testCase("decl comp = fun f:funt(funt(int)), g:funt(int) -> fun x:int -> f(g(x)) end end in " 
+		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in  " 
 				+ "		decl inc = fun x:int -> x+1 end in "
 				+ "			decl dup = comp(inc, inc) in " 
 				+ "				dup(2) " 
 				+ "			end "
 				+ "		end " 
 				+ "end;;");
-//		testCase("decl TRUE = fun -> true end () in TRUE end;;");
-//		testCase("decl FALSE = fun -> true end () in FALSE end;;");
 		testCase("decl f = fun x:int, y:int -> "
 				+ "			decl i = var(y) res = var(0) in "
 				+ "				while *i > 0 do "
@@ -314,10 +310,15 @@ public class ParserTester {
 				+ "				end;"
 				+ "				*res "
 				+ "			end " 	
-				+ "		end"
+				+ "		end "
 				+ "in "
 				+ "		f(3, 2) "
 				+ "end;;");
+		testCase("decl and = fun x:bool, y:bool -> x && y end in "
+				+ "		and(true, true) "
+				+ "end;;");
+//		testCase("decl TRUE = fun -> true end () in TRUE end;;");
+//		testCase("decl FALSE = fun -> true end () in FALSE end;;");
 		testNegativeCase("decl f = fun x:int -> x+1 end in " 
 						+ "		decl g = fun y:(int, int) -> y(2) end in "
 						+ "			g(f) " 

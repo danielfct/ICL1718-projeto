@@ -1,7 +1,7 @@
 package ast;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -54,11 +54,11 @@ public class ASTFun implements ASTNode {
 
 	}
 
-	final Collection<Parameter> parameters;
+	final List<Parameter> parameters;
 	final ASTNode body;
-	private FunType type;
+	private IType type;
 
-	public ASTFun(Collection<Parameter> parameters, ASTNode body) {
+	public ASTFun(List<Parameter> parameters, ASTNode body) {
 		this.parameters = parameters;
 		this.body = body;
 		this.type = null;
@@ -77,13 +77,13 @@ public class ASTFun implements ASTNode {
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IEnvironment<IType> newEnv = env.beginScope();
-		Collection<IType> params = new ArrayList<IType>(parameters.size());
+		List<IType> paramsType = new ArrayList<IType>(parameters.size());
 		for (Parameter param : parameters) {
 			newEnv.assoc(param.id, param.type);
-			params.add(param.type);
+			paramsType.add(param.type);
 		}
-		IType ret = body.typecheck(newEnv);
-		type = new FunType(params, ret);
+		IType retType = body.typecheck(newEnv);
+		type = new FunType(paramsType, retType);
 		newEnv.endScope();
 
 		return type;
@@ -108,7 +108,7 @@ public class ASTFun implements ASTNode {
 		//		; store SL
 		//		astore 2
 		//IType retType = body.getType();
-		Closure closure = code.newClosure(type);
+		Closure closure = code.newClosure((FunType)type);
 		StackFrame frame = code.newFrame();
 		closure.emit_newline();
 		closure.emit_comment("start new frame");

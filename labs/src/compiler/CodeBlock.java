@@ -160,7 +160,7 @@ public class CodeBlock implements ICodeBuilder {
 	private TypeSignature requestSignature(FunType funType) {
 		TypeSignature signature = this.getSignature(funType);
 		if (signature == null) {
-			signature = new TypeSignature(funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList()), toJasmin(funType.getRetType()));
+			signature = new TypeSignature(funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList()), toJasmin(funType.retType));
 			typeSignatures.put(funType, signature);
 		}
 		return signature;
