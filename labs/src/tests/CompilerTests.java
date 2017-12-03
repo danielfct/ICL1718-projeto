@@ -289,8 +289,14 @@ public class CompilerTests {
 		IdFactory.singleton.init();
 		// by default, while statement always returns false
 		testCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", false);
-		testCase("decl i = var(1) in " + "		decl x = while *i > 0 do " + "      			i := *i - 1 "
-				+ "           	 end " + "		in " + "			x " + "		end " + "end;;", false);
+		testCase("decl i = var(1) in " 
+				+ "		decl x = while *i > 0 do " 
+				+ "      			i := *i - 1 "
+				+ "           	 end " 
+				+ "		in " 
+				+ "			x " 
+				+ "		end " 
+				+ "end;;", false);
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", true);
 		testNegativeCase("decl x = var(0) in while *x < 1 do x := *x + 1 end end;;", 2);
 	}
@@ -327,7 +333,8 @@ public class CompilerTests {
 	public void testFun() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
-		testCase("decl x = 1 in fun x:int -> x+1 end (1) end;;", 2);
+		//testCase("decl x = 1 in fun x:int -> x+1 end (1) end;;", 2);
+		testCase("fun x:int -> x + 1 end (1);;", 2);
 	}
 
 	@Test

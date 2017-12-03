@@ -278,20 +278,19 @@ ASTNode Unary() :
 
 
 ASTNode Call() :
-/* F | F( '('EL')' )* */
-{ ASTNode e1; List<ASTNode> args; }
+/* F | F( '('Args')' )* */
+{ ASTNode e; List<ASTNode> args; }
 {
-  	e1 = Fact()
+  	e = Fact()
   	(
-    	<LPAR> args = Arguments() <RPAR> { e1 = new ASTCall(e1, args); }  	)*
-  	{ return e1; }
+    	<LPAR> args = Arguments() <RPAR> { e = new ASTCall(e, args); }  	)*
+  	{ return e; }
 }
 
 List<ASTNode> Arguments() :
-/* [ E(',' E)* ] */
 { 	List<ASTNode> args = new ArrayList<ASTNode>(5); ASTNode e; }
 {
-// 	[
+//	[
   		e = Seq() { args.add(e); }
   		(
   	  		<COMMA> e = Seq() { args.add(e); }
@@ -299,7 +298,6 @@ List<ASTNode> Arguments() :
 // 	]
   	{ return args; }
 }
-
 
 ASTNode Fact() :
 /*ID | Decl | .. | Num | (E)*/

@@ -15,7 +15,7 @@ import types.IType;
 import types.TypingException;
 import values.IValue;
 import values.TypeMismatchException;
-import static compiler.CodeBlock.FRAME_SL;
+import static compiler.CodeBlock.MAIN_SL;
 
 public class ASTDecl implements ASTNode {
 
@@ -100,7 +100,7 @@ public class ASTDecl implements ASTNode {
 		if (frame.ancestor != null) {
 			// Initialize Static Linker
 			code.emit_dup();
-			code.emit_aload(FRAME_SL);
+			code.emit_aload(MAIN_SL);
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 		ICompilationEnvironment newEnv = env.beginScope();
@@ -117,19 +117,19 @@ public class ASTDecl implements ASTNode {
 		
 		code.emit_comment("in");
 		code.setCurrentFrame(frame);
-		code.emit_astore(FRAME_SL);
+		code.emit_astore(MAIN_SL);
 		body.compile(code, newEnv);
 
 		code.emit_comment("end");
 		StackFrame currentFrame = code.getCurrentFrame();
 		if (currentFrame.ancestor != null) {
-			code.emit_aload(FRAME_SL);
+			code.emit_aload(MAIN_SL);
 			code.emit_checkcast(currentFrame.name);
 			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 		} else {
 			code.emit_null();
 		}
-		code.emit_astore(FRAME_SL);
+		code.emit_astore(MAIN_SL);
 		code.setCurrentFrame(currentFrame.ancestor);
 		env = newEnv.endScope();
 	}

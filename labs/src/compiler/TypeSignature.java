@@ -17,7 +17,7 @@ public class TypeSignature implements ITypeSignature {
 
 	@Override
 	public void dump(PrintStream out) {
-		out.println(".interface " + name);
+		out.println(".interface public " + name);
 		out.println(".super java/lang/Object");
 		out.print(".method public abstract call(");
 		for (String s : params)

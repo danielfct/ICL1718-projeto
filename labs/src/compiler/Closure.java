@@ -30,7 +30,7 @@ public class Closure implements IClosure {
 	public void dump(PrintStream out, String resultType) throws FileNotFoundException {
 		dumpHeader(out);
 		dumpBody(out);
-		dumpFooter(out);
+		dumpFooter(out, resultType);
 	}
 
 	//// fun x -> x + 1 end (1)
@@ -105,7 +105,8 @@ public class Closure implements IClosure {
 			out.println("	" + s);
 	}
 
-	private void dumpFooter(PrintStream out) {
+	private void dumpFooter(PrintStream out, String resultType) {
+		out.println("	" + (resultType.matches("L*;") ? "areturn" : "ireturn"));
 		out.println(".end method");
 		out.println();
 		out.println("; define toString method");
@@ -185,8 +186,8 @@ public class Closure implements IClosure {
 	}
 	
 	@Override
-	public void emit_invokeinterface(String interfacename, String methodname, String descriptor) {
-		body.add("invokeinterface " + interfacename + "/" + methodname + descriptor);
+	public void emit_invokeinterface(String interfacename, String methodname, String descriptor, int nArgs) {
+		body.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
 	}
 
 	@Override

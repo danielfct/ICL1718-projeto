@@ -1,6 +1,6 @@
 package ast;
 
-import static compiler.CodeBlock.FRAME_SL;
+import static compiler.CodeBlock.MAIN_SL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +110,10 @@ public class ASTFun implements ASTNode {
 		//		; store SL
 		//		astore 2
 		//IType retType = body.getType();
-		Closure closure = code.newClosure((FunType)type);
+
 		StackFrame frame = code.newFrame();
+		code.setCurrentFrame(frame);
+		Closure closure = code.newClosure((FunType)type);
 		closure.emit_newline();
 		closure.emit_comment("start new frame");
 		closure.emit_new(frame.name);
@@ -137,41 +139,30 @@ public class ASTFun implements ASTNode {
 			frame.setLocation(location, type);
 			closure.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
-		code.setCurrentFrame(frame);
 		closure.emit_astore(closure.SL);
 		closure.emit_comment("->");
 		body.compile(closure, newEnv);
-		
-
-		// MAIN:
-		//		; initialize a new closure
-		//		new closure_01
-		//		dup
-		//		invokespecial closure_01/<init>()V
-		//		; set closure's SL
-		//		dup
-		//		aload 1 ; SP
-		//		putfield closure_01/SL Lframe_1;
 
 		code.emit_new(closure.name);
 		code.emit_dup();
 		code.emit_invokespecial(closure.name, "<init>", "()V");
-		code.emit_dup();
-		code.emit_aload(2);
-		code.emit_putfield(closure.name, "SL", closure.env.toJasmin());
-		
-		// TODO verificar se frame sl está correto
+		if (frame.ancestor != null) {
+			code.emit_dup();
+			code.emit_aload(MAIN_SL);
+			code.emit_checkcast(frame.name);
+			code.emit_putfield(closure.name, "SL", closure.env.toJasmin());
+		}
+
 		code.emit_comment("end");
-		StackFrame currentFrame = code.getCurrentFrame();
-		if (currentFrame.ancestor != null) {
-			code.emit_aload(FRAME_SL);
-			code.emit_checkcast(currentFrame.name);
-			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
+		if (frame.ancestor != null) {
+			code.emit_aload(MAIN_SL);
+			code.emit_checkcast(frame.name);
+			code.emit_getfield(frame.name, "SL", frame.ancestor.toJasmin());
 		} else {
 			code.emit_null();
 		}
-		code.emit_astore(FRAME_SL);
-		code.setCurrentFrame(currentFrame.ancestor);
+		code.emit_astore(MAIN_SL);
+		code.setCurrentFrame(frame.ancestor);
 		env = newEnv.endScope();
 	}
 

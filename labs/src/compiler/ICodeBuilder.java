@@ -49,7 +49,7 @@ public interface ICodeBuilder {
 	void emit_invokespecial(String classname, String methodname, String descriptor); 
 
 	// invoke interface method
-	void emit_invokeinterface(String interfacename, String methodname, String descriptor); 
+	void emit_invokeinterface(String interfacename, String methodname, String descriptor, int nArgs); 
 
 	// push null into stack
 	void emit_null(); 

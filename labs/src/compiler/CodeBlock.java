@@ -18,7 +18,7 @@ import types.RefType;
 
 public class CodeBlock implements ICodeBuilder {
 
-	public static final int FRAME_SL = 1;
+	public static final int MAIN_SL = 0;
 	
 	List<String> code;
 	private List<StackFrame> frames;
@@ -224,8 +224,8 @@ public class CodeBlock implements ICodeBuilder {
 	}
 	
 	@Override
-	public void emit_invokeinterface(String interfacename, String methodname, String descriptor) {
-		code.add("invokeinterface " + interfacename + "/" + methodname + descriptor);
+	public void emit_invokeinterface(String interfacename, String methodname, String descriptor, int nArgs) {
+		code.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
 	}
 
 	@Override
