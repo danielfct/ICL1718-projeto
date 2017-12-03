@@ -1,5 +1,7 @@
 package ast;
 
+import static compiler.CodeBlock.FRAME_SL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -84,7 +86,7 @@ public class ASTFun implements ASTNode {
 		}
 		IType retType = body.typecheck(newEnv);
 		type = new FunType(paramsType, retType);
-		newEnv.endScope();
+		env = newEnv.endScope();
 
 		return type;
 	}
@@ -158,9 +160,19 @@ public class ASTFun implements ASTNode {
 		code.emit_aload(2);
 		code.emit_putfield(closure.name, "SL", closure.env.toJasmin());
 		
-		
-		newEnv.endScope();
-		code.endScope();
+		// TODO verificar se frame sl está correto
+		code.emit_comment("end");
+		StackFrame currentFrame = code.getCurrentFrame();
+		if (currentFrame.ancestor != null) {
+			code.emit_aload(FRAME_SL);
+			code.emit_checkcast(currentFrame.name);
+			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
+		} else {
+			code.emit_null();
+		}
+		code.emit_astore(FRAME_SL);
+		code.setCurrentFrame(currentFrame.ancestor);
+		env = newEnv.endScope();
 	}
 
 	@Override

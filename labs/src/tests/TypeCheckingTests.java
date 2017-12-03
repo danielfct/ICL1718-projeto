@@ -286,7 +286,7 @@ public class TypeCheckingTests {
 	}
 	
 	@Test
-	public void testFunction() throws Exception {
+	public void testFun() throws Exception {
 		testCase("fun x:int -> x*x end;;", new FunType(Collections.singletonList(IntType.singleton), IntType.singleton));
 		testCase("fun x:int, y:bool -> if y then x + 1 else x - 1 end end;;", new FunType(Arrays.asList(IntType.singleton, BoolType.singleton), IntType.singleton));
 		testCase("fun -> true end;;", new FunType(Collections.emptyList(), BoolType.singleton));

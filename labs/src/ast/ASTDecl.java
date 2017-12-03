@@ -70,11 +70,11 @@ public class ASTDecl implements ASTNode {
 	
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IEnvironment<IValue> newenv = env.beginScope();
+		IEnvironment<IValue> newEnv = env.beginScope();
 		for (Declaration d : declarations)
-			newenv.assoc(d.id, d.def.eval(env));
-		IValue value = body.eval(newenv);
-		env.endScope();
+			newEnv.assoc(d.id, d.def.eval(env));
+		IValue value = body.eval(newEnv);
+		env = newEnv.endScope();
 
 		return value;
 	}
@@ -85,28 +85,24 @@ public class ASTDecl implements ASTNode {
 		for (Declaration d : declarations)
 			newEnv.assoc(d.id, d.def.typecheck(env));
 		type = body.typecheck(newEnv);
-		env.endScope();
+		env = newEnv.endScope();
 
 		return type;
 	}
 
 	@Override
 	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		System.out.println("compiling: " + this);
-		// Create a new StackFrame in the compiler
 		code.emit_comment("decl");
 		StackFrame frame = code.newFrame();
 		code.emit_new(frame.name);
 		code.emit_dup();
 		code.emit_invokespecial(frame.name, "<init>", "()V");
-		// Initialize Static Linker
 		if (frame.ancestor != null) {
+			// Initialize Static Linker
 			code.emit_dup();
 			code.emit_aload(FRAME_SL);
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
-
-		// x=1, x=y+1, x=decl y=1 in x+y end, etc
 		ICompilationEnvironment newEnv = env.beginScope();
 		for (Declaration d : declarations) {
 			code.emit_comment(d.id);
@@ -118,14 +114,24 @@ public class ASTDecl implements ASTNode {
 			frame.setLocation(location, type);
 			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
+		
+		code.emit_comment("in");
 		code.setCurrentFrame(frame);
 		code.emit_astore(FRAME_SL);
-		code.emit_comment("in");
 		body.compile(code, newEnv);
 
 		code.emit_comment("end");
-		env.endScope();
-		code.endScope();
+		StackFrame currentFrame = code.getCurrentFrame();
+		if (currentFrame.ancestor != null) {
+			code.emit_aload(FRAME_SL);
+			code.emit_checkcast(currentFrame.name);
+			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
+		} else {
+			code.emit_null();
+		}
+		code.emit_astore(FRAME_SL);
+		code.setCurrentFrame(currentFrame.ancestor);
+		env = newEnv.endScope();
 	}
 
 	@Override

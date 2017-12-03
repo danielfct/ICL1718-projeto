@@ -26,8 +26,6 @@ public interface ICodeBuilder {
 	
 	Closure newClosure(FunType type);
 
-	void endScope();
-
 	String toJasmin(IType t);
 
 	// pushes stack pointer onto the operand stack

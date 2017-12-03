@@ -40,7 +40,6 @@ public class CodeBlock implements ICodeBuilder {
 		out.println(".class public Demo");
 		out.println(".super java/lang/Object");
 		out.println("");
-		out.println(";");
 		out.println("; standard initializer");
 		out.println(".method public <init>()V");
 		out.println("   aload_0");
@@ -48,6 +47,7 @@ public class CodeBlock implements ICodeBuilder {
 		out.println("   return");
 		out.println(".end method");
 		out.println("");
+		out.println("; main method");
 		out.println(".method public static main([Ljava/lang/String;)V");
 		out.println("       ; set limits used by this method");
 		out.println("       .limit locals 10");
@@ -177,19 +177,6 @@ public class CodeBlock implements ICodeBuilder {
 		Closure closure = new Closure(currentFrame, signature, this);
 		closures.add(closure);
 		return closure;
-	}
-
-	@Override
-	public void endScope() {
-		if (currentFrame.ancestor != null) {
-			emit_aload(FRAME_SL);
-			emit_checkcast(currentFrame.name);
-			emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
-		} else {
-			emit_null();
-		}
-		emit_astore(FRAME_SL);
-		setCurrentFrame(currentFrame.ancestor);
 	}
 
 	// TODO tentar melhorar

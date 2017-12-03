@@ -151,11 +151,6 @@ public class Closure implements IClosure {
 	}
 
 	@Override
-	public void endScope() {
-		code.endScope();
-	}
-
-	@Override
 	public String toJasmin(IType t) {
 		return code.toJasmin(t);
 	}

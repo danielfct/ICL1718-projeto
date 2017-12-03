@@ -241,7 +241,7 @@ public class ParserTester {
 	}
 
 	@Test
-	public void testFunction() throws Exception {
+	public void testFun() throws Exception {
 		testCase("fun x:int -> x*x end;;");
 		testCase("fun x:int, y:bool -> if y then x + 1 else x - 1 end end;;");
 		testCase("fun -> true end;;");

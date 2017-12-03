@@ -234,21 +234,15 @@ public class CompilerTests {
 		testCase("decl x = decl x = 1 in x+2 end y = decl x = 34 in x/17 end in decl z = 3 in (x+y)*z end end;;", 15);
 		testCase("decl y = decl x = 3 in x * 4 end in y + 2 end;;", 14);
 		testCase("decl x = 6 in decl x = 3 y = decl z = 7 + x in z * x end in y + x end end;;", 81);
-		testCase(
-				"decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end;;",
-				86);
+		testCase("decl x = 6 in decl x = decl z = 2 in z * z * z end y = decl z = 7 + x in z * x end in y + x end end;;", 86);
 		testCase("decl x = true in x && false end;;", false);
 		testCase("decl x = false in decl y = true in x || y end end;;", true);
 		testCase("decl x = decl y = 3 in y != 2 end in x && true end;;", true);
 		testCase("decl x = 1 in x < 2 end && decl y = 1 in 2 <= y end;;", false);
-		testCase(
-				"decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end;;",
-				false);
+		testCase("decl x = decl x = 1 in x >= 2 end y = decl x = 34 in x*17 end in decl z = 3 in !x && (y == z) end end;;", false);
 		testCase("decl x = !true y = false in !(x || y) end;;", true);
 		testCase("decl x = decl z = 2 in !(2 <= z) end y = !true in !(x || y) end;;", true);
-		testCase(
-				"decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end;;",
-				true);
+		testCase("decl x = !true y = decl z = 2 in !(2 <= z) end in decl w = 2 t = !y in (w != 1) && !(x || y) || t end end;;", true);
 		testNegativeCase("decl x = 1 in x+1 end;;", 0);
 	}
 
@@ -259,7 +253,7 @@ public class CompilerTests {
 		testCase("var(1) := 0;;", 0);
 		testCase("var(0) := var(0) := 1;;", 1);
 		testCase("var(var(1)) := var(2);;", "Ref_3 int");
-		testCase("var(var(true)) := var(false);;", "Ref_5 Boolean");
+		testCase("var(var(true)) := var(false);;", "Ref_5 bool");
 		testNegativeCase("var(0) := 1;;", 2);
 		testNegativeCase("var(true) := false;;", true);
 	}
@@ -284,7 +278,7 @@ public class CompilerTests {
 		System.out.println("\n====== VAR ======\n");
 		IdFactory.singleton.init();
 		testCase("var(0);;", "Ref_0 int");
-		testCase("var(true);;", "Ref_1 Boolean");
+		testCase("var(true);;", "Ref_1 bool");
 		testNegativeCase("var(false);;", "Ref_2 int");
 		testNegativeCase("var(1);;", 1);
 	}
@@ -330,7 +324,7 @@ public class CompilerTests {
 	}
 
 	@Test
-	public void testFunction() throws Exception {
+	public void testFun() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
 		testCase("decl x = 1 in fun x:int -> x+1 end (1) end;;", 2);
