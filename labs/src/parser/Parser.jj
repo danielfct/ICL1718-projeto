@@ -288,14 +288,14 @@ ASTNode Call() :
 }
 
 List<ASTNode> Arguments() :
-{ 	List<ASTNode> args = new ArrayList<ASTNode>(5); ASTNode e; }
+{ 	List<ASTNode> args = new LinkedList<ASTNode>(); ASTNode e; }
 {
-//	[
+	[
   		e = Seq() { args.add(e); }
   		(
   	  		<COMMA> e = Seq() { args.add(e); }
   		)*
-// 	]
+ 	]
   	{ return args; }
 }
 
@@ -329,7 +329,7 @@ ASTNode Fact() :
 }
 
 List<Parameter> Parameters() :
-{ List<Parameter> params = new ArrayList<Parameter>(5); Token x; IType t; }
+{ List<Parameter> params = new LinkedList<Parameter>(); Token x; IType t; }
 {
  	[
   		x = <ID> <COLON> t = Type() { params.add(new Parameter(x.image, t)); }

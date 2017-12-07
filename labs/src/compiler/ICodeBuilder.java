@@ -27,10 +27,8 @@ public interface ICodeBuilder {
 	Closure newClosure(FunType type);
 
 	String toJasmin(IType t);
-
-	// pushes stack pointer onto the operand stack
-	void loadSP();
 	
+	int getSPPosition();
 	
 	
 	// Bytecode instructions

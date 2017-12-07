@@ -366,6 +366,41 @@ public class InterpreterTests {
 
 	@Test
 	public void testCall() throws Exception {
+		testCase("decl x = 1 in "
+				+ "		fun x:int -> x+1 end (1) "
+				+ "end;;", new IntValue(2));
+		testCase("fun x:int -> x + 1 end (1);;", new IntValue(2));
+		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", new IntValue(3));
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in " 
+				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "     end "
+				+ "	end;;", new IntValue(3));
+		//		testCase("decl f = fun -> 1 end in "
+		//				+ "		f() + 1 "
+		//				+ "end;;", 2);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		f(1) "
+				+ "end;;", new IntValue(2));    
+		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
+		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
+		//				+ "		f(fun x:int, y:int -> x+y end) "
+		//				+ "end;;", 5);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ " 		g(f) "
+				+ "		end "
+				+ "end;;", new IntValue(2));
+		testCase("decl f = fun x : int, y : int -> x + y end in "
+				+ "		f(1, 2) + f(1, 3) "
+				+ "end;;", new IntValue(7));
+		testCase("decl f = fun x:int -> fun y:int -> x + y end end in "
+				+ "		decl g = f(1) in "
+				+ "			g(2) + g(3) "
+				+ "		end "
+				+ "end;;", new IntValue(7));
 		testCase("fun x:int -> x+2 end (4);;", new IntValue(6));
 		testCase("decl f = fun x:int -> x+1 end in f(1) end;;", new IntValue(2));
 		testCase("decl x=1 in " 
@@ -538,11 +573,14 @@ public class InterpreterTests {
 					+ "  	end "
 					+ "end;;", 
 					new IntValue(values[i]));
-			testNegativeCase("(20+20)/(4*5);;", new IntValue(1));
-			testNegativeCase("true || false != false && false;;", new BoolValue(false));
-			testNegativeCase("1 == 2 || 3 == 4 && xpto;;", new BoolValue(true));
-			testNegativeCase("!(1 == 2) && xpto;;", new BoolValue(true));
 		}
+		testCase("decl x = 1 in x + 1 end == (fun x:int -> x+1 end)(1);;", new BoolValue(true));
+		testCase("decl x = 1 in x + 1 end == decl x = (fun x:int -> x+1 end) in x(1) end;;", new BoolValue(true));
+		testCase("(fun x:int -> x+1 end)(1) == decl x = (fun x:int -> x+1 end) in x(1) end;;", new BoolValue(true));
+		testNegativeCase("(20+20)/(4*5);;", new IntValue(1));
+		testNegativeCase("true || false != false && false;;", new BoolValue(false));
+		testNegativeCase("1 == 2 || 3 == 4 && xpto;;", new BoolValue(true));
+		testNegativeCase("!(1 == 2) && xpto;;", new BoolValue(true));
 	}
 
 }

@@ -81,12 +81,13 @@ public class ASTCall implements ASTNode {
 	@Override
 	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {	
 		function.compile(code, env);
+		code.emit_comment("call with args " + arguments);
 		FunType type = (FunType)function.getType();
 		TypeSignature signature = code.getSignature(type);
 		code.emit_checkcast(signature.name);
 		for (ASTNode argument : arguments)
 			argument.compile(code, env);
-		code.emit_invokeinterface(signature.name, "call", signature.toJasmin(), arguments.size() + 1);
+		code.emit_invokeinterface(signature.name, "apply", "(" + String.join("", signature.params) + ")" + code.toJasmin(signature.ret), arguments.size() + 1);
 	}
 
 	@Override

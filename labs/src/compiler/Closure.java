@@ -13,7 +13,6 @@ public class Closure implements IClosure {
 	public final String name;
 	public final StackFrame env;
 	public final TypeSignature signature;
-	public final int SL;
 	List<String> body;
 	private final CodeBlock code;
 
@@ -22,7 +21,6 @@ public class Closure implements IClosure {
 		this.env = env;
 		this.signature = signature;
 		this.body = new ArrayList<String>(100);
-		this.SL = signature.params.size() + 1;
 		this.code = code;
 	}
 
@@ -33,59 +31,15 @@ public class Closure implements IClosure {
 		dumpFooter(out, resultType);
 	}
 
-	//// fun x -> x + 1 end (1)
-
-	// interface Type_00 { int call (int); }
-
-	// class Closure_00 implements Type_00 { int call(int x) { return x+1; } }
-
-	// .source type_00.j
-	// .interface public type_00
-	// .super java/lang/Object
-	// .method public abstract call(I)I
-	// .end method
-
-	// .class public closure_01
-	// .super java/lang/Object
-	// .implements type_00
-	// .field public SL Lframe_1;
-	// .method public call(I)I
-	// .limit locals 3
-	// .limit stack 256
-	// ; initialize new stackframe frame_1
-	// new frame_1
-	// dup
-	// invokespecial frame_1/<init>()V
-	// dup
-	// iload 1
-	// putfield frame_1/loc_00 I
-	// astore 2
-
-	// decl x = 1 in fun x:int => x+1 end (1) end
-	// new frame_1
-	// dup
-	// invokespecial frame_1/<init>()V
-	// dup
-	// sipush 1
-	// putfield frame_1/loc_00 I
-	// astore 1 ; SP is now at local variable 1, 0 is reserved for “this”
-	// new closure_01
-	// dup
-	// invokespecial closure_01/<init>()V
-	// dup
-	// aload 1 ; SP
-	// putfield closure_01/SL Lframe_1;
-	// checkcast type_00
-	// sipush 1
-	// invokeinterface type_00/call(I)I 2
-
 	private void dumpHeader(PrintStream out) {
 		out.println(".class " + name);
 		out.println(".super java/lang/Object");
 		out.println(".implements " + signature.name);
-		out.println();
-		out.println("; variables");
-		out.println(".field public SL " + env.toJasmin());
+		if (env != null) {
+			out.println();
+			out.println("; variables");
+			out.println(".field public SL " + env.toJasmin());
+		}
 		out.println();
 		out.println("; standard initializer");
 		out.println(".method public <init>()V");
@@ -94,8 +48,8 @@ public class Closure implements IClosure {
 		out.println("	return");
 		out.println(".end method");
 		out.println();
-		out.println("; define call method");
-		out.println(".method public call" + signature.toJasmin());
+		out.println("; define apply method");
+		out.println(".method public apply" + "(" + String.join("", signature.params) + ")" + code.toJasmin(signature.ret));
 		out.println("	.limit locals 5");
 		out.println("	.limit stack 256");
 	}
@@ -106,7 +60,7 @@ public class Closure implements IClosure {
 	}
 
 	private void dumpFooter(PrintStream out, String resultType) {
-		out.println("	" + (resultType.matches("L*;") ? "areturn" : "ireturn"));
+		out.println("	" + (resultType.matches("L(.*);") ? "areturn" : "ireturn"));
 		out.println(".end method");
 		out.println();
 		out.println("; define toString method");
@@ -155,14 +109,10 @@ public class Closure implements IClosure {
 	public String toJasmin(IType t) {
 		return code.toJasmin(t);
 	}
-
+	
 	@Override
-	public void loadSP() {
-		StackFrame currentFrame = code.getCurrentFrame();
-		if (currentFrame != null) {
-			emit_aload(SL);
-			emit_checkcast(currentFrame.name);
-		}
+	public int getSPPosition() {
+		return signature.params.size() + 1;
 	}
 	
 	@Override

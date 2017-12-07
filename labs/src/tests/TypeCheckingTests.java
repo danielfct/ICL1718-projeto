@@ -380,6 +380,41 @@ public class TypeCheckingTests {
 				BoolType.singleton);
 //		testCase("decl TRUE = fun -> true end () in TRUE end;;", BoolType.singleton);
 //		testCase("decl FALSE = fun -> true end () in FALSE end;;", BoolType.singleton);
+		testCase("decl x = 1 in "
+				+ "		fun x:int -> x+1 end (1) "
+				+ "end;;", IntType.singleton);
+		testCase("fun x:int -> x + 1 end (1);;", IntType.singleton);
+		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", IntType.singleton);
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in " 
+				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "     end "
+				+ "	end;;", IntType.singleton);
+		//		testCase("decl f = fun -> 1 end in "
+		//				+ "		f() + 1 "
+		//				+ "end;;", 2);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		f(1) "
+				+ "end;;", IntType.singleton);    
+		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
+		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
+		//				+ "		f(fun x:int, y:int -> x+y end) "
+		//				+ "end;;", 5);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ " 		g(f) "
+				+ "		end "
+				+ "end;;", IntType.singleton);
+		testCase("decl f = fun x : int, y : int -> x + y end in "
+				+ "		f(1, 2) + f(1, 3) "
+				+ "end;;", IntType.singleton);
+		testCase("decl f = fun x:int -> fun y:int -> x + y end end in "
+				+ "		decl g = f(1) in "
+				+ "			g(2) + g(3) "
+				+ "		end "
+				+ "end;;", IntType.singleton);
 		testNegativeCase("decl f = fun x -> x+1 end in "
 				+ "				f(1) "
 				+ "		  end;;", 
@@ -413,6 +448,9 @@ public class TypeCheckingTests {
 		testNegativeCase("true || false != false && false;;", IntType.singleton);
 		testExceptionCase("1+2 && true != false;;");
 		testExceptionCase("(20+20)(4*5);;");
+		testCase("decl x = 1 in x + 1 end == (fun x:int -> x+1 end)(1);;", BoolType.singleton);
+		testCase("decl x = 1 in x + 1 end == decl x = (fun x:int -> x+1 end) in x(1) end;;", BoolType.singleton);
+		testCase("(fun x:int -> x+1 end)(1) == decl x = (fun x:int -> x+1 end) in x(1) end;;", BoolType.singleton);
 	}
 
 }

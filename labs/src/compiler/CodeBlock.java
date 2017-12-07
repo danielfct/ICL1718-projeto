@@ -18,8 +18,6 @@ import types.RefType;
 
 public class CodeBlock implements ICodeBuilder {
 
-	public static final int MAIN_SL = 0;
-	
 	List<String> code;
 	private List<StackFrame> frames;
 	private Map<IType, Reference> references;
@@ -37,7 +35,7 @@ public class CodeBlock implements ICodeBuilder {
 	}
 
 	private void dumpHeader(PrintStream out) {
-		out.println(".class public Demo");
+		out.println(".class public Main");
 		out.println(".super java/lang/Object");
 		out.println("");
 		out.println("; standard initializer");
@@ -99,7 +97,7 @@ public class CodeBlock implements ICodeBuilder {
 	private void dumpTypeSignatures() throws FileNotFoundException {
 		for (TypeSignature signature : typeSignatures.values()) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + signature.name + ".j"));
-			signature.dump(out);
+			signature.dump(out, toJasmin(signature.ret));
 			out.close();
 		}
 	}
@@ -107,7 +105,7 @@ public class CodeBlock implements ICodeBuilder {
 	private void dumpClosures() throws FileNotFoundException {
 		for (Closure closure : closures) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + closure.name + ".j"));
-			closure.dump(out, ""); // TODO
+			closure.dump(out, toJasmin(closure.signature.ret));
 			out.close();
 		}
 	}
@@ -156,21 +154,29 @@ public class CodeBlock implements ICodeBuilder {
 	public Reference getReference(IType type) {
 		return references.get(type);
 	}
-	
+
 	private TypeSignature requestSignature(FunType funType) {
-		TypeSignature signature = this.getSignature(funType);
+		TypeSignature signature = getSignature(funType);
 		if (signature == null) {
-			signature = new TypeSignature(funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList()), toJasmin(funType.retType));
+			List<String> types = funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList());
+			System.out.println(funType.retType);
+			System.out.println("Types on list");
+			for (TypeSignature s : typeSignatures.values())
+				System.out.println(s);
+			if (typeSignatures.isEmpty())
+				System.out.println("none");
+			signature = new TypeSignature(types, funType.retType);
+			
 			typeSignatures.put(funType, signature);
 		}
 		return signature;
 	}
-	
+
 	@Override
 	public TypeSignature getSignature(FunType type) {
 		return typeSignatures.get(type);
 	}
-	
+
 	@Override
 	public Closure newClosure(FunType funType) {
 		TypeSignature signature = this.requestSignature(funType);
@@ -179,7 +185,6 @@ public class CodeBlock implements ICodeBuilder {
 		return closure;
 	}
 
-	// TODO tentar melhorar
 	@Override
 	public String toJasmin(IType t) {
 		if (t == IntType.singleton)
@@ -188,21 +193,19 @@ public class CodeBlock implements ICodeBuilder {
 			return ((BoolType) t).toJasmin();
 		else if (t instanceof RefType)
 			return references.get(((RefType) t).type).toJasmin();
-		// else if (t instanceof FunType)
-		// return closures.get((FunType)t).toJasmin();
-		return null;
+		else if (t instanceof FunType)
+			return typeSignatures.get((FunType) t).toJasmin();
+		else
+			throw new RuntimeException("Tojasmin not implemented for type " + t);
+	}
+	
+	@Override
+	public int getSPPosition() {
+		return 1; // 1 because main is static (no "this") and has 1 argument (array of strings)
 	}
 
-	@Override
-	public void loadSP() {
-		if (currentFrame != null) {
-			emit_aload(1);
-			emit_checkcast(currentFrame.name);
-		}
-	}
-	
 	// Bytecode instructions
-	
+
 	@Override
 	public void emit_comment(String comment) {
 		code.add("; " + comment);
@@ -212,7 +215,7 @@ public class CodeBlock implements ICodeBuilder {
 	public void emit_newline() {
 		code.add("\n");
 	}
-	
+
 	@Override
 	public void emit_new(String classname) {
 		code.add("new " + classname);
@@ -222,7 +225,7 @@ public class CodeBlock implements ICodeBuilder {
 	public void emit_invokespecial(String classname, String methodname, String descriptor) {
 		code.add("invokespecial " + classname + "/" + methodname + descriptor);
 	}
-	
+
 	@Override
 	public void emit_invokeinterface(String interfacename, String methodname, String descriptor, int nArgs) {
 		code.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
@@ -323,7 +326,7 @@ public class CodeBlock implements ICodeBuilder {
 	public void emit_icmpge(String label) {
 		code.add("if_icmpge " + label);
 	}
-	
+
 	@Override
 	public void emit_icmpgt(String label) {
 		code.add("if_icmpgt " + label);
@@ -378,7 +381,7 @@ public class CodeBlock implements ICodeBuilder {
 	public void emit_swap() {
 		code.add("swap");
 	}
-	
+
 	@Override
 	public void emit_iload(int position) {
 		code.add("iload_" + position);

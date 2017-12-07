@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import compiler.IdFactory;
 import main.Compiler;
+import values.BoolValue;
+import values.IntValue;
 
 public class CompilerTests {
 
@@ -42,7 +44,7 @@ public class CompilerTests {
 		}
 		System.out.print(output.toString());
 
-		p = Runtime.getRuntime().exec(new String[] { "cmd", "/c", "java Demo" }, null, dir);
+		p = Runtime.getRuntime().exec(new String[] { "cmd", "/c", "java Main" }, null, dir);
 		p.waitFor();
 
 		reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -269,6 +271,7 @@ public class CompilerTests {
 		testCase("*var(var(0));;", "Ref_5 int");
 		testCase("*var(var(var(0)));;", "Ref_7 Ref(int)");
 		testCase("*var(*var(true));;", true);
+		testCase("***var(var(var(1)));;", 1);
 		testNegativeCase("*var(0);;", 1);
 		testNegativeCase("*var(true);;", 0);
 	}
@@ -333,15 +336,126 @@ public class CompilerTests {
 	public void testFun() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
-		//testCase("decl x = 1 in fun x:int -> x+1 end (1) end;;", 2);
-		testCase("fun x:int -> x + 1 end (1);;", 2);
 	}
 
 	@Test
 	public void testCall() throws Exception {
 		System.out.println("\n====== FUNCTION CALL ======\n");
-		IdFactory.singleton.init();
+		testCase("decl x = 1 in "
+				+ "		fun x:int -> x+1 end (1) "
+				+ "end;;", 2);
+		testCase("fun x:int -> x + 1 end (1);;", 2);
+		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", 3);
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in " 
+				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "     end "
+				+ "	end;;", 3);
+		//		testCase("decl f = fun -> 1 end in "
+		//				+ "		f() + 1 "
+		//				+ "end;;", 2);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		f(1) "
+				+ "end;;", 2);    
+		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
+		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
+		//				+ "		f(fun x:int, y:int -> x+y end) "
+		//				+ "end;;", 5);
+		testCase("decl f = fun x:int -> x + 1 end in "
+				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ " 		g(f) "
+				+ "		end "
+				+ "end;;", 2);
+		testCase("decl f = fun x : int, y : int -> x + y end in "
+				+ "		f(1, 2) + f(1, 3) "
+				+ "end;;", 7);
+		testCase("decl f = fun x:int -> fun y:int -> x + y end end in "
+				+ "		decl g = f(1) in "
+				+ "			g(2) + g(3) "
+				+ "		end "
+				+ "end;;", 7);
 
+
+		testCase("fun x:int -> x+2 end (4);;", new IntValue(6));
+		testCase("decl f = fun x:int -> x+1 end in f(1) end;;", new IntValue(2));
+		testCase("decl x=1 in " 
+				+ "		decl f = fun y:int -> y+x end in "
+				+ "			decl g = fun x:int -> x+f(x) end in " 
+				+ "				g(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;",
+				new IntValue(5));
+		testCase("decl f = fun x:int -> x+1 end in " 
+				+ "		decl g = fun y:int -> f(y)+2 end in "
+				+ "			decl x = g(2) in " 
+				+ "				x+x " 
+				+ "			end " 
+				+ "		end " 
+				+ "end;;", 
+				new IntValue(10));
+		testCase("decl x = fun x:int -> var(x) end in " 
+				+ "		*x(1) " 
+				+ "end;;",
+				new IntValue(1));
+		testCase("decl f = fun y:int -> y+1 end in "
+				+ "		decl g = fun x:int -> f(x)+1 end in "
+				+ "			decl h = g i = fun y:int -> fun x:int -> x end (g(y)) end in "
+				+ "				i(f(1)) "
+				+ "			end "
+				+ "		end "
+				+ "end;;",
+				new IntValue(4));
+		testCase("decl x = 1 in "
+				+ "		decl f = fun y:int -> y+x end in "
+				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
+				+ "				g(f) "
+				+ "			end "
+				+ "		end "		
+				+ "end;;",
+				new IntValue(3));
+		testCase("decl y = 3 in " 
+				+ "		decl x = 2*y in " 
+				+ "			decl f = fun y:int -> y+x end in "
+				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
+				+ "					g(2)(f) "
+				+ "				end " 
+				+ "			end " 
+				+ "		end " 
+				+ "end;;",
+				new IntValue(10));
+		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in " 
+				+ "		decl inc = fun x:int -> x+1 end in "
+				+ "			decl dup = comp(inc, inc) in " 
+				+ "				dup(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;",
+				new IntValue(4));
+		testCase("decl f = fun x:int, y:int -> "
+				+ "			decl i = var(y) res = var(0) in "
+				+ "				while *i > 0 do "
+				+ "					res := *res + x * y; "
+				+ "					i := *i - 1 "
+				+ "				end; "
+				+ "				*res "
+				+ "			end " 	
+				+ "		end "
+				+ "in "
+				+ "		f(3, 2) "
+				+ "end;;",
+				new IntValue(12));
+		testCase("decl add = fun x:int, y:int -> x + y end in "
+				+ "		add(1, 2) "
+				+ "end;;", 
+				new IntValue(3));
+		testCase("decl and = fun x:bool, y:bool -> x && y end in "
+				+ "		and(true, true) "
+				+ "end;;", 
+				new BoolValue(true));
+		testNegativeCase("decl f = fun x -> x+1 end in (1) end;;", new IntValue(1));
 	}
 
 	@Test
@@ -353,6 +467,9 @@ public class CompilerTests {
 		testCase("true || false != false && false;;", true);
 		testCase("(20+20)/(4*5);;", 2);
 		// TODO add imperative testes
+		testCase("decl x = 1 in x + 1 end == (fun x:int -> x+1 end)(1);;", true);
+		testCase("decl x = 1 in x + 1 end == decl x = (fun x:int -> x+1 end) in x(1) end;;", true);
+		testCase("(fun x:int -> x+1 end)(1) == decl x = (fun x:int -> x+1 end) in x(1) end;;", true);
 	}
 
 }

@@ -1,7 +1,5 @@
 package ast;
 
-import static compiler.CodeBlock.MAIN_SL;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -93,77 +91,64 @@ public class ASTFun implements ASTNode {
 
 	@Override
 	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-
-		// CALL:
-		//		; initialize a new frame
-		//		new Frame_2
-		//		dup
-		//		invokespecial Frame_2/<init>()V
-		//		; set frame's SL
-		//		dup
-		//		aload 1
-		//		putfield Frame_2/SL LFrame_1;
-		//		; add x parameter to the frame
-		//		dup
-		//		iload 1
-		//		putfield Frame_2/loc_00 I
-		//		; store SL
-		//		astore 2
-		//IType retType = body.getType();
-
+		Closure closure = code.newClosure((FunType)type);
+		code.emit_new(closure.name);
+		code.emit_dup();
+		code.emit_invokespecial(closure.name, "<init>", "()V");
+		// Set closure's frame  
+		StackFrame currentFrame = code.getCurrentFrame();
+		if (currentFrame != null) {
+			code.emit_comment("initialize closure's SL");
+			code.emit_dup();
+			code.emit_aload(code.getSPPosition());
+			code.emit_checkcast(currentFrame.name);
+			code.emit_putfield(closure.name, "SL", closure.env.toJasmin());
+		}
+		// Start a new frame because a function has its own scope
 		StackFrame frame = code.newFrame();
 		code.setCurrentFrame(frame);
-		Closure closure = code.newClosure((FunType)type);
-		closure.emit_newline();
 		closure.emit_comment("start new frame");
 		closure.emit_new(frame.name);
 		closure.emit_dup();
 		closure.emit_invokespecial(frame.name, "<init>", "()V");
 		if (frame.ancestor != null) {
-			closure.emit_comment("initialize SL");
+			closure.emit_comment("initialize frame's SL");
 			closure.emit_dup();
-			closure.emit_aload(closure.SL);
+			closure.emit_aload(0); // this
+			closure.emit_getfield(closure.name, "SL", closure.env.toJasmin());
 			closure.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
-		closure.emit_newline();
 		// Initialize parameters
 		ICompilationEnvironment newEnv = env.beginScope();
 		int position = 1; // position 0 reserved for 'this'
 		for (Parameter param : parameters) {
 			closure.emit_comment("initialize param " + param.id);
 			closure.emit_dup();
-			closure.emit_iload(position++); // x argument
+			if (code.toJasmin(param.type).matches("L(.*);"))
+				closure.emit_aload(position++); // param.id argument is not primitive
+			else
+				closure.emit_iload(position++); // param.id argument is primitive
 			int location = frame.nextLocation();
 			newEnv.assoc(param.id, location);
 			String type = code.toJasmin(param.type);
 			frame.setLocation(location, type);
 			closure.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
 		}
-		closure.emit_astore(closure.SL);
+		closure.emit_astore(closure.getSPPosition());
 		closure.emit_comment("->");
 		body.compile(closure, newEnv);
 
-		code.emit_new(closure.name);
-		code.emit_dup();
-		code.emit_invokespecial(closure.name, "<init>", "()V");
+		closure.emit_comment("end");
 		if (frame.ancestor != null) {
-			code.emit_dup();
-			code.emit_aload(MAIN_SL);
-			code.emit_checkcast(frame.name);
-			code.emit_putfield(closure.name, "SL", closure.env.toJasmin());
-		}
-
-		code.emit_comment("end");
-		if (frame.ancestor != null) {
-			code.emit_aload(MAIN_SL);
-			code.emit_checkcast(frame.name);
-			code.emit_getfield(frame.name, "SL", frame.ancestor.toJasmin());
+			closure.emit_aload(closure.getSPPosition());
+			closure.emit_checkcast(frame.name);
+			closure.emit_getfield(frame.name, "SL", frame.ancestor.toJasmin());
 		} else {
-			code.emit_null();
+			closure.emit_null();
 		}
-		code.emit_astore(MAIN_SL);
-		code.setCurrentFrame(frame.ancestor);
-		env = newEnv.endScope();
+		closure.emit_astore(closure.getSPPosition());
+		closure.setCurrentFrame(frame.ancestor);
+		newEnv.endScope();
 	}
 
 	@Override

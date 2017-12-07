@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 public interface ITypeSignature {
 
-	void dump(PrintStream out);
+	void dump(PrintStream out, String returnType);
 	
 	String toJasmin();
 

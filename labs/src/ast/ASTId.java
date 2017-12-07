@@ -69,14 +69,16 @@ public class ASTId implements ASTNode {
 
 	@Override
 	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		// Get the stack pointer
-		code.loadSP();
+		code.emit_comment("Get " + id);
 		// Ask code for the current frame
 		StackFrame currentFrame = code.getCurrentFrame();
-		code.emit_comment("Get " + id);
+		// Get the stack pointer
+		if (currentFrame != null) {
+			code.emit_aload(code.getSPPosition());
+			code.emit_checkcast(currentFrame.name);
+		}
 		// Ask Environment for the address (num jumps, location)
 		Address addr = env.lookup(id);
-		System.out.println(addr);
 		// Get Static Links
 		for (int i = 0; i < addr.jumps; i++) {
 			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
