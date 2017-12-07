@@ -36,11 +36,84 @@ This is the list of lab assignments for the course. We first have the complete l
 
 >**Dec 4-8**   - Evaluation strategies (Lazy languages)
 
->**Project assignment: submission** (exact date awaiting approval)
+>**Project assignment: submission** (10 Dez + Late days)
 
->**Dec 11-15** - Project Presentation and Discussion
+>**Dec 18-21** - Project Presentation and Discussion
 
 
+## Final Assignment 
+
+The final assignment is the implementation of all the Labs (1-9), graded from 0 to 20 points. Extra points can be obtained until a maximum of 20 points via two language extensions. 
+
+- Pairs (1 extra point): implement the following expressions:
+~~~
+exp ::= ...
+    | '(' exp ',' exp ')' 
+    | 'fst' '(' exp ')'
+    | 'snd' '(' exp ')'
+~~~
+
+- Lists (2 extra point): implement the following expressions:
+~~~
+exp ::= ...
+    | '[' explist ']'
+    | 'hd' '(' exp ')'
+    | 'tail' '(' exp ')'
+    | 'foreach' id 'in' exp 'do' exp
+~~~
+
+The semantics of `foreach` expressions are the same as a map function, to return a list with the results of the iteration of the list.
+
+- Lazy evaluation (3 extra points): implement lazy evaluation using suspensions with memory.
+
+Only full implementations are considered (interpreter, compiler and typechecker) for extra points.
+
+### Submission: 
+
+#### Dates:
+
+- Submission date: 10 Dec
+- Available Late days for the two phases: 3
+
+#### Submission:
+
+Submission will be performed through the working repository, with a tag `1.0`.
+
+### Discussions:
+
+Presentations and discussions will be held from 18 to 22 of December. The latest version in git will be used as a base for the discusssion.
+
+## Lab 9 - Compiling Functional Abstractions 
+
+Implement the compiler for the language in Lab 8. Follow the compilation patterns depicted in the lecture slides. 
+
+## Lab 8 - Functional Abstraction (Evaluation and Typing)
+
+Implement the interpreter and type system for a language with functional abstraction. The extra expressions are the following (this syntax is not JavaCC ready, not LL):
+
+~~~
+type ::= 'int' | 'bool' | 'RefT' '(' type ')' | 'FunT' '(' typelist ')'
+
+typeList ::= type | type ',' typelist
+
+par ::= id ':' type
+
+parList ::= par | par ',' parlist
+
+parListOrEmpty ::= (empty) | parlist
+
+expList ::= exp | exp ',' expList
+
+expListOrEmpty ::= (empty) | expList
+
+exp ::= ...
+    | 'fun' parlistOrEmpty '->' exp 'end'
+    | exp '(' expListOrEmpty ')'
+~~~
+
+Follow the semantics based on closures, using call-by-value evaluation strategy. Refer to the lecture slides to suport the implementation.
+
+Notice that in a functional type `FunT(t1,t2,...,tn)` the last type `tn` corresponds to the return type of the function.
 
 ## Lab 7 - Implementing an imperative language
 
