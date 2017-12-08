@@ -373,23 +373,23 @@ public class InterpreterTests {
 		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", new IntValue(3));
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in " 
-				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "			decl g = fun h:funt(int, int) -> h(2) end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "     end "
 				+ "	end;;", new IntValue(3));
-		//		testCase("decl f = fun -> 1 end in "
-		//				+ "		f() + 1 "
-		//				+ "end;;", 2);
+		testCase("decl f = fun -> 1 end in "
+				+ "		f() + 1 "
+				+ "end;;", new IntValue(2));
 		testCase("decl f = fun x:int -> x + 1 end in "
 				+ "		f(1) "
 				+ "end;;", new IntValue(2));    
-		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
-		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
-		//				+ "		f(fun x:int, y:int -> x+y end) "
-		//				+ "end;;", 5);
+		testCase("(fun f:funt(int, int, int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", new IntValue(5));
+		testCase("decl f = (fun f:funt(int, int, int) -> f(2, 3) end) in "
+				+ "		f(fun x:int, y:int -> x+y end) "
+				+ "end;;", new IntValue(5));
 		testCase("decl f = fun x:int -> x + 1 end in "
-				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ "		decl g = fun f:funt(int, int) -> f(1) end in "
 				+ " 		g(f) "
 				+ "		end "
 				+ "end;;", new IntValue(2));
@@ -433,7 +433,7 @@ public class InterpreterTests {
 				new IntValue(4));
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in "
-				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
+				+ "			decl g = fun h:funt(int, int) -> h(x)+1 end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "		end "		
@@ -442,14 +442,14 @@ public class InterpreterTests {
 		testCase("decl y = 3 in " 
 				+ "		decl x = 2*y in " 
 				+ "			decl f = fun y:int -> y+x end in "
-				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
+				+ "				decl g = fun x:int -> fun h:funt(int, int) -> x+h(x) end end in " 
 				+ "					g(2)(f) "
 				+ "				end " 
 				+ "			end " 
 				+ "		end " 
 				+ "end;;",
 				new IntValue(10));
-		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in " 
+		testCase("decl comp = fun f:funt(int, int), g:funt(int, int) -> fun x:int -> f(g(x)) end end in " 
 				+ "		decl inc = fun x:int -> x+1 end in "
 				+ "			decl dup = comp(inc, inc) in " 
 				+ "				dup(2) " 

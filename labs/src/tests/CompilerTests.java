@@ -363,9 +363,9 @@ public class CompilerTests {
 				+ "end;;", 
 				2);    
 		testCase("(fun f:funt(int, int, int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
-//		testCase("decl f = (fun f:funt(int, int, int) -> f(2, 3) end) in "
-//				+ "		f(fun x:int, y:int -> x+y end) "
-//				+ "end;;", 5);
+		testCase("decl f = (fun f:funt(int, int, int) -> f(2, 3) end) in "
+				+ "		f(fun x:int, y:int -> x+y end) "
+				+ "end;;", 5);
 		testCase("decl f = fun x:int -> x + 1 end in "
 				+ "		decl g = fun f:funt(int, int) -> f(1) end in "
 				+ " 		g(f) "
@@ -432,14 +432,14 @@ public class CompilerTests {
 				+ "		end " 
 				+ "end;;",
 				10);
-//		testCase("decl comp = fun f:funt(int, int), g:funt(int, int) -> fun x:int -> f(g(x)) end end in " 
-//				+ "		decl inc = fun x:int -> x+1 end in "
-//				+ "			decl dup = comp(inc, inc) in " 
-//				+ "				dup(2) " 
-//				+ "			end "
-//				+ "		end " 
-//				+ "end;;",
-//				4);
+		testCase("decl comp = fun f:funt(int, int), g:funt(int, int) -> fun x:int -> f(g(x)) end end in " 
+				+ "		decl inc = fun x:int -> x+1 end in "
+				+ "			decl dup = comp(inc, inc) in " 
+				+ "				dup(2) " 
+				+ "			end "
+				+ "		end " 
+				+ "end;;",
+				4);
 		testCase("decl f = fun x:int, y:int -> "
 				+ "			decl i = var(y) res = var(0) in "
 				+ "				while *i > 0 do "

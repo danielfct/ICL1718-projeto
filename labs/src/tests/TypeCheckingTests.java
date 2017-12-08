@@ -284,7 +284,7 @@ public class TypeCheckingTests {
 		testExceptionCase("if false then true then 1 end;;");
 		testExceptionCase("if 1 then true else false end;;");
 	}
-	
+
 	@Test
 	public void testFun() throws Exception {
 		testCase("fun x:int -> x*x end;;", new FunType(Collections.singletonList(IntType.singleton), IntType.singleton));
@@ -333,7 +333,7 @@ public class TypeCheckingTests {
 				IntType.singleton);
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in "
-				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
+				+ "			decl g = fun h:funt(int, int) -> h(x)+1 end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "		end "		
@@ -342,14 +342,14 @@ public class TypeCheckingTests {
 		testCase("decl y = 3 in " 
 				+ "		decl x = 2*y in " 
 				+ "			decl f = fun y:int -> y+x end in "
-				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
+				+ "				decl g = fun x:int -> fun h:funt(int, int) -> x+h(x) end end in " 
 				+ "					(g(2))(f) "
 				+ "				end " 
 				+ "			end " 
 				+ "		end " 
 				+ "end;;",
 				IntType.singleton);
-		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in " 
+		testCase("decl comp = fun f:funt(int, int), g:funt(int, int) -> fun x:int -> f(g(x)) end end in " 
 				+ "		decl inc = fun x:int -> x+1 end in "
 				+ "			decl dup = comp(inc, inc) in " 
 				+ "				dup(2) " 
@@ -378,8 +378,8 @@ public class TypeCheckingTests {
 				+ "		and(true, true) "
 				+ "end;;", 
 				BoolType.singleton);
-//		testCase("decl TRUE = fun -> true end () in TRUE end;;", BoolType.singleton);
-//		testCase("decl FALSE = fun -> true end () in FALSE end;;", BoolType.singleton);
+		testCase("decl TRUE = fun -> true end () in TRUE end;;", BoolType.singleton);
+		testCase("decl FALSE = fun -> true end () in FALSE end;;", BoolType.singleton);
 		testCase("decl x = 1 in "
 				+ "		fun x:int -> x+1 end (1) "
 				+ "end;;", IntType.singleton);
@@ -387,23 +387,23 @@ public class TypeCheckingTests {
 		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", IntType.singleton);
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in " 
-				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "			decl g = fun h:funt(int, int) -> h(2) end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "     end "
 				+ "	end;;", IntType.singleton);
-		//		testCase("decl f = fun -> 1 end in "
-		//				+ "		f() + 1 "
-		//				+ "end;;", 2);
+		testCase("decl f = fun -> 1 end in "
+				+ "		f() + 1 "
+				+ "end;;", IntType.singleton);
 		testCase("decl f = fun x:int -> x + 1 end in "
 				+ "		f(1) "
 				+ "end;;", IntType.singleton);    
-		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
-		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
-		//				+ "		f(fun x:int, y:int -> x+y end) "
-		//				+ "end;;", 5);
+		testCase("(fun f:funt(int, int, int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", IntType.singleton);
+		testCase("decl f = (fun f:funt(int, int, int) -> f(2, 3) end) in "
+				+ "		f(fun x:int, y:int -> x+y end) "
+				+ "end;;", IntType.singleton);
 		testCase("decl f = fun x:int -> x + 1 end in "
-				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ "		decl g = fun f:funt(int, int) -> f(1) end in "
 				+ " 		g(f) "
 				+ "		end "
 				+ "end;;", IntType.singleton);
@@ -419,7 +419,7 @@ public class TypeCheckingTests {
 				+ "				f(1) "
 				+ "		  end;;", 
 				BoolType.singleton);
-		 testExceptionCase("decl f = fun x -> x(x) end in f(f) end;;");
+		testExceptionCase("decl f = fun x -> x(x) end in f(f) end;;");
 	}
 
 	@Test
@@ -428,22 +428,56 @@ public class TypeCheckingTests {
 		testCase("1+2*3+2/2;;", IntType.singleton);
 		testCase("true || false != false && false;;", BoolType.singleton);
 		testCase("(20+20)/(4*5);;", IntType.singleton);
-		testCase("decl x = var(0) in x := 1; *x end;;", IntType.singleton);
-		testCase("decl x = var(0) in decl y = x in x := 1; *y end end;;", IntType.singleton);
-		testCase("decl x = var(0) in decl y = var(0) in x := 1; *y end end;;", IntType.singleton);
-		testCase("decl x = var(0) in decl y = var(0) in while *x < 10 do y := *y + 2; x := *x + 1 end; *y end end;;",
+		testCase("decl x = var(0) in "
+				+ "		x := 1; *x "
+				+ "end;;", 
 				IntType.singleton);
-		testCase("decl x = var(3) in " + "		decl y = var(1) in " + "			while *x > 0 do "
-				+ "  			y := *y * *x; " + "  			x := *x - 1 " + "			end; " + "			*y "
-				+ "		end " + "end;;", IntType.singleton);
-		testCase("decl x = var(3) in\n" + "		decl y = var(1) in\n" + "			while *x > 0 do\n"
-				+ "  			y := *y * *x;\n" + "  			x := *x - 1\n" + "			end;\n" + "			*y\n"
-				+ "		end\n" + "end;;", IntType.singleton);
-		testCase("decl x = 2;var(0;1) in " + "		(2;x) := *x+1; " + "		*x " + "end;;", IntType.singleton);
+		testCase("decl x = var(0) in "
+				+ "		decl y = x in "
+				+ "			x := 1; *y "
+				+ "		end "
+				+ "end;;", 
+				IntType.singleton);
+		testCase("decl x = var(0) in "
+				+ "		decl y = var(0) in "
+				+ "			x := 1; *y "
+				+ "		end "
+				+ "end;;", 
+				IntType.singleton);
+		testCase("decl x = var(0) in "
+				+ "		decl y = var(0) in "
+				+ "			while *x < 10 do "
+				+ "				y := *y + 2; "
+				+ "				x := *x + 1 "
+				+ "			end; "
+				+ "			*y "
+				+ "		end "
+				+ "end;;", IntType.singleton);
+		testCase("decl x = var(3) in " 
+				+ "		decl y = var(1) in " 
+				+ "			while *x > 0 do "
+				+ "  			y := *y * *x; " 
+				+ "  			x := *x - 1 " 
+				+ "			end; " 
+				+ "			*y "
+				+ "		end " 
+				+ "end;;", 
+				IntType.singleton);
+		testCase("decl x = 2;var(0;1) in " 
+				+ "		(2; x) := *x + 1; " 
+				+ "		*x " 
+				+ "end;;", 
+				IntType.singleton);
 		testCase("***var(var(var(1)));;", IntType.singleton);
-		testCase("decl x = var(3) in " + "		decl y = var(1) in " + "			while *x > 0 do "
-				+ "  			y := *y * *x; " + "  			x := *x - 1 " + "			end; "
-				+ "			*y > *x " + "		end " + "end;;", BoolType.singleton);
+		testCase("decl x = var(3) in " 
+				+ "		decl y = var(1) in " 
+				+ "			while *x > 0 do "
+				+ "  			y := *y * *x; " 
+				+ "  			x := *x - 1 " 
+				+ "			end; "
+				+ "			*y > *x " 
+				+ "		end " + "end;;",
+				BoolType.singleton);
 		testNegativeCase("(20+20)/(4*5);;", BoolType.singleton);
 		testNegativeCase("true || false != false && false;;", IntType.singleton);
 		testExceptionCase("1+2 && true != false;;");
