@@ -57,7 +57,7 @@ public class ASTVar implements ASTNode {
 		code.emit_dup();
 		expression.compile(code, env);
 		// Associate the value on top of stack with the new reference
-		code.emit_putfield(ref.name, "value", code.toJasmin(ref.type));
+		code.emit_putfield(ref.name, "value", ref.type);
 	}
 
 	@Override

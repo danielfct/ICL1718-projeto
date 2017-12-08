@@ -131,7 +131,7 @@ IType Type():
     { final int size = types.size(); return new FunType(types.subList(0, size-1), types.get(size-1)); }
 }
 
-ASTNode Start():
+ASTNode Start() :
 { ASTNode e; }
 {
 	e = Seq() <EL>  { return e; }
@@ -158,7 +158,7 @@ ASTNode Assign() :
   	{ return e1; }
 }
 
-ASTNode Disjunction(): // D -- > C ( '||' C )*
+ASTNode Disjunction() : // D -- > C ( '||' C )*
 { ASTNode e1, e2; }
 {
 	e1 = Conjunction()
@@ -168,7 +168,7 @@ ASTNode Disjunction(): // D -- > C ( '||' C )*
 	{  return e1; }
 }
 
-ASTNode Conjunction(): // C -- > B ('&&' B )*
+ASTNode Conjunction() : // C -- > B ('&&' B )*
 {  ASTNode e1, e2; }
 {
 	e1 = BooleanExp()
@@ -178,7 +178,7 @@ ASTNode Conjunction(): // C -- > B ('&&' B )*
 	{ return e1; }
 }
 
-ASTNode BooleanExp(): // B --> E ('==' | '!=' | '<' | '>' | '<=' | '>=' E )*
+ASTNode BooleanExp() : // B --> E ('==' | '!=' | '<' | '>' | '<=' | '>=' E )*
 { ASTNode e1, e2; }
 {
 	e1 = ArithmeticExp()

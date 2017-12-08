@@ -101,7 +101,7 @@ public class ASTFun implements ASTNode {
 		if (currentFrame != null) {
 			code.emit_comment("initialize closure's SL");
 			code.emit_dup();
-			code.emit_aload(code.getSPPosition());
+			code.emit_aload(code.getCurrentSP());
 			code.emit_checkcast(currentFrame.name);
 			code.emit_putfield(closure.name, "SL", closure.envc.toJasmin());
 		}

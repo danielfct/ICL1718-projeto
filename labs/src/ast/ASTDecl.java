@@ -99,7 +99,7 @@ public class ASTDecl implements ASTNode {
 		if (frame.ancestor != null) {
 			// Initialize Static Linker
 			code.emit_dup();
-			code.emit_aload(code.getSPPosition());
+			code.emit_aload(code.getCurrentSP());
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 		ICompilationEnvironment newEnv = env.beginScope();
@@ -111,24 +111,24 @@ public class ASTDecl implements ASTNode {
 			newEnv.assoc(d.id, location);
 			String type = code.toJasmin(d.def.getType());
 			frame.addLocation(type);
-			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location++), type);
+			code.emit_putfield(frame.name, "loc_" + location++, type);
 		}
 		
 		code.pushFrame(frame);
-		code.emit_astore(code.getSPPosition());
+		code.emit_astore(code.getCurrentSP());
 		code.emit_comment("in");
 		body.compile(code, newEnv);
 
 		code.emit_comment("end");
 		StackFrame currentFrame = code.getCurrentFrame();
 		if (currentFrame.ancestor != null) {
-			code.emit_aload(code.getSPPosition());
+			code.emit_aload(code.getCurrentSP());
 			code.emit_checkcast(currentFrame.name);
 			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 		} else {
 			code.emit_null();
 		}
-		code.emit_astore(code.getSPPosition());
+		code.emit_astore(code.getCurrentSP());
 		code.pushFrame(currentFrame.ancestor);
 		newEnv.endScope();
 	}

@@ -58,7 +58,7 @@ public class ASTDeref implements ASTNode {
 		expression.compile(code, env);
 		IType type = ((RefType) expression.getType()).type;
 		Reference ref = code.getReference(type);
-		code.emit_getfield(ref.name, "value", code.toJasmin(ref.type));
+		code.emit_getfield(ref.name, "value", ref.type);
 	}
 
 	@Override

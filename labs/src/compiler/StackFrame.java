@@ -31,7 +31,7 @@ public class StackFrame implements IStackFrame {
 			out.println(".field public SL " + ancestor.toJasmin());
 		int loc = 0;
 		for (String type : locations) {
-			out.println(".field public loc_" + String.format("%02d", loc++) + " " + type);
+			out.println(".field public loc_" + loc++ + " " + type);
 		}
 		out.println();
 		out.println("; standard initializer");

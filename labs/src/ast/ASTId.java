@@ -74,7 +74,7 @@ public class ASTId implements ASTNode {
 		StackFrame currentFrame = code.getCurrentFrame();
 		// Get the stack pointer
 		if (currentFrame != null) {
-			code.emit_aload(code.getSPPosition());
+			code.emit_aload(code.getCurrentSP());
 			code.emit_checkcast(currentFrame.name);
 		}
 		// Ask Environment for the address (num jumps, location)
@@ -85,7 +85,7 @@ public class ASTId implements ASTNode {
 			currentFrame = currentFrame.ancestor;
 		}
 		// Get Id
-		code.emit_getfield(currentFrame.name, "loc_" + String.format("%02d", addr.location), code.toJasmin(type));
+		code.emit_getfield(currentFrame.name, "loc_" + addr.location, code.toJasmin(type));
 	}
 
 	@Override

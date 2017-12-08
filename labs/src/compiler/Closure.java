@@ -61,15 +61,15 @@ public class Closure implements IClosure {
 			out.println("	getfield " + name + "/SL " + envc.toJasmin());
 			out.println("	putfield " + localEnv.name + "/SL " + localEnv.ancestor.toJasmin());
 		}
-		int index = 0;
+		int location = 0;
 		for (String type : signature.params) {
-			out.println("	; initialize param " + index);
+			out.println("	; initialize param " + location);
 			out.println(" 	dup");
 			if (type.matches("L(.*);"))
-				out.println("	aload_" + (index+1)); // +1 before "this" is stored at position 0
+				out.println("	aload_" + (location+1)); // +1 before "this" is stored at position 0
 			else
-				out.println(" 	iload_" + (index+1));
-			out.println(" 	putfield " + localEnv.name + "/loc_" + String.format("%02d", index++) + " " + type);
+				out.println(" 	iload_" + (location+1));
+			out.println(" 	putfield " + localEnv.name + "/loc_" + location++ + " " + type);
 		}
 		out.println(" 	astore_" + SPPosition);
 		out.println(" 	; ->");

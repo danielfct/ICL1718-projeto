@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 public interface IReference {
 
-	void dump(PrintStream out, String fieldType);
+	void dump(PrintStream out);
 
 	String toJasmin();
 

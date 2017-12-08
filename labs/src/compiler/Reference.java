@@ -2,25 +2,23 @@ package compiler;
 
 import java.io.PrintStream;
 
-import types.IType;
-
 public class Reference implements IReference {
 
 	public final String name;
-	public final IType type;
+	public final String type;
 
-	public Reference(IType type) {
+	public Reference(String type) {
 		this.name = "Ref_" + IdFactory.singleton.reference();
 		this.type = type;
 	}
 
 	@Override
-	public void dump(PrintStream out, String fieldType) {
+	public void dump(PrintStream out) {
 		out.println(".class " + name);
 		out.println(".super java/lang/Object");
 		out.println();
 		out.println("; variables");
-		out.println(".field public value " + fieldType);
+		out.println(".field public value " + type);
 		out.println();
 		out.println("; standard initializer");
 		out.println(".method public <init>()V");

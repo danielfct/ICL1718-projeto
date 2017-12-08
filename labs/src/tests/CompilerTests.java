@@ -252,8 +252,8 @@ public class CompilerTests {
 		IdFactory.singleton.init();
 		testCase("var(1) := 0;;", 0);
 		testCase("var(0) := var(0) := 1;;", 1);
-		testCase("var(var(1)) := var(2);;", "Ref_3 int");
-		testCase("var(var(true)) := var(false);;", "Ref_5 bool");
+		testCase("var(var(1)) := var(2);;", "Ref_2 I");
+		testCase("var(var(true)) := var(false);;", "Ref_4 Z");
 		testNegativeCase("var(0) := 1;;", 2);
 		testNegativeCase("var(true) := false;;", true);
 	}
@@ -266,8 +266,8 @@ public class CompilerTests {
 		testCase("*var(99);;", 99);
 		testCase("*var(true);;", true);
 		testCase("*var(*var(1));;", 1);
-		testCase("*var(var(0));;", "Ref_5 int");
-		testCase("*var(var(var(0)));;", "Ref_7 Ref(int)");
+		testCase("*var(var(0));;", "Ref_4 I");
+		testCase("*var(var(var(0)));;", "Ref_7 LRef_6;");
 		testCase("*var(*var(true));;", true);
 		testCase("***var(var(var(1)));;", 1);
 		testNegativeCase("*var(0);;", 1);
@@ -278,9 +278,9 @@ public class CompilerTests {
 	public void testVar() throws Exception {
 		System.out.println("\n====== VAR ======\n");
 		IdFactory.singleton.init();
-		testCase("var(0);;", "Ref_0 int");
-		testCase("var(true);;", "Ref_1 bool");
-		testNegativeCase("var(false);;", "Ref_2 int");
+		testCase("var(0);;", "Ref_0 I");
+		testCase("var(true);;", "Ref_1 Z");
+		testNegativeCase("var(false);;", "Ref_2 I");
 		testNegativeCase("var(1);;", 1);
 	}
 
@@ -310,7 +310,7 @@ public class CompilerTests {
 		testCase("true ; true ; false;;", false);
 		testCase("1 ; 2 ; true;;", true);
 		testCase("decl x = 1; 2 in x end;;", 2);
-		testCase("var(0); var(1);;", "Ref_0 int");
+		testCase("var(0); var(1);;", "Ref_0 I");
 		testNegativeCase("1 ; 2 ; 3;;", 1);
 		testNegativeCase("1 ; 2 ; true;;", false);
 	}
@@ -323,7 +323,7 @@ public class CompilerTests {
 		testCase("if false then 1 else 0 end;;", 0);
 		testCase("if true then false else true end;;", false);
 		testCase("if false then false else true end;;", true);
-		testCase("if true then var(1) else var(2) end;;", "Ref_0 int");
+		testCase("if true then var(1) else var(2) end;;", "Ref_0 I");
 		testNegativeCase("if true then false else true end;;", true);
 		testNegativeCase("if false then false else true end;;", false);
 		testNegativeCase("if true then false else true end;;", 1);

@@ -2,6 +2,7 @@ package compiler;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.List;
 
 import types.FunType;
 import types.IType;
@@ -22,7 +23,7 @@ public interface ICodeBuilder {
 
 	void popClosure();
 
-	Closure getCurrentClosure();
+	List<String> getCurrentCode();
 	
 	Reference requestReference(IType type);
 
@@ -32,7 +33,7 @@ public interface ICodeBuilder {
 	
 	Closure createClosure(FunType type);
 	
-	int getSPPosition();
+	int getCurrentSP();
 
 	String toJasmin(IType t);
 	
