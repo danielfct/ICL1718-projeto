@@ -3,8 +3,10 @@ package compiler;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,20 +20,22 @@ import types.RefType;
 
 public class CodeBlock implements ICodeBuilder {
 
-	List<String> code;
-	private List<StackFrame> frames;
-	private Map<IType, Reference> references;
-	private Map<FunType, TypeSignature> typeSignatures;
-	private List<Closure> closures;
+	private final List<String> code;
+	private final List<StackFrame> frames;
+	private final Map<IType, Reference> references;
+	private final Map<FunType, TypeSignature> typeSignatures;
+	private final List<Closure> closures;
 	private StackFrame currentFrame;
+	private final Deque<Closure> closuresStack;
 
 	public CodeBlock() {
-		this.code = new ArrayList<String>(100);
-		this.frames = new ArrayList<StackFrame>(10);
+		this.code = new LinkedList<String>();
+		this.frames = new LinkedList<StackFrame>();
 		this.references = new HashMap<IType, Reference>(10);
 		this.typeSignatures = new HashMap<FunType, TypeSignature>(10);
-		this.closures = new ArrayList<Closure>(10);
+		this.closures = new LinkedList<Closure>();
 		this.currentFrame = null;
+		this.closuresStack = new ArrayDeque<Closure>(5);
 	}
 
 	private void dumpHeader(PrintStream out) {
@@ -97,7 +101,7 @@ public class CodeBlock implements ICodeBuilder {
 	private void dumpTypeSignatures() throws FileNotFoundException {
 		for (TypeSignature signature : typeSignatures.values()) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + signature.name + ".j"));
-			signature.dump(out, toJasmin(signature.ret));
+			signature.dump(out);
 			out.close();
 		}
 	}
@@ -105,7 +109,7 @@ public class CodeBlock implements ICodeBuilder {
 	private void dumpClosures() throws FileNotFoundException {
 		for (Closure closure : closures) {
 			PrintStream out = new PrintStream(new FileOutputStream(Compiler.DIR + "/" + closure.name + ".j"));
-			closure.dump(out, toJasmin(closure.signature.ret));
+			closure.dump(out);
 			out.close();
 		}
 	}
@@ -122,7 +126,7 @@ public class CodeBlock implements ICodeBuilder {
 	}
 
 	@Override
-	public StackFrame newFrame() {
+	public StackFrame createFrame() {
 		// Create a new StackFrame in the compiler
 		StackFrame frame = new StackFrame(currentFrame);
 		frames.add(frame);
@@ -131,13 +135,33 @@ public class CodeBlock implements ICodeBuilder {
 	}
 
 	@Override
-	public void setCurrentFrame(StackFrame frame) {
+	public void pushFrame(StackFrame frame) {
 		currentFrame = frame;
+	}
+
+	@Override
+	public void popFrame() {
+		currentFrame = currentFrame.ancestor;
 	}
 
 	@Override
 	public StackFrame getCurrentFrame() {
 		return currentFrame;
+	}
+
+	@Override
+	public void pushClosure(Closure closure) {
+		closuresStack.push(closure);
+	}
+
+	@Override
+	public void popClosure() {
+		closuresStack.pop();
+	}
+
+	@Override
+	public Closure getCurrentClosure() {
+		return closuresStack.peek();
 	}
 
 	@Override
@@ -158,15 +182,7 @@ public class CodeBlock implements ICodeBuilder {
 	private TypeSignature requestSignature(FunType funType) {
 		TypeSignature signature = getSignature(funType);
 		if (signature == null) {
-			List<String> types = funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList());
-			System.out.println(funType.retType);
-			System.out.println("Types on list");
-			for (TypeSignature s : typeSignatures.values())
-				System.out.println(s);
-			if (typeSignatures.isEmpty())
-				System.out.println("none");
-			signature = new TypeSignature(types, funType.retType);
-			
+			signature = new TypeSignature(funType.paramsType.stream().map(this::toJasmin).collect(Collectors.toList()), toJasmin(funType.retType));
 			typeSignatures.put(funType, signature);
 		}
 		return signature;
@@ -178,11 +194,17 @@ public class CodeBlock implements ICodeBuilder {
 	}
 
 	@Override
-	public Closure newClosure(FunType funType) {
+	public Closure createClosure(FunType funType) {
 		TypeSignature signature = this.requestSignature(funType);
-		Closure closure = new Closure(currentFrame, signature, this);
+		Closure closure = new Closure(currentFrame, signature);
 		closures.add(closure);
 		return closure;
+	}
+
+	@Override
+	public int getSPPosition() {
+		// main SP is stored at position 1 because it is static (no "this") and has 1 argument (array of strings)
+		return closuresStack.isEmpty() ? 1 : getCurrentClosure().SPPosition;
 	}
 
 	@Override
@@ -192,108 +214,158 @@ public class CodeBlock implements ICodeBuilder {
 		else if (t == BoolType.singleton)
 			return ((BoolType) t).toJasmin();
 		else if (t instanceof RefType)
-			return references.get(((RefType) t).type).toJasmin();
+			return requestReference(((RefType) t).type).toJasmin();
 		else if (t instanceof FunType)
-			return typeSignatures.get((FunType) t).toJasmin();
+			return requestSignature((FunType) t).toJasmin();
 		else
 			throw new RuntimeException("Tojasmin not implemented for type " + t);
-	}
-	
-	@Override
-	public int getSPPosition() {
-		return 1; // 1 because main is static (no "this") and has 1 argument (array of strings)
+
 	}
 
 	// Bytecode instructions
 
 	@Override
 	public void emit_comment(String comment) {
-		code.add("; " + comment);
+		if (closuresStack.isEmpty())
+			code.add("; " + comment);
+		else
+			getCurrentClosure().body.add("; " + comment);
 	}
 
 	@Override
 	public void emit_newline() {
-		code.add("\n");
+		if (closuresStack.isEmpty())
+			code.add("\n");
+		else
+			getCurrentClosure().body.add("\n");
 	}
 
 	@Override
 	public void emit_new(String classname) {
-		code.add("new " + classname);
+		if (closuresStack.isEmpty())
+			code.add("new " + classname);
+		else
+			getCurrentClosure().body.add("new " + classname);
 	}
 
 	@Override
 	public void emit_invokespecial(String classname, String methodname, String descriptor) {
-		code.add("invokespecial " + classname + "/" + methodname + descriptor);
+		if (closuresStack.isEmpty())
+			code.add("invokespecial " + classname + "/" + methodname + descriptor);
+		else
+			getCurrentClosure().body.add("invokespecial " + classname + "/" + methodname + descriptor);
 	}
 
 	@Override
 	public void emit_invokeinterface(String interfacename, String methodname, String descriptor, int nArgs) {
-		code.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
+		if (closuresStack.isEmpty())
+			code.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
+		else
+			getCurrentClosure().body.add("invokeinterface " + interfacename + "/" + methodname + descriptor + " " + nArgs);
 	}
 
 	@Override
 	public void emit_null() {
-		code.add("aconst_null");
+		if (closuresStack.isEmpty())
+			code.add("aconst_null");
+		else
+			getCurrentClosure().body.add("aconst_null");
 	}
 
 	@Override
 	public void emit_getfield(String classname, String fieldname, String descriptor) {
-		code.add("getfield " + classname + "/" + fieldname + " " + descriptor);
+		if (closuresStack.isEmpty())
+			code.add("getfield " + classname + "/" + fieldname + " " + descriptor);
+		else
+			getCurrentClosure().body.add("getfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
 	@Override
 	public void emit_putfield(String classname, String fieldname, String descriptor) {
-		code.add("putfield " + classname + "/" + fieldname + " " + descriptor);
+		if (closuresStack.isEmpty())
+			code.add("putfield " + classname + "/" + fieldname + " " + descriptor);
+		else
+			getCurrentClosure().body.add("putfield " + classname + "/" + fieldname + " " + descriptor);
 	}
 
 	@Override
 	public void emit_dup() {
-		code.add("dup");
+		if (closuresStack.isEmpty())
+			code.add("dup");
+		else
+			getCurrentClosure().body.add("dup");
 	}
 
 	@Override
 	public void emit_astore(int n) {
-		code.add("astore_" + n);
+		if (closuresStack.isEmpty())
+			code.add("astore_" + n);
+		else
+			getCurrentClosure().body.add("astore_" + n);
 	}
 
 	@Override
 	public void emit_aload(int n) {
-		code.add("aload_" + n);
+		if (closuresStack.isEmpty())
+			code.add("aload_" + n);
+		else
+			getCurrentClosure().body.add("aload_" + n);
 	}
 
 	@Override
 	public void emit_checkcast(String t) {
-		code.add("checkcast " + t);
+		if (closuresStack.isEmpty())
+			code.add("checkcast " + t);
+		else
+			getCurrentClosure().body.add("checkcast " + t);
 	}
 
 	@Override
 	public void emit_push(int n) {
-		code.add("sipush " + n);
+		if (closuresStack.isEmpty())
+			code.add("sipush " + n);
+		else
+			getCurrentClosure().body.add("sipush " + n);
 	}
 
 	@Override
 	public void emit_add() {
-		code.add("iadd");
+		if (closuresStack.isEmpty())
+			code.add("iadd");
+		else
+			getCurrentClosure().body.add("iadd");
 	}
 
 	@Override
 	public void emit_mul() {
-		code.add("imul");
+		if (closuresStack.isEmpty())
+			code.add("imul");
+		else
+			getCurrentClosure().body.add("imul");
 	}
 
 	@Override
 	public void emit_div() {
-		code.add("idiv");
+		if (closuresStack.isEmpty())
+			code.add("idiv");
+		else
+			getCurrentClosure().body.add("idiv");
 	}
 
 	@Override
 	public void emit_sub() {
-		code.add("isub");
+		if (closuresStack.isEmpty())
+			code.add("isub");
+		else
+			getCurrentClosure().body.add("isub");
 	}
 
 	@Override
 	public void emit_xor() {
-		code.add("ixor");
+		if (closuresStack.isEmpty())
+			code.add("ixor");
+		else
+			getCurrentClosure().body.add("ixor");
 	}
 
 	@Override
@@ -302,89 +374,143 @@ public class CodeBlock implements ICodeBuilder {
 			emit_val(1);
 		else
 			emit_val(0);
+
 	}
 
 	@Override
 	public void emit_val(int val) {
-		if (val == -1)
-			code.add("iconst_m1");
-		else
-			code.add("iconst_" + val);
+		if (closuresStack.isEmpty()) {
+			if (val == -1)
+				code.add("iconst_m1");
+			else
+				code.add("iconst_" + val);
+		}
+		else {
+			if (val == -1)
+				getCurrentClosure().body.add("iconst_m1");
+			else
+				getCurrentClosure().body.add("iconst_" + val);
+		}
 	}
 
 	@Override
 	public void emit_icmpeq(String label) {
-		code.add("if_icmpeq " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmpeq " + label);
+		else
+			getCurrentClosure().body.add("if_icmpeq " + label);
 	}
 
 	@Override
 	public void emit_icmpne(String label) {
-		code.add("if_icmpne " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmpne " + label);
+		else
+			getCurrentClosure().body.add("if_icmpne " + label);
 	}
 
 	@Override
 	public void emit_icmpge(String label) {
-		code.add("if_icmpge " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmpge " + label);
+		else
+			getCurrentClosure().body.add("if_icmpge " + label);
 	}
 
 	@Override
 	public void emit_icmpgt(String label) {
-		code.add("if_icmpgt " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmpgt " + label);
+		else
+			getCurrentClosure().body.add("if_icmpgt " + label);
 	}
 
 	@Override
 	public void emit_icmple(String label) {
-		code.add("if_icmple " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmple " + label);
+		else
+			getCurrentClosure().body.add("if_icmple " + label);
 	}
 
 	@Override
 	public void emit_icmplt(String label) {
-		code.add("if_icmplt " + label);
+		if (closuresStack.isEmpty())
+			code.add("if_icmplt " + label);
+		else
+			getCurrentClosure().body.add("if_icmplt " + label);
 	}
 
 	@Override
 	public void emit_ifeq(String label) {
-		code.add("ifeq " + label);
+		if (closuresStack.isEmpty())
+			code.add("ifeq " + label);
+		else
+			getCurrentClosure().body.add("ifeq " + label);
 	}
 
 	@Override
 	public void emit_ifne(String label) {
-		code.add("ifne " + label);
+		if (closuresStack.isEmpty())
+			code.add("ifne " + label);
+		else
+			getCurrentClosure().body.add("ifne " + label);
 	}
 
 	@Override
 	public void emit_jump(String label) {
-		code.add("goto " + label);
+		if (closuresStack.isEmpty())
+			code.add("goto " + label);
+		else
+			getCurrentClosure().body.add("goto " + label);
 	}
 
 	@Override
 	public void emit_anchor(String label) {
-		code.add(label + ":");
+		if (closuresStack.isEmpty())
+			code.add(label + ":");
+		else
+			getCurrentClosure().body.add(label + ":");
 	}
 
 	@Override
 	public void emit_and() {
-		code.add("iand");
+		if (closuresStack.isEmpty())
+			code.add("iand");
+		else
+			getCurrentClosure().body.add("iand");
 	}
 
 	@Override
 	public void emit_or() {
-		code.add("ior");
+		if (closuresStack.isEmpty())
+			code.add("ior");
+		else
+			getCurrentClosure().body.add("ior");
 	}
 
 	@Override
 	public void emit_pop() {
-		code.add("pop");
+		if (closuresStack.isEmpty())
+			code.add("pop");
+		else
+			getCurrentClosure().body.add("pop");
 	}
 
 	@Override
 	public void emit_swap() {
-		code.add("swap");
+		if (closuresStack.isEmpty())
+			code.add("swap");
+		else
+			getCurrentClosure().body.add("swap");
 	}
 
 	@Override
 	public void emit_iload(int position) {
-		code.add("iload_" + position);
+		if (closuresStack.isEmpty())
+			code.add("iload_" + position);
+		else
+			getCurrentClosure().body.add("iload_" + position);
 	}
 
 }

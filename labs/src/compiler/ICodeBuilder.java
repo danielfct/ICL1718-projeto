@@ -10,25 +10,31 @@ public interface ICodeBuilder {
 
 	void dump(PrintStream out, String resultType) throws FileNotFoundException;
 
-	StackFrame newFrame();
+	StackFrame createFrame();
 	
-	void setCurrentFrame(StackFrame frame);
+	void pushFrame(StackFrame frame);
+	
+	void popFrame();
 
 	StackFrame getCurrentFrame();
+	
+	void pushClosure(Closure closure);
 
+	void popClosure();
+
+	Closure getCurrentClosure();
+	
 	Reference requestReference(IType type);
 
 	Reference getReference(IType type);
 	
-	// TypeSignature requestSignature(FunType type);
-	
 	TypeSignature getSignature(FunType type);
 	
-	Closure newClosure(FunType type);
-
-	String toJasmin(IType t);
+	Closure createClosure(FunType type);
 	
 	int getSPPosition();
+
+	String toJasmin(IType t);
 	
 	
 	// Bytecode instructions

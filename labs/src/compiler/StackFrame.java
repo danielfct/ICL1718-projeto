@@ -1,41 +1,24 @@
 package compiler;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class StackFrame implements IStackFrame {
 
 	public final String name;
 	public final StackFrame ancestor;
-	private List<String> locations; // e.g. posicao 0 com um valor do tipo I
-									// (inteiro) = loc_00 I
-									// posicao 1 com um valor do tipo Z
-									// (booleano) = loc_01 Z
-	
+	private final List<String> locations;
 
 	public StackFrame(StackFrame ancestor) {
 		this.name = "Frame_" + IdFactory.singleton.frame();
 		this.ancestor = ancestor;
-		this.locations = new ArrayList<String>(5);
-	}
-
-	@Override
-	public int nextLocation() {
-		return locations.size();
-	}
-
-	@Override
-	public void setLocation(int location, String type) {
-		if (location >= locations.size())
-			locations.add(type);
-		else
-			locations.set(location, type);
+		this.locations = new LinkedList<String>();
 	}
 	
 	@Override
 	public void addLocation(String type) {
-		setLocation(nextLocation(), type);
+		locations.add(type);
 	}
 
 	@Override
@@ -46,9 +29,9 @@ public class StackFrame implements IStackFrame {
 		out.println("; variables");
 		if (ancestor != null)
 			out.println(".field public SL " + ancestor.toJasmin());
-		int index = 0;
+		int loc = 0;
 		for (String type : locations) {
-			out.println(".field public loc_" + String.format("%02d", index++) + " " + type);
+			out.println(".field public loc_" + String.format("%02d", loc++) + " " + type);
 		}
 		out.println();
 		out.println("; standard initializer");

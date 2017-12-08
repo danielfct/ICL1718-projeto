@@ -22,8 +22,7 @@ public class ClosureValue implements IRefValue {
 	
 	@Override
 	public String toString() {
-		return "closure(fun " + String.join(", ", params.stream().map(Parameter::toString).collect(Collectors.toList()))
-				+ " -> " + body + " end; " + env + ")";
+		return "closure(fun " + String.join(", ", params.stream().map(Parameter::toString).collect(Collectors.toList())) + " -> " + body + " end; " + env + ")";
 	}
 
 	@Override

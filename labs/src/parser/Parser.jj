@@ -1,28 +1,3 @@
-/*
-
-Start ::= Seq
-
-Seq ::= Assign | Assign ';' Seq
-
-Assign ::= Disjunction | Disjunction ':=' Assign
-
-Disjunction ::= Conjunction | Disjunction '||' Conjunction
-
-Conjunction ::= BooleanExp | Conjunction '&&' BooleanExp
-
-BooleanExp ::= ArithmeticExp | BooleanExp '<' ArithmeticExp | BooleanExp '>' ArithmeticExp |
-			   BooleanExp '>=' ArithmeticExp | BooleanExp '<=' ArithmeticExp | BooleanExp '==' ArithmeticExp
-
-ArithmeticExp ::= Term | ArithmeticExp '+' Term | ArithmeticExp '-' Term
-
-Term ::= Fact | Term '*' Fact | Term '/' Fact
-
-Fact ::= id | (...) | var | decl-end | ... | -Fact | *Fact | !BooleanExp
-
-*/
-
-
-
 options {
   STATIC=false;
 }
@@ -133,11 +108,11 @@ TOKEN :
 	|
 	< FUNT : "funt" >
 	|
-  	< ID : ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  	< ID : ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* >
 }
 
 IType Type():
-{ IType t; List<IType> types = new ArrayList<IType>(5); }
+{ IType t; List<IType> types = new LinkedList<IType>(); }
 {
     <INT>
     { return IntType.singleton; }
@@ -148,7 +123,11 @@ IType Type():
     <REF> <LPAR> t = Type() <RPAR>
     { return new RefType(t); }
     | 
-    <FUNT> <LPAR> (t = Type() { types.add(t); })+ <RPAR>
+    <FUNT> <LPAR> t = Type() { types.add(t); }
+    			(
+      				<COMMA> t = Type() { types.add(t); }
+      			)*
+      		<RPAR>
     { final int size = types.size(); return new FunType(types.subList(0, size-1), types.get(size-1)); }
 }
 
@@ -172,18 +151,11 @@ ASTNode Seq():
 ASTNode Assign() :
 { ASTNode e1, e2; }
 {
-	e1 = Exp()
+	e1 = Disjunction()
  	[
   		<ASSIGN > e2 = Assign() { e1 = new ASTAssign(e1, e2); } 
   	]
   	{ return e1; }
-}
-
-// Just a wrap up function to make parser more clear
-ASTNode Exp() :
-{ }
-{
-	{ return Disjunction(); }
 }
 
 ASTNode Disjunction(): // D -- > C ( '||' C )*
@@ -315,9 +287,9 @@ ASTNode Fact() :
  	|
 	<VAR> <LPAR> e1 = Seq() <RPAR> { return new ASTVar(e1); }
 	|
-	<WHILE> e1 = Exp() <DO> e2 = Seq() <END> { return new ASTWhile(e1, e2); }
+	<WHILE> e1 = Seq() <DO> e2 = Seq() <END> { return new ASTWhile(e1, e2); }
 	|
-	<IF> e1 = Exp() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
+	<IF> e1 = Seq() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
 	|
 	<FUN> params = Parameters() <ARROW> e1 = Seq() <END> { return new ASTFun(params, e1); }
 	|

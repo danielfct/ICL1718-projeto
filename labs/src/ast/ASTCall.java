@@ -45,10 +45,7 @@ public class ASTCall implements ASTNode {
 			Iterator<String> params = closure.params.stream().map(p -> p.id).collect(Collectors.toList()).iterator();
 			Iterator<ASTNode> args = arguments.iterator();
 			while (params.hasNext() && args.hasNext()) {
-				newEnv.assoc(params.next(), args.next().eval(env)); // TODO
-																	// verificar
-																	// tipo dos
-																	// argumentos
+				newEnv.assoc(params.next(), args.next().eval(env));
 			}
 			IValue value = closure.body.eval(newEnv);
 			newEnv.endScope();
@@ -87,7 +84,7 @@ public class ASTCall implements ASTNode {
 		code.emit_checkcast(signature.name);
 		for (ASTNode argument : arguments)
 			argument.compile(code, env);
-		code.emit_invokeinterface(signature.name, "apply", "(" + String.join("", signature.params) + ")" + code.toJasmin(signature.ret), arguments.size() + 1);
+		code.emit_invokeinterface(signature.name, "apply", signature.toString(), arguments.size() + 1);
 	}
 
 	@Override

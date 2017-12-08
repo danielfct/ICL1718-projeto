@@ -91,47 +91,45 @@ public class ASTDecl implements ASTNode {
 
 	@Override
 	public void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException {
-		final int SL = code.getSPPosition();
-		
 		code.emit_comment("decl");
-		StackFrame frame = code.newFrame();
+		StackFrame frame = code.createFrame();
 		code.emit_new(frame.name);
 		code.emit_dup();
 		code.emit_invokespecial(frame.name, "<init>", "()V");
 		if (frame.ancestor != null) {
 			// Initialize Static Linker
 			code.emit_dup();
-			code.emit_aload(SL);
+			code.emit_aload(code.getSPPosition());
 			code.emit_putfield(frame.name, "SL", frame.ancestor.toJasmin());
 		}
 		ICompilationEnvironment newEnv = env.beginScope();
+		int location = 0;
 		for (Declaration d : declarations) {
 			code.emit_comment("initialize constant " + d.id);
 			code.emit_dup();
 			d.def.compile(code, env);
-			int location = frame.nextLocation();
 			newEnv.assoc(d.id, location);
 			String type = code.toJasmin(d.def.getType());
-			frame.setLocation(location, type);
-			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location), type);
+			frame.addLocation(type);
+			code.emit_putfield(frame.name, "loc_" + String.format("%02d", location++), type);
 		}
 		
-		code.setCurrentFrame(frame);
-		code.emit_astore(SL);
+		code.pushFrame(frame);
+		code.emit_astore(code.getSPPosition());
 		code.emit_comment("in");
 		body.compile(code, newEnv);
 
 		code.emit_comment("end");
 		StackFrame currentFrame = code.getCurrentFrame();
 		if (currentFrame.ancestor != null) {
-			code.emit_aload(SL);
+			code.emit_aload(code.getSPPosition());
 			code.emit_checkcast(currentFrame.name);
 			code.emit_getfield(currentFrame.name, "SL", currentFrame.ancestor.toJasmin());
 		} else {
 			code.emit_null();
 		}
-		code.emit_astore(SL);
-		code.setCurrentFrame(currentFrame.ancestor);
+		code.emit_astore(code.getSPPosition());
+		code.pushFrame(currentFrame.ancestor);
 		newEnv.endScope();
 	}
 

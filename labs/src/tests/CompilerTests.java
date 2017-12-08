@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import compiler.IdFactory;
 import main.Compiler;
-import values.BoolValue;
-import values.IntValue;
 
 public class CompilerTests {
 
@@ -336,6 +334,7 @@ public class CompilerTests {
 	public void testFun() throws Exception {
 		System.out.println("\n====== FUNCTION DECL ======\n");
 		IdFactory.singleton.init();
+		//TODO
 	}
 
 	@Test
@@ -343,43 +342,50 @@ public class CompilerTests {
 		System.out.println("\n====== FUNCTION CALL ======\n");
 		testCase("decl x = 1 in "
 				+ "		fun x:int -> x+1 end (1) "
-				+ "end;;", 2);
+				+ "end;;", 
+				2);
 		testCase("fun x:int -> x + 1 end (1);;", 2);
 		testCase("fun x:int -> (fun y:int -> x + y end) (2) end (1);;", 3);
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in " 
-				+ "			decl g = fun h:funt(int int) -> h(2) end in "
+				+ "			decl g = fun h:funt(int, int) -> h(2) end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "     end "
-				+ "	end;;", 3);
-		//		testCase("decl f = fun -> 1 end in "
-		//				+ "		f() + 1 "
-		//				+ "end;;", 2);
+				+ "	end;;", 
+				3);
+		testCase("decl f = fun -> 1 end in "
+				+ "		f() + 1 "
+				+ "end;;", 
+				2);
 		testCase("decl f = fun x:int -> x + 1 end in "
 				+ "		f(1) "
-				+ "end;;", 2);    
-		//		testCase("(fun f:funt(int int int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
-		//		testCase("decl f = (fun f:funt(int int int) -> f(2, 3) end) in "
-		//				+ "		f(fun x:int, y:int -> x+y end) "
-		//				+ "end;;", 5);
+				+ "end;;", 
+				2);    
+		testCase("(fun f:funt(int, int, int) -> f(2, 3) end) (fun x:int, y:int -> x+y end);;", 5);
+//		testCase("decl f = (fun f:funt(int, int, int) -> f(2, 3) end) in "
+//				+ "		f(fun x:int, y:int -> x+y end) "
+//				+ "end;;", 5);
 		testCase("decl f = fun x:int -> x + 1 end in "
-				+ "		decl g = fun f:funt(int int) -> f(1) end in "
+				+ "		decl g = fun f:funt(int, int) -> f(1) end in "
 				+ " 		g(f) "
 				+ "		end "
-				+ "end;;", 2);
-		testCase("decl f = fun x : int, y : int -> x + y end in "
+				+ "end;;", 
+				2);
+		testCase("decl f = fun x:int, y:int -> x + y end in "
 				+ "		f(1, 2) + f(1, 3) "
-				+ "end;;", 7);
+				+ "end;;", 
+				7);
 		testCase("decl f = fun x:int -> fun y:int -> x + y end end in "
 				+ "		decl g = f(1) in "
 				+ "			g(2) + g(3) "
 				+ "		end "
-				+ "end;;", 7);
-
-
-		testCase("fun x:int -> x+2 end (4);;", new IntValue(6));
-		testCase("decl f = fun x:int -> x+1 end in f(1) end;;", new IntValue(2));
+				+ "end;;",
+				7);
+		testCase("fun x:int -> x+2 end (4);;", 
+				6);
+		testCase("decl f = fun x:int -> x+1 end in f(1) end;;", 
+				2);
 		testCase("decl x=1 in " 
 				+ "		decl f = fun y:int -> y+x end in "
 				+ "			decl g = fun x:int -> x+f(x) end in " 
@@ -387,7 +393,7 @@ public class CompilerTests {
 				+ "			end "
 				+ "		end " 
 				+ "end;;",
-				new IntValue(5));
+				5);
 		testCase("decl f = fun x:int -> x+1 end in " 
 				+ "		decl g = fun y:int -> f(y)+2 end in "
 				+ "			decl x = g(2) in " 
@@ -395,11 +401,11 @@ public class CompilerTests {
 				+ "			end " 
 				+ "		end " 
 				+ "end;;", 
-				new IntValue(10));
+				10);
 		testCase("decl x = fun x:int -> var(x) end in " 
 				+ "		*x(1) " 
 				+ "end;;",
-				new IntValue(1));
+				1);
 		testCase("decl f = fun y:int -> y+1 end in "
 				+ "		decl g = fun x:int -> f(x)+1 end in "
 				+ "			decl h = g i = fun y:int -> fun x:int -> x end (g(y)) end in "
@@ -407,33 +413,33 @@ public class CompilerTests {
 				+ "			end "
 				+ "		end "
 				+ "end;;",
-				new IntValue(4));
+				4);
 		testCase("decl x = 1 in "
 				+ "		decl f = fun y:int -> y+x end in "
-				+ "			decl g = fun h:funt(int int) -> h(x)+1 end in "
+				+ "			decl g = fun h:funt(int, int) -> h(x)+1 end in "
 				+ "				g(f) "
 				+ "			end "
 				+ "		end "		
 				+ "end;;",
-				new IntValue(3));
+				3);
 		testCase("decl y = 3 in " 
 				+ "		decl x = 2*y in " 
 				+ "			decl f = fun y:int -> y+x end in "
-				+ "				decl g = fun x:int -> fun h:funt(int int) -> x+h(x) end end in " 
+				+ "				decl g = fun x:int -> fun h:funt(int, int) -> x+h(x) end end in " 
 				+ "					g(2)(f) "
 				+ "				end " 
 				+ "			end " 
 				+ "		end " 
 				+ "end;;",
-				new IntValue(10));
-		testCase("decl comp = fun f:funt(int int), g:funt(int int) -> fun x:int -> f(g(x)) end end in " 
-				+ "		decl inc = fun x:int -> x+1 end in "
-				+ "			decl dup = comp(inc, inc) in " 
-				+ "				dup(2) " 
-				+ "			end "
-				+ "		end " 
-				+ "end;;",
-				new IntValue(4));
+				10);
+//		testCase("decl comp = fun f:funt(int, int), g:funt(int, int) -> fun x:int -> f(g(x)) end end in " 
+//				+ "		decl inc = fun x:int -> x+1 end in "
+//				+ "			decl dup = comp(inc, inc) in " 
+//				+ "				dup(2) " 
+//				+ "			end "
+//				+ "		end " 
+//				+ "end;;",
+//				4);
 		testCase("decl f = fun x:int, y:int -> "
 				+ "			decl i = var(y) res = var(0) in "
 				+ "				while *i > 0 do "
@@ -446,16 +452,18 @@ public class CompilerTests {
 				+ "in "
 				+ "		f(3, 2) "
 				+ "end;;",
-				new IntValue(12));
+				12);
 		testCase("decl add = fun x:int, y:int -> x + y end in "
 				+ "		add(1, 2) "
 				+ "end;;", 
-				new IntValue(3));
+				3);
 		testCase("decl and = fun x:bool, y:bool -> x && y end in "
 				+ "		and(true, true) "
 				+ "end;;", 
-				new BoolValue(true));
-		testNegativeCase("decl f = fun x -> x+1 end in (1) end;;", new IntValue(1));
+				true);
+		testCase("fun y:int -> (fun x:int -> x end)(y) end (1);;", 1);
+		testCase("(fun x:int -> (fun h:funt(int, int) -> h(x) end) end)(1)(fun x:int -> x+1 end);;", 2);
+		testNegativeCase("decl f = fun x:int -> x+1 end in (1) end;;", 2);
 	}
 
 	@Test
