@@ -16,15 +16,16 @@ import types.IType;
 import types.TypingException;
 import values.ClosureValue;
 import values.IValue;
+import values.Suspension;
 import values.TypeMismatchException;
 
-public class ASTCall implements ASTNode {
+public class ASTCall extends ASTNode {
 
-	final ASTNode function;
-	final List<ASTNode> arguments;
+	final IASTNode function;
+	final List<IASTNode> arguments;
 	private IType type;
 
-	public ASTCall(ASTNode function, List<ASTNode> arguments) {
+	public ASTCall(IASTNode function, List<IASTNode> arguments) {
 		this.function = function;
 		this.arguments = arguments;
 		this.type = null;
@@ -32,7 +33,7 @@ public class ASTCall implements ASTNode {
 
 	@Override
 	public String toString() {
-		return function + "(" + String.join(",", arguments.stream().map(ASTNode::toString).collect(Collectors.toList())) + ")";
+		return function + "(" + String.join(",", arguments.stream().map(IASTNode::toString).collect(Collectors.toList())) + ")";
 	}
 	
 	@Override
@@ -43,9 +44,9 @@ public class ASTCall implements ASTNode {
 			ClosureValue closure = (ClosureValue) f;
 			IEnvironment<IValue> newEnv = closure.env.beginScope();
 			Iterator<String> params = closure.params.stream().map(p -> p.id).collect(Collectors.toList()).iterator();
-			Iterator<ASTNode> args = arguments.iterator();
+			Iterator<IASTNode> args = arguments.iterator();
 			while (params.hasNext() && args.hasNext()) {
-				newEnv.assoc(params.next(), args.next().eval(env));
+				newEnv.assoc(params.next(), new Suspension(args.next(), env));
 			}
 			IValue value = closure.body.eval(newEnv);
 			newEnv.endScope();
@@ -62,7 +63,7 @@ public class ASTCall implements ASTNode {
 		if (f instanceof FunType) {
 			FunType fun = (FunType) f;
 			Iterator<IType> params = fun.paramsType.iterator();
-			Iterator<ASTNode> args = arguments.iterator();
+			Iterator<IASTNode> args = arguments.iterator();
 			while (params.hasNext() && args.hasNext()) {
 				if (!params.next().equals(args.next().typecheck(env)))
 					throw new TypingException("Function expecting arguments of type " + fun.paramsType + " and got " + arguments + ".");
@@ -82,7 +83,7 @@ public class ASTCall implements ASTNode {
 		FunType type = (FunType)function.getType();
 		TypeSignature signature = code.getSignature(type);
 		code.emit_checkcast(signature.name);
-		for (ASTNode argument : arguments)
+		for (IASTNode argument : arguments)
 			argument.compile(code, env);
 		code.emit_invokeinterface(signature.name, "apply", signature.toString(), arguments.size() + 1);
 	}

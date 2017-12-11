@@ -108,6 +108,16 @@ TOKEN :
 	|
 	< FUNT : "funt" >
 	|
+	< LBRACKETS : "[" >
+	|
+	< RBRACKETS : "]" >
+	|
+	< HD : "hd" >
+	|
+	< TAIL : "tail" >
+	|
+	< FOREACH : "foreach" >
+	|
   	< ID : ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* >
 }
 
@@ -131,25 +141,24 @@ IType Type():
     { final int size = types.size(); return new FunType(types.subList(0, size-1), types.get(size-1)); }
 }
 
-ASTNode Start() :
-{ ASTNode e; }
+IASTNode Start() :
+{ IASTNode e; }
 {
 	e = Seq() <EL>  { return e; }
 }
 
-ASTNode Seq():
-{ ASTNode e1, e2; }
+IASTNode Seq():
+{ IASTNode e1, e2; }
 {
-  	// left-associative: Exp() ( < SEMICOLON > Exp() )*
 	e1 = Assign()
   	[
   		<SEMICOLON > e2 = Seq() { e1 = new ASTSeq(e1, e2); } 
- 	] // right associative tree
+ 	]
   	{ return e1; }
 }
 
-ASTNode Assign() :
-{ ASTNode e1, e2; }
+IASTNode Assign() :
+{ IASTNode e1, e2; }
 {
 	e1 = Disjunction()
  	[
@@ -158,8 +167,8 @@ ASTNode Assign() :
   	{ return e1; }
 }
 
-ASTNode Disjunction() : // D -- > C ( '||' C )*
-{ ASTNode e1, e2; }
+IASTNode Disjunction() :
+{ IASTNode e1, e2; }
 {
 	e1 = Conjunction()
 	(
@@ -168,8 +177,8 @@ ASTNode Disjunction() : // D -- > C ( '||' C )*
 	{  return e1; }
 }
 
-ASTNode Conjunction() : // C -- > B ('&&' B )*
-{  ASTNode e1, e2; }
+IASTNode Conjunction() :
+{  IASTNode e1, e2; }
 {
 	e1 = BooleanExp()
 	(
@@ -178,8 +187,8 @@ ASTNode Conjunction() : // C -- > B ('&&' B )*
 	{ return e1; }
 }
 
-ASTNode BooleanExp() : // B --> E ('==' | '!=' | '<' | '>' | '<=' | '>=' E )*
-{ ASTNode e1, e2; }
+IASTNode BooleanExp() :
+{ IASTNode e1, e2; }
 {
 	e1 = ArithmeticExp()
 	(
@@ -198,8 +207,8 @@ ASTNode BooleanExp() : // B --> E ('==' | '!=' | '<' | '>' | '<=' | '>=' E )*
 	{ return e1; }
 }
 
-ASTNode ArithmeticExp() : // A --> E ('+' | '-' E)*
-{ ASTNode e1, e2; }
+IASTNode ArithmeticExp() :
+{ IASTNode e1, e2; }
 {
    	e1 = Term()
 	(
@@ -210,8 +219,8 @@ ASTNode ArithmeticExp() : // A --> E ('+' | '-' E)*
     { return e1; }
 }
 
-ASTNode Term() : // T --> T ('*' | '/' E)*
-{ ASTNode e1, e2; }
+IASTNode Term() :
+{ IASTNode e1, e2; }
 {
      e1 = Unary()
      (
@@ -222,22 +231,9 @@ ASTNode Term() : // T --> T ('*' | '/' E)*
      { return e1; }
 }
 
-/*
 
-Unary := C | *U | !U | -U
-
-Call := F | F( '('EL')' )*
-
-EL := [ E (',' E)* ] Expression list
-
-F := ID | Decl .. | Num | (E) | <FUN> (...)* <ARROW> Seq() <END>
-								fun x1:T1, x2:T2 - > Exp end
-*/
-
-
-ASTNode Unary() :
-/*Unary := C | *U | !U | -U*/
-{ ASTNode e; }
+IASTNode Unary() :
+{ IASTNode e; }
 {
   	e = Call() 	{ return e; }
 	|
@@ -249,9 +245,8 @@ ASTNode Unary() :
 }
 
 
-ASTNode Call() :
-/* F | F( '('Args')' )* */
-{ ASTNode e; List<ASTNode> args; }
+IASTNode Call() :
+{ IASTNode e; List<IASTNode> args; }
 {
   	e = Fact()
   	(
@@ -259,8 +254,8 @@ ASTNode Call() :
   	{ return e; }
 }
 
-List<ASTNode> Arguments() :
-{ 	List<ASTNode> args = new LinkedList<ASTNode>(); ASTNode e; }
+List<IASTNode> Arguments() :
+{ 	List<IASTNode> args = new LinkedList<IASTNode>(); IASTNode e; }
 {
 	[
   		e = Seq() { args.add(e); }
@@ -271,9 +266,8 @@ List<ASTNode> Arguments() :
   	{ return args; }
 }
 
-ASTNode Fact() :
-/*ID | Decl | .. | Num | (E)*/
-{ Token x; ASTDecl d; ASTNode e1, e2, e3; List<Parameter> params; }
+IASTNode Fact() :
+{ Token x; ASTDecl d; IASTNode e1, e2, e3; List<Parameter> params; IASTNode list; }
 {
  	x = <ID> { return new ASTId(x.image); }
 	|
@@ -281,7 +275,7 @@ ASTNode Fact() :
 		(
 	  		x = <ID> <EQ> e1 = Seq() { d.newBinding(x.image, e1); }
 		)+
-		<IN> e2 = Seq() <END> { d.addBody(e2); return d; }
+		<IN> e2 = Seq() <END> { d.setBody(e2); return d; }
 	|
    	<LPAR> e1 = Seq() <RPAR> { return e1; }
  	|
@@ -292,6 +286,10 @@ ASTNode Fact() :
 	<IF> e1 = Seq() <THEN> e2 = Seq() <ELSE> e3 = Seq() <END> { return new ASTIfThenElse(e1, e2, e3); }
 	|
 	<FUN> params = Parameters() <ARROW> e1 = Seq() <END> { return new ASTFun(params, e1); }
+	|
+	<LBRACKETS> list = List() <RBRACKETS> { return list; }
+	|
+	<FOREACH> x = <ID> <IN> <LBRACKETS> list = List() <RBRACKETS> <DO> e1 = Seq() <END> { return new ASTForEach(x.image, list, e1); }
 	|
 	<TRUE> { return new ASTBool(true); }
 	|
@@ -311,3 +309,16 @@ List<Parameter> Parameters() :
   	]
   	{ return params; }
 }
+
+IASTNode List() :
+{ IASTNode hd = null; IASTNode t; List<IASTNode> tail = new LinkedList<IASTNode>(); }
+{
+	[
+  		hd = Seq()
+  		(
+  	  		<COMMA> t = Seq() { tail.add(t); }
+  		)*
+ 	]
+  	{ return new ASTList(hd, tail); }
+}
+

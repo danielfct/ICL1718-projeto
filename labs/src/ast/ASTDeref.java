@@ -16,12 +16,12 @@ import values.IValue;
 import values.IRefValue;
 import values.TypeMismatchException;
 
-public class ASTDeref implements ASTNode {
+public class ASTDeref extends ASTNode {
 
-	final ASTNode expression;
+	final IASTNode expression;
 	private IType type;
 
-	public ASTDeref(ASTNode n) {
+	public ASTDeref(IASTNode n) {
 		this.expression = n;
 		this.type = null;
 	}
@@ -33,7 +33,7 @@ public class ASTDeref implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue v = expression.eval(env);
+		IValue v = force(expression.eval(env));
 
 		if (v instanceof IRefValue)
 			return Memory.singleton.get((IRefValue) v);

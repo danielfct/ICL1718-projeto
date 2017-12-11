@@ -1,6 +1,7 @@
 package compiler;
 
 import java.io.PrintStream;
+import java.util.Objects;
 
 public class Reference implements IReference {
 
@@ -42,6 +43,23 @@ public class Reference implements IReference {
 	@Override
 	public String toString() {
 		return name + " " + type;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, type);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Reference))
+			return false;
+		Reference other = (Reference) obj;
+		return Objects.equals(name, other.name) && Objects.equals(type, other.type);
 	}
 
 }

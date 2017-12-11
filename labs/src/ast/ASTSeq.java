@@ -12,13 +12,13 @@ import types.TypingException;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTSeq implements ASTNode {
+public class ASTSeq extends ASTNode {
 
-	final ASTNode left;
-	final ASTNode right;
+	final IASTNode left;
+	final IASTNode right;
 	private IType type;
 
-	public ASTSeq(ASTNode left, ASTNode right) {
+	public ASTSeq(IASTNode left, IASTNode right) {
 		this.left = left;
 		this.right = right;
 		this.type = null;
@@ -31,8 +31,8 @@ public class ASTSeq implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		left.eval(env);
-		IValue value = right.eval(env);
+		force(left.eval(env));
+		IValue value = force(right.eval(env));
 
 		return value;
 	}

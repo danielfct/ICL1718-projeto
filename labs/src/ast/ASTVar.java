@@ -15,12 +15,12 @@ import types.TypingException;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTVar implements ASTNode {
+public class ASTVar extends ASTNode {
 
-	final ASTNode expression;
+	final IASTNode expression;
 	private IType type;
 
-	public ASTVar(ASTNode expression) {
+	public ASTVar(IASTNode expression) {
 		this.expression = expression;
 		this.type = null;
 	}
@@ -32,7 +32,7 @@ public class ASTVar implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue v = expression.eval(env);
+		IValue v = force(expression.eval(env));
 
 		return Memory.singleton.newVar(v);
 	}

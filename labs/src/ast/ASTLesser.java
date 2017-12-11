@@ -17,12 +17,12 @@ import values.IValue;
 import values.IntValue;
 import values.TypeMismatchException;
 
-public class ASTLesser implements ASTNode {
+public class ASTLesser extends ASTNode {
 
-	final ASTNode left, right;
+	final IASTNode left, right;
 	private IType type;
 
-	public ASTLesser(ASTNode left, ASTNode right) {
+	public ASTLesser(IASTNode left, IASTNode right) {
 		this.left = left;
 		this.right = right;
 		this.type = null;
@@ -35,8 +35,8 @@ public class ASTLesser implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(env);
-		IValue r = right.eval(env);
+		IValue l = force(left.eval(env));
+		IValue r = force(right.eval(env));
 
 		if (l instanceof IntValue && r instanceof IntValue)
 			return new BoolValue(((IntValue) l).getValue() < ((IntValue) r).getValue());

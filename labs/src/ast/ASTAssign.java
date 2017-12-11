@@ -16,13 +16,13 @@ import values.IValue;
 import values.IRefValue;
 import values.TypeMismatchException;
 
-public class ASTAssign implements ASTNode {
+public class ASTAssign extends ASTNode {
 
-	final ASTNode reference;
-	final ASTNode expression;
+	final IASTNode reference;
+	final IASTNode expression;
 	private IType type;
 
-	public ASTAssign(ASTNode reference, ASTNode expression) {
+	public ASTAssign(IASTNode reference, IASTNode expression) {
 		this.reference = reference;
 		this.expression = expression;
 		this.type = null;
@@ -35,8 +35,8 @@ public class ASTAssign implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue ref = reference.eval(env);
-		IValue v = expression.eval(env);
+		IValue ref = force(reference.eval(env));
+		IValue v = force(expression.eval(env));
 
 		if (ref instanceof IRefValue)
 			return Memory.singleton.set((IRefValue) ref, v);

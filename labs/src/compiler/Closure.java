@@ -115,7 +115,7 @@ public class Closure implements IClosure {
 
 	@Override
 	public String toString() {
-		return name + "(" + signature + ", " + envc + ")";
+		return name + "(" + signature + ", " + localEnv + ")";
 	}
 
 }

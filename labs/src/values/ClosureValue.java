@@ -5,16 +5,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import ast.ASTFun.Parameter;
-import ast.ASTNode;
+import ast.IASTNode;
 import environment.IEnvironment;
 
 public class ClosureValue implements IRefValue {
 
 	public final Collection<Parameter> params;
-	public final ASTNode body;
+	public final IASTNode body;
 	public final IEnvironment<IValue> env;
 
-	public ClosureValue(Collection<Parameter> params, ASTNode body, IEnvironment<IValue> env) {
+	public ClosureValue(Collection<Parameter> params, IASTNode body, IEnvironment<IValue> env) {
 		this.params = params;
 		this.body = body;
 		this.env = env;

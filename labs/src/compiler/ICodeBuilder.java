@@ -139,7 +139,7 @@ public interface ICodeBuilder {
 	// jump to given label
 	void emit_icmplt(String label); 
 
-	// compare value on top of stack with 0, if equal, jumpo to given label
+	// compare value on top of stack with 0, if equal, jump to given label
 	void emit_ifeq(String label); 
 
 	// check if value on top of stack is diferent than 0
@@ -165,5 +165,32 @@ public interface ICodeBuilder {
 
 	// pushes the int value held in a local variable onto the operand stack
 	void emit_iload(int position); 
+
+	// create a new array of primitive types
+	void emit_newarray(IType type);
+	
+	// create a new array of reference types
+	void emit_anewarray(IType type);
+	
+	// push item from run-time constant pool
+	void emit_ldc(int v);
+	
+	// store into int array
+	void emit_iastore();
+	
+	// store into reference array
+	void emit_aastore();
+
+	// store into boolean or byte array
+	void emit_bastore();
+
+	// load from int array
+	void emit_iaload();
+
+	// load from boolean array
+	void emit_baload();
+
+	// load from reference array
+	void emit_aaload();
 
 }

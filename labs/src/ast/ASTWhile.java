@@ -15,13 +15,13 @@ import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTWhile implements ASTNode {
+public class ASTWhile extends ASTNode {
 
-	final ASTNode condition;
-	final ASTNode expression;
+	final IASTNode condition;
+	final IASTNode expression;
 	private IType type;
 
-	public ASTWhile(ASTNode condition, ASTNode expression) {
+	public ASTWhile(IASTNode condition, IASTNode expression) {
 		this.condition = condition;
 		this.expression = expression;
 		this.type = null;
@@ -34,11 +34,11 @@ public class ASTWhile implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue c = condition.eval(env);
+		IValue c = force(condition.eval(env));
 		
 		if (c instanceof BoolValue) {
 			if (((BoolValue) c).getValue()) {
-				expression.eval(env);
+				force(expression.eval(env));
 				return eval(env);
 			} else {
 				return new BoolValue(false);

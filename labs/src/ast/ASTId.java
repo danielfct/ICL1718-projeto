@@ -11,8 +11,9 @@ import environment.UndeclaredIdentifierException;
 import types.IType;
 import types.TypingException;
 import values.IValue;
+import values.TypeMismatchException;
 
-public class ASTId implements ASTNode {
+public class ASTId extends ASTNode {
 
 	public static class Address {
 		final int jumps;
@@ -56,8 +57,8 @@ public class ASTId implements ASTNode {
 	}
 
 	@Override
-	public IValue eval(IEnvironment<IValue> env) throws UndeclaredIdentifierException {
-		return env.find(id);
+	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		return force(env.find(id));
 	}
 
 	@Override

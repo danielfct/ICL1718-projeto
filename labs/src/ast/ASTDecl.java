@@ -16,13 +16,13 @@ import types.TypingException;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTDecl implements ASTNode {
+public class ASTDecl extends ASTNode {
 
 	static class Declaration {
-		String id;
-		ASTNode def;
+		final String id;
+		final IASTNode def;
 
-		public Declaration(String id, ASTNode def) {
+		public Declaration(String id, IASTNode def) {
 			this.id = id;
 			this.def = def;
 		}
@@ -50,8 +50,8 @@ public class ASTDecl implements ASTNode {
 		}
 	}
 
-	List<Declaration> declarations;
-	ASTNode body;
+	final List<Declaration> declarations;
+	private IASTNode body;
 	private IType type;
 
 	public ASTDecl() {
@@ -59,21 +59,25 @@ public class ASTDecl implements ASTNode {
 		this.type = null;
 	}
 
-	public void addBody(ASTNode body) {
+	public void setBody(IASTNode body) {
 		this.body = body;
 	}
+	
+	public IASTNode getBody() {
+		return body;
+	}
 
-	public void newBinding(String id, ASTNode e) {
+	public void newBinding(String id, IASTNode e) {
 		declarations.add(new Declaration(id, e));
 	}
 	
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IEnvironment<IValue> newEnv = env.beginScope();
-		for (Declaration d : declarations)
-			newEnv.assoc(d.id, d.def.eval(env));
-		IValue value = body.eval(newEnv);
-		env = newEnv.endScope();
+		for (Declaration decl : declarations)
+			newEnv.assoc(decl.id, force(decl.def.eval(env)));
+		IValue value = force(body.eval(newEnv));
+		newEnv.endScope();
 
 		return value;
 	}
@@ -81,10 +85,10 @@ public class ASTDecl implements ASTNode {
 	@Override
 	public IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException {
 		IEnvironment<IType> newEnv = env.beginScope();
-		for (Declaration d : declarations)
-			newEnv.assoc(d.id, d.def.typecheck(env));
+		for (Declaration decl : declarations)
+			newEnv.assoc(decl.id, decl.def.typecheck(env));
 		type = body.typecheck(newEnv);
-		env = newEnv.endScope();
+		newEnv.endScope();
 
 		return type;
 	}

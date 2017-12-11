@@ -14,7 +14,7 @@ import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTBool implements ASTNode {
+public class ASTBool extends ASTNode {
 
 	final boolean value;
 	private IType type;

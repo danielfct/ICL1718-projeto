@@ -73,9 +73,13 @@ public class CodeBlock implements ICodeBuilder {
 	private void dumpFooter(PrintStream out, String resultType) {
 		out.println("       ; END");
 		out.println("");
-		out.println("");
 		out.println("       ; convert to String;");
-		out.println("       invokestatic java/lang/String/valueOf(" + resultType + ")Ljava/lang/String;");
+		if (resultType.startsWith("[")) {
+			out.println(" 		invokestatic java/util/Arrays/toString(" + resultType + ")Ljava/lang/String;");
+		}
+		else {
+			out.println("       invokestatic java/lang/String/valueOf(" + resultType + ")Ljava/lang/String;");	
+		}
 		out.println("       ; call println ");
 		out.println("       invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
 		out.println("");
@@ -407,6 +411,51 @@ public class CodeBlock implements ICodeBuilder {
 	@Override
 	public void emit_iload(int position) {
 		getCurrentCode().add("iload_" + position);
+	}
+
+	@Override
+	public void emit_newarray(IType t) {
+		getCurrentCode().add("newarray " + t);
+	}
+
+	@Override
+	public void emit_anewarray(IType t) {
+		getCurrentCode().add("anewarray " + toJasmin(t));
+	}
+
+	@Override
+	public void emit_ldc(int v) {
+		getCurrentCode().add("ldc " + v);
+	}
+
+	@Override
+	public void emit_iastore() {
+		getCurrentCode().add("iastore");
+	}
+
+	@Override
+	public void emit_aastore() {
+		getCurrentCode().add("aastore");
+	}
+
+	@Override
+	public void emit_bastore() {
+		getCurrentCode().add("bastore");
+	}
+
+	@Override
+	public void emit_iaload() {
+		getCurrentCode().add("iaload");
+	}
+
+	@Override
+	public void emit_baload() {
+		getCurrentCode().add("baload");
+	}
+
+	@Override
+	public void emit_aaload() {
+		getCurrentCode().add("aaload");
 	}
 
 }

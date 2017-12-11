@@ -40,6 +40,5 @@ public class FunType implements IType {
 		FunType other = (FunType) obj;
 		return Objects.equals(paramsType, other.paramsType) && Objects.equals(retType, other.retType);
 	}
-
 	
 }

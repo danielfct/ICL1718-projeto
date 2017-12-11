@@ -19,7 +19,7 @@ import values.ClosureValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTFun implements ASTNode {
+public class ASTFun extends ASTNode {
 
 	public static class Parameter {
 		public final String id;
@@ -55,10 +55,10 @@ public class ASTFun implements ASTNode {
 	}
 
 	final List<Parameter> parameters;
-	final ASTNode body;
+	final IASTNode body;
 	private IType type;
 
-	public ASTFun(List<Parameter> parameters, ASTNode body) {
+	public ASTFun(List<Parameter> parameters, IASTNode body) {
 		this.parameters = parameters;
 		this.body = body;
 		this.type = null;
@@ -84,7 +84,7 @@ public class ASTFun implements ASTNode {
 		}
 		IType retType = body.typecheck(newEnv);
 		type = new FunType(paramsType, retType);
-		env = newEnv.endScope();
+		newEnv.endScope();
 
 		return type;
 	}

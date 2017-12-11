@@ -17,7 +17,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import ast.ASTNode;
+import ast.IASTNode;
 
 public class Compiler {
 
@@ -39,7 +39,7 @@ public class Compiler {
 	public static void compile(InputStream is) throws FileNotFoundException {
 		Parser parser = new Parser(is);
 		try {
-			ASTNode n = parser.Start();
+			IASTNode n = parser.Start();
 			IType t = n.typecheck(new Environment<IType>());
 			CodeBlock code = new CodeBlock();
 			n.compile(code, new CompilationEnvironment());

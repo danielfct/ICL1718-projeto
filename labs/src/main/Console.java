@@ -2,7 +2,7 @@ package main;
 
 import java.io.ByteArrayInputStream;
 
-import ast.ASTNode;
+import ast.IASTNode;
 import environment.DuplicateIdentifierException;
 import environment.Environment;
 import environment.UndeclaredIdentifierException;
@@ -20,7 +20,7 @@ public class Console {
 		Parser parser = new Parser(System.in);
 		while (true) {
 			try {
-				ASTNode n = parser.Start();
+				IASTNode n = parser.Start();
 				n.typecheck(new Environment<>());
 				System.out.println("OK! " + n.eval(new Environment<>()));
 			} catch (TokenMgrError e) {
@@ -62,8 +62,10 @@ public class Console {
 	public static boolean acceptCompareValues(String s, IValue value) {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
-			ASTNode n = parser.Start();
-			return n.eval(new Environment<IValue>()).equals(value);
+			IASTNode n = parser.Start();
+			IValue v = n.eval(new Environment<IValue>());
+			System.out.println(v);
+			return v.equals(value);
 		} catch (Exception e) {
 			return false;
 		}
@@ -72,7 +74,7 @@ public class Console {
 	public static boolean acceptCompareTypes(String s, IType type) {
 		Parser parser = new Parser(new ByteArrayInputStream(s.getBytes()));
 		try {
-			ASTNode n = parser.Start();
+			IASTNode n = parser.Start();
 			return n.typecheck(new Environment<IType>()).equals(type);
 		} catch (Exception e) {
 			return false;

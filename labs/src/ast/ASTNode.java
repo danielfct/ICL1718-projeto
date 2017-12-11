@@ -8,16 +8,30 @@ import environment.UndeclaredIdentifierException;
 import types.IType;
 import types.TypingException;
 import values.IValue;
+import values.Suspension;
 import values.TypeMismatchException;
 
-public interface ASTNode {
+public abstract class ASTNode implements IASTNode {
 
-	IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException;
+	@Override
+	public abstract IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException;
+	
+	@Override
+	public IValue force(IValue value) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
+		if (value instanceof Suspension)
+			value = ((Suspension)value).evaluate();
+		return value;
+	}
 
-	IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException;
+	@Override
+	public abstract IType typecheck(IEnvironment<IType> env) throws TypingException, DuplicateIdentifierException, UndeclaredIdentifierException;
 
-	void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException;
+	@Override
+	public abstract void compile(ICodeBuilder code, ICompilationEnvironment env) throws DuplicateIdentifierException, UndeclaredIdentifierException;
 
-	IType getType();
+	@Override
+	public abstract IType getType();
+	
+	
 
 }

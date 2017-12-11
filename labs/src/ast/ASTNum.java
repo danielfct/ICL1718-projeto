@@ -13,7 +13,7 @@ import types.TypingException;
 import values.IValue;
 import values.IntValue;
 
-public class ASTNum implements ASTNode {
+public class ASTNum extends ASTNode {
 
 	final int value;
 	private IType type;

@@ -14,12 +14,12 @@ import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTAnd implements ASTNode {
+public class ASTAnd extends ASTNode {
 
-	final ASTNode left, right;
+	final IASTNode left, right;
 	private IType type;
 
-	public ASTAnd(ASTNode left, ASTNode right) {
+	public ASTAnd(IASTNode left, IASTNode right) {
 		this.left = left;
 		this.right = right;
 		this.type = null;
@@ -32,8 +32,8 @@ public class ASTAnd implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue l = left.eval(env);
-		IValue r = right.eval(env);
+		IValue l = force(left.eval(env));
+		IValue r = force(right.eval(env));
 
 		if (l instanceof BoolValue && r instanceof BoolValue)
 			return new BoolValue(((BoolValue) l).getValue() && ((BoolValue) r).getValue());

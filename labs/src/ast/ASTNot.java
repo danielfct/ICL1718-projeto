@@ -14,12 +14,12 @@ import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTNot implements ASTNode {
+public class ASTNot extends ASTNode {
 
-	final ASTNode value;
+	final IASTNode value;
 	private IType type;
 
-	public ASTNot(ASTNode value) {
+	public ASTNot(IASTNode value) {
 		this.value = value;
 		this.type = null;
 	}
@@ -31,7 +31,7 @@ public class ASTNot implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, UndeclaredIdentifierException, DuplicateIdentifierException {
-		IValue v = value.eval(env);
+		IValue v = force(value.eval(env));
 
 		if (v instanceof BoolValue)
 			return new BoolValue(!((BoolValue) v).getValue());

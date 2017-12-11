@@ -17,7 +17,7 @@ public class Environment<T> implements IEnvironment<T> {
 		public String toString() {
 			return id + "=" + value;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return Objects.hash(id, value);
@@ -35,7 +35,7 @@ public class Environment<T> implements IEnvironment<T> {
 			return Objects.equals(id, other.id) &&
 					Objects.equals(value, other.value);
 		}
-		
+
 	}
 
 	Environment<T> up;
@@ -48,18 +48,6 @@ public class Environment<T> implements IEnvironment<T> {
 	private Environment(Environment<T> up) {
 		this.up = up;
 		this.assocs = new ArrayList<Assoc<T>>();
-	}
-
-	@Override
-	public T find(String id) throws UndeclaredIdentifierException {
-		Environment<T> current = this;
-		while (current != null) {
-			for (Assoc<T> assoc : current.assocs)
-				if (assoc.id.equals(id))
-					return assoc.value;
-			current = current.up;
-		}
-		throw new UndeclaredIdentifierException(id);
 	}
 
 	@Override
@@ -81,10 +69,32 @@ public class Environment<T> implements IEnvironment<T> {
 	}
 
 	@Override
+	public IEnvironment<T> update(String id, T value) throws UndeclaredIdentifierException {
+		for (Assoc<T> assoc : assocs)
+			if (assoc.id.equals(id)) {
+				assoc.value = value;
+				return this; 
+			}
+		throw new UndeclaredIdentifierException(id);
+	}
+
+	@Override
+	public T find(String id) throws UndeclaredIdentifierException {
+		Environment<T> current = this;
+		while (current != null) {
+			for (Assoc<T> assoc : current.assocs)
+				if (assoc.id.equals(id))
+					return assoc.value;
+			current = current.up;
+		}
+		throw new UndeclaredIdentifierException(id);
+	}
+
+	@Override
 	public String toString() {
 		return (up != null ? up.toString() + "," : "") + assocs.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(up, assocs);

@@ -35,6 +35,7 @@ public class IdFactory {
 	public void init() {
 		this.labelCounter = 0;
 		this.referenceCounter = 0;
+		this.frameCounter = 0;
 		this.typeSignatureCounter = 0;
 		this.closureCounter = 0;
 	}

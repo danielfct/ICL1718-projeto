@@ -15,14 +15,14 @@ import values.BoolValue;
 import values.IValue;
 import values.TypeMismatchException;
 
-public class ASTIfThenElse implements ASTNode {
+public class ASTIfThenElse extends ASTNode {
 
-	final ASTNode condition;
-	final ASTNode thenExpression;
-	final ASTNode elseExpression;
+	final IASTNode condition;
+	final IASTNode thenExpression;
+	final IASTNode elseExpression;
 	private IType type;
 
-	public ASTIfThenElse(ASTNode condition, ASTNode thenExpression, ASTNode elseExpression) {
+	public ASTIfThenElse(IASTNode condition, IASTNode thenExpression, IASTNode elseExpression) {
 		this.condition = condition;
 		this.thenExpression = thenExpression;
 		this.elseExpression = elseExpression;
@@ -36,13 +36,13 @@ public class ASTIfThenElse implements ASTNode {
 
 	@Override
 	public IValue eval(IEnvironment<IValue> env) throws TypeMismatchException, DuplicateIdentifierException, UndeclaredIdentifierException {
-		IValue c = condition.eval(env);
+		IValue c = force(condition.eval(env));
 
 		if (c instanceof BoolValue) {
 			if (((BoolValue) c).getValue())
-				return thenExpression.eval(env);
+				return force(thenExpression.eval(env));
 			else
-				return elseExpression.eval(env);
+				return force(elseExpression.eval(env));
 		} else
 			throw new TypeMismatchException("Wrong type on If then else condition: If (" + c + ") then ... else ...");
 	}
